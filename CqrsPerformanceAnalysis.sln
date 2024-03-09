@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{1C0ECF18-EA76-455D-9D01-B1A5BCEBB6C5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{89CB2F17-E4A1-4A2B-A425-34BFDC235618}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{04E9D03F-C5BB-4580-8774-C09CDFF990B2}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		README.md = README.md
+		Directory.Build.props = Directory.Build.props
+		Packages.props = Packages.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cqrs", "Cqrs", "{7FE222D0-5FA4-4433-A7AB-E495969F8EA1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Cqrs", "Cqrs", "{E4432A6B-9FF4-4E7F-B98A-2668B3EDF4DC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Traditional", "Traditional", "{57828119-B773-44B0-979E-4CD67F7D5FB5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Traditional", "Traditional", "{43D4D48D-4B1C-42D5-841B-B2C94D3AFC73}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{6BD86EB5-992B-4A86-82FC-0B3D4E7D8CBC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{3564792D-2FFB-410A-B0DE-4AD6147E37B3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Traditional.Sandbox", "src\Traditional\Traditional.Sandbox\Traditional.Sandbox.csproj", "{A4478D80-A677-4D5A-871A-093AE9F874C1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7FE222D0-5FA4-4433-A7AB-E495969F8EA1} = {1C0ECF18-EA76-455D-9D01-B1A5BCEBB6C5}
+		{E4432A6B-9FF4-4E7F-B98A-2668B3EDF4DC} = {89CB2F17-E4A1-4A2B-A425-34BFDC235618}
+		{57828119-B773-44B0-979E-4CD67F7D5FB5} = {1C0ECF18-EA76-455D-9D01-B1A5BCEBB6C5}
+		{43D4D48D-4B1C-42D5-841B-B2C94D3AFC73} = {89CB2F17-E4A1-4A2B-A425-34BFDC235618}
+		{6BD86EB5-992B-4A86-82FC-0B3D4E7D8CBC} = {E4432A6B-9FF4-4E7F-B98A-2668B3EDF4DC}
+		{3564792D-2FFB-410A-B0DE-4AD6147E37B3} = {43D4D48D-4B1C-42D5-841B-B2C94D3AFC73}
+		{A4478D80-A677-4D5A-871A-093AE9F874C1} = {57828119-B773-44B0-979E-4CD67F7D5FB5}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A4478D80-A677-4D5A-871A-093AE9F874C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4478D80-A677-4D5A-871A-093AE9F874C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4478D80-A677-4D5A-871A-093AE9F874C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4478D80-A677-4D5A-871A-093AE9F874C1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
