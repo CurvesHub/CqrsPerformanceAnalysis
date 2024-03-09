@@ -1,6 +1,13 @@
 bin/
 obj/
-/packages/
-riderModule.iml
-/_ReSharper.Caches/
 .idea
+*.DotSettings*
+/data
+/docs/inProgress
+/docs/Technologies
+/docs/.obsidian
+/docs/_Thesis
+/tests/Traditional/Traditional.PerformanceTests/Assets/K6Tests/*/archive
+/tests/Traditional/Traditional.PerformanceTests/Assets/K6Tests/*/results
+/thesis
+/docs/TODOs and Timeline.md

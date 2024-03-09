@@ -1,0 +1,18 @@
+﻿@host = http://localhost:5012
+
+### If an excpetion occures, the server will redirect to this error endpoint and return a problem+json response
+
+GET {{host}}/error
+Accept: application/problem+json
+
+### Example response
+
+# HTTP/1.1 500 Internal Server Error
+# Content-Type: application/problem+json
+#
+# {
+#   "type": "https://tools.ietf.org/html/rfc9110#section-15.6.1",
+#   "title": "An error occurred while processing your request.",
+#   "status": 500,
+#   "traceIdentifier": "0HN361LE74QR8:00000001"
+# }

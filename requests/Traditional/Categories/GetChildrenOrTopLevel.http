@@ -1,0 +1,32 @@
+﻿@host = http://localhost:5012
+
+@rootCategoryId = 1
+@articleNumber = 1
+@CategoryNumber = 1
+
+### Get children of a category
+
+GET {{host}}/categories/children?rootCategoryId={{rootCategoryId}}&articleNumber={{articleNumber}}&categoryNumber={{CategoryNumber}}
+Content-Type: application/json
+Accept: application/json
+
+### Get the top level categories
+
+GET {{host}}/categories/children?rootCategoryId={{rootCategoryId}}&articleNumber={{articleNumber}}
+
+### Example response
+
+# [
+#     {
+#         "categoryNumber": 1,
+#         "label": "Category Name 1",
+#         "isSelected": true,
+#         "isLeaf": false
+#     },
+#     {
+#         "categoryNumber": 2,
+#         "label": "Category Name 2",
+#         "isSelected": false,
+#         "isLeaf": false
+#     }
+# ]

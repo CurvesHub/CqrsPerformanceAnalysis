@@ -1,0 +1,54 @@
+﻿@host = http://localhost:5012
+
+### Get all root categories
+
+GET {{host}}/rootCategories
+Accept: application/json
+
+### Example response
+
+# HTTP/1.1 200 OK
+# Content-Type: application/json; charset=utf-8
+#
+# [
+#   {
+#     "rootCategoryId": 1,
+#     "localeCode": "de_DE",
+#     "isDefaultRoot": true
+#   },
+#   {
+#     "rootCategoryId": 2,
+#     "localeCode": "fr_FR",
+#     "isDefaultRoot": false
+#   },
+#   {
+#     "rootCategoryId": 3,
+#     "localeCode": "nl_NL",
+#     "isDefaultRoot": false
+#   },
+#   {
+#     "rootCategoryId": 4,
+#     "localeCode": "es_ES",
+#     "isDefaultRoot": false
+#   },
+#   {
+#     "rootCategoryId": 5,
+#     "localeCode": "en_GB",
+#     "isDefaultRoot": false
+#   },
+#   {
+#     "rootCategoryId": 6,
+#     "localeCode": "it_IT",
+#     "isDefaultRoot": false
+#   },
+#   {
+#     "rootCategoryId": 7,
+#     "localeCode": "pl_PL",
+#     "isDefaultRoot": false
+#   },
+#   {
+#     "rootCategoryId": 8,
+#     "localeCode": "sv_SE",
+#     "isDefaultRoot": false
+#   }
+# ]

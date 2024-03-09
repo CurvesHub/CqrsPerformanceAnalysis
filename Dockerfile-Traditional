@@ -1,0 +1,34 @@
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER $APP_UID
+WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+# Copy the Directory.Build.props and Package.props from the solution root into src
+COPY ["Directory.Build.props", "."]
+COPY ["Directory.Packages.props", "."]
+WORKDIR /src/Traditional
+# Copy the Directory.Build.props from the /src directory into /src/Traditional
+COPY ["src/Directory.Build.props", "."]
+# Copy the project files from /Traditional (where we are) into /src/Traditional
+COPY ["src/Traditional/Traditional.Api/Traditional.Api.csproj", "Traditional.Api/"]
+COPY ["src/Traditional/Traditional.Domain/Traditional.Domain.csproj", "Traditional.Domain/"]
+COPY ["src/Traditional/Traditional.Application/Traditional.Application.csproj", "Traditional.Application/"]
+COPY ["src/Traditional/Traditional.Infrastructure/Traditional.Infrastructure.csproj", "Traditional.Infrastructure/"]
+RUN dotnet restore "Traditional.Api/Traditional.Api.csproj"
+# Copy the rest of the files from /Traditional into /src/Traditional
+COPY ["src/Traditional", "."]
+WORKDIR /src/Traditional/Traditional.Api
+RUN dotnet build "Traditional.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "Traditional.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Traditional.Api.dll"]

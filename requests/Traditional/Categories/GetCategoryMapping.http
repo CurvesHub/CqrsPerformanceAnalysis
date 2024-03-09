@@ -1,0 +1,18 @@
+﻿@host = http://localhost:5012
+
+### Get the mapped category for an article and a root category
+
+@rootCategoryId = 1
+@articleNumber = 1
+
+GET {{host}}/categories?rootCategoryId={{rootCategoryId}}&articleNumber={{articleNumber}}
+Content-Type: application/json
+
+### Expected response
+
+# {
+#   "categoryNumber": 1,
+#   "categoryPath": "Garten",
+#   "germanCategoryNumber": 1,
+#   "germanCategoryPath": "Garten"
+# }

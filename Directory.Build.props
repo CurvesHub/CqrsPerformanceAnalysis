@@ -9,4 +9,48 @@
         <EnableNETAnalyzers>true</EnableNETAnalyzers>
         <AnalysisLevel>latest</AnalysisLevel>
     </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Analyzer -->
+        <GlobalPackageReference Include="Meziantou.Analyzer" Version="2.0.153">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </GlobalPackageReference>
+        <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="9.25.1.91650">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </GlobalPackageReference>
+        <GlobalPackageReference Include="Roslynator.Analyzers" Version="4.12.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </GlobalPackageReference>
+        <GlobalPackageReference Include="Roslynator.Core" Version="4.12.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </GlobalPackageReference>
+        <GlobalPackageReference Include="Roslynator.CSharp" Version="4.12.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </GlobalPackageReference>
+        <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </GlobalPackageReference>
+        <!-- We need to reference:
+        'Microsoft.CodeAnalysis.CSharp' and
+        'Microsoft.CodeAnalysis.CSharp.Work'
+        here directly, because it otherwise conflicts with EF Core Design.
+        EF Core Design references the version 4.5.0 of these packages,
+        which is not compatible with the version 4.7.0 of the analyzers.
+        We use the latest version of those packages here.
+         -->
+        <GlobalPackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </GlobalPackageReference>
+        <GlobalPackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.9.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </GlobalPackageReference>
+    </ItemGroup>
 </Project>
