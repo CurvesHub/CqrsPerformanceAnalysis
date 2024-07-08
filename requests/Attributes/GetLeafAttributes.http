@@ -1,0 +1,48 @@
+﻿### Get leaf attributes by rootCategoryId, article number and attributeId
+
+@rootCategoryId = 1
+@articleNumber = 1
+@attributeId = 1
+
+GET {{host}}/attributes/leafAttributes?rootCategoryId={{rootCategoryId}}&articleNumber={{articleNumber}}&attributeId={{attributeId}}
+Content-Type: application/json
+
+### Expected response
+
+# [
+#   {
+#     "attributeId": 601,
+#     "attributeName": "Attribute Name 3",
+#     "type": "BOOLEAN",
+#     "maxValues": 1,
+#     "maxLength": null,
+#     "minLength": null,
+#     "description": null,
+#     "allowedValues": [],
+#     "exampleValues": [],
+#     "canAddAllowedValues": false,
+#     "subAttributes": [],
+#     "attributePath": [
+#       "Attribute Name 2"
+#     ],
+#     "isEditable": true,
+#     "values": [
+#       {
+#         "characteristicId": 0,
+#         "values": [
+#           "False"
+#         ]
+#       },
+#       {
+#         "characteristicId": 1,
+#         "values": []
+#       },
+#       {
+#         "characteristicId": 2,
+#         "values": []
+#       }
+#     ],
+#     "minValues": 1,
+#     "dependentAttributes": []
+#   }
+# ]

@@ -3,8 +3,8 @@ using ErrorOr;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using TestCommon.Logging;
 using Traditional.Api.Common.ErrorHandling;
-using Traditional.Tests.TestCommon.Logging;
 using Xunit.Abstractions;
 
 namespace Traditional.Tests.Common.ErrorHandling;

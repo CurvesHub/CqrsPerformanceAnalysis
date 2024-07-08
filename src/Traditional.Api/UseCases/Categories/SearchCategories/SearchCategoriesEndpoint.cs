@@ -4,7 +4,6 @@ using Traditional.Api.Common.Constants;
 using Traditional.Api.Common.Endpoints;
 using Traditional.Api.Common.ErrorHandling;
 using Traditional.Api.UseCases.Categories.Common.Persistence.Entities;
-using Traditional.Api.UseCases.RootCategories.Common.Persistence;
 
 namespace Traditional.Api.UseCases.Categories.SearchCategories;
 

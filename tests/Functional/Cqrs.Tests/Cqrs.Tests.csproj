@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+        <PackageReference Include="NSubstitute" />
+        <PackageReference Include="Respawn" />
+        <PackageReference Include="Testcontainers" />
+        <PackageReference Include="Testcontainers.PostgreSql" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\src\Cqrs.Api\Cqrs.Api.csproj" />
+        <ProjectReference Include="..\..\TestCommon\TestCommon.csproj" />
+    </ItemGroup>
+
+</Project>

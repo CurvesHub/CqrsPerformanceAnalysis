@@ -5,10 +5,7 @@
         <PackageReference Include="Serilog.Sinks.Console" />
         <PackageReference Include="Serilog.Sinks.TestCorrelator" />
         <PackageReference Include="Serilog.Sinks.XUnit" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\src\Traditional.Api\Traditional.Api.csproj" />
+        <PackageReference Include="FluentAssertions" />
     </ItemGroup>
 
 </Project>

@@ -6,7 +6,7 @@ using ErrorOr;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using TestCommon.Constants;
-using TestCommon.Factories;
+using TestCommon.ErrorHandling;
 using Traditional.Api.Common.BaseRequests;
 using Traditional.Api.UseCases.Articles.Errors;
 using Traditional.Api.UseCases.Categories.GetCategoryMapping;
@@ -14,6 +14,7 @@ using Traditional.Api.UseCases.RootCategories.Common.Errors;
 using Traditional.Api.UseCases.RootCategories.Common.Persistence.Entities;
 using Traditional.Tests.TestCommon.BaseTest;
 using Traditional.Tests.TestCommon.ErrorHandling;
+using Traditional.Tests.TestCommon.Factories;
 
 namespace Traditional.Tests.UseCases.Categories.GetCategoryMapping;
 

@@ -1,13 +1,10 @@
-bin/
-obj/
-.idea
+**/bin/
+**/obj/
+**/.idea/
 *.DotSettings*
-/data
-/docs/inProgress
-/docs/Technologies
-/docs/.obsidian
-/docs/_Thesis
-/tests/Traditional/Traditional.PerformanceTests/Assets/K6Tests/*/archive
-/tests/Traditional/Traditional.PerformanceTests/Assets/K6Tests/*/results
-/thesis
-/docs/TODOs and Timeline.md
+**/data/
+**/docs/.obsidian/
+**/docs/inProgress/
+**/docs/TODOs and Timeline.md
+**/Assets/K6Tests/*/archive/
+**/Assets/K6Tests/*/results/

@@ -1,0 +1,83 @@
+﻿### Get sub attributes by rootCategoryId and article number and attributeIds
+
+@rootCategoryId = 1
+@articleNumber = 1
+@attributeIds = 1,2
+
+GET {{host}}/attributes/subAttributes?rootCategoryId={{rootCategoryId}}&articleNumber={{articleNumber}}&attributeIds={{attributeIds}}
+Content-Type: application/json
+
+### Expected response
+
+# [
+#   {
+#     "attributeId": 1,
+#     "attributeName": "Attribute Name 1",
+#     "type": "BOOLEAN",
+#     "maxValues": 1,
+#     "maxLength": null,
+#     "minLength": null,
+#     "description": null,
+#     "allowedValues": [],
+#     "exampleValues": [],
+#     "canAddAllowedValues": false,
+#     "subAttributes": [
+#       "301"
+#     ],
+#     "attributePath": [],
+#     "isEditable": true,
+#     "values": [
+#       {
+#         "characteristicId": 0,
+#         "values": [
+#           "False"
+#         ]
+#       },
+#       {
+#         "characteristicId": 1,
+#         "values": []
+#       },
+#       {
+#         "characteristicId": 2,
+#         "values": []
+#       }
+#     ],
+#     "minValues": 1,
+#     "dependentAttributes": []
+#   },
+#   {
+#     "attributeId": 2,
+#     "attributeName": "Attribute Name 4",
+#     "type": "BOOLEAN",
+#     "maxValues": 1,
+#     "maxLength": null,
+#     "minLength": null,
+#     "description": null,
+#     "allowedValues": [],
+#     "exampleValues": [],
+#     "canAddAllowedValues": false,
+#     "subAttributes": [
+#       "302"
+#     ],
+#     "attributePath": [],
+#     "isEditable": true,
+#     "values": [
+#       {
+#         "characteristicId": 0,
+#         "values": [
+#           "True"
+#         ]
+#       },
+#       {
+#         "characteristicId": 1,
+#         "values": []
+#       },
+#       {
+#         "characteristicId": 2,
+#     "values": []
+#     }
+#     ],
+#     "minValues": 1,
+#     "dependentAttributes": []
+#   }
+# ]

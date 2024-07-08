@@ -21,6 +21,26 @@ TODO: Anleitung wie man die endpoints ausprobiert, die app in docker started, di
 TODO: Use click to expand in Readme
 TODO: link to the database scheme and put it on a page with some information about the database
 
+TODO: Put this into a sh file
+
+## Build the performance test project:
+- `cd .\repositories\DemoProjects\Bachelor\CqrsPerformanceAnalysis`
+- `rm .\src\Traditional\Traditional.Api\appsettings.Development.json`
+- `rm .\src\Traditional\Traditional.Api\appsettings.json`
+- `cd .\tests\Common\PerformanceTests\`
+- `dotnet restore PerformanceTests.csproj --no-cache`
+- `dotnet build PerformanceTests.csproj -c Release --no-cache`
+- `dotnet publish PerformanceTests.csproj -c Release /p:UseAppHost=false`
+- `cd ..\..\..\`
+- `git checkout -- .\src\Traditional\Traditional.Api\appsettings.json`
+- `git checkout -- .\src\Traditional\Traditional.Api\appsettings.Development.json`
+
+## Run the performance test project:
+- `cd .\repositories\DemoProjects\Bachelor\CqrsPerformanceAnalysis\tests\Common\PerformanceTests\`
+- `dotnet C:\Users\jens.richter\repositories\DemoProjects\Bachelor\CqrsPerformanceAnalysis\tests\Common\PerformanceTests\bin\Release\net8.0\publish\PerformanceTests.dll --urls="http://localhost:5017"`
+- `curl 'http://localhost:5017'`
+- `curl 'http://localhost:5017/K6Tests/allOfBothApis?checkElastic=true&withWarmUp=true&saveMinimalResults=true'`
+
 ## Overview
 
 This project aims to provide different complex scenarios. Those are used to evaluate if restructuring a project with CQRS will bring performance benefits.

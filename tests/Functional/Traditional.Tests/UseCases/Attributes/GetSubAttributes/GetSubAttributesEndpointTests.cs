@@ -6,7 +6,7 @@ using System.Web;
 using ErrorOr;
 using FluentAssertions;
 using TestCommon.Constants;
-using TestCommon.Factories;
+using TestCommon.ErrorHandling;
 using Traditional.Api.UseCases.Articles.Errors;
 using Traditional.Api.UseCases.Attributes.Common.Errors;
 using Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;
@@ -14,6 +14,7 @@ using Traditional.Api.UseCases.Attributes.Common.Responses;
 using Traditional.Api.UseCases.Attributes.GetSubAttributes;
 using Traditional.Tests.TestCommon.BaseTest;
 using Traditional.Tests.TestCommon.ErrorHandling;
+using Traditional.Tests.TestCommon.Factories;
 using Traditional.Tests.UseCases.Attributes.Common;
 using Attribute = Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 

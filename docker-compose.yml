@@ -1,9 +1,9 @@
 ﻿networks:
   default:
-    name: traditional-network
+    name: main-network
 
 services:
-# The database for the performance test results
+  # The database for the performance test results
   db-performance-postgres:
     image: postgres:16.2
     container_name: db-performance-postgres
@@ -18,7 +18,23 @@ services:
     networks:
       - default
 
-# The elasticsearch service which stores logs
+  # The grafana service for visualizations
+  grafana:
+    image: grafana/grafana:9.1.7
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=secret
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+    depends_on:
+      - db-performance-postgres
+      # - elasticsearch
+    networks:
+      - default
+
+  # The elasticsearch service which stores logs
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
     container_name: elasticsearch
@@ -32,7 +48,7 @@ services:
     networks:
       - default
 
-# The kibana service which visualizes logs
+  # The kibana service which visualizes logs
   kibana:
     image: docker.elastic.co/kibana/kibana:8.13.0
     container_name: kibana
@@ -47,32 +63,15 @@ services:
     networks:
       - default
 
-# The grafana service for visualizations
-  grafana:
-    image: grafana/grafana:9.1.7
-    container_name: grafana
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=secret
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./data/grafana:/var/lib/grafana
-    depends_on:
-      - db-performance-postgres
-      #      - db-traditional-postgres
-      #      - elasticsearch
-    networks:
-      - default
+  # The followings services are for manual testing. In the automated tests the
+  # required container are started by the test itself.
 
-# The followings services are for manual testing, for the automated tests the
-# needed container gets started by the test itself.
-
-# The database for the traditional API
-  db-traditional-postgres:
+  # The main database for the traditional and cqrs API
+  db-main-postgres:
     image: postgres:16.2
-    container_name: db-traditional-postgres
+    container_name: db-main-postgres
     environment:
-      POSTGRES_DB: postgres-traditional
+      POSTGRES_DB: postgres-main
       POSTGRES_USER: postgres-user
       POSTGRES_PASSWORD: postgres-password
     deploy:
@@ -83,12 +82,12 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./data/postgres/traditional:/var/lib/postgresql/data
+      - ./data/postgres/main:/var/lib/postgresql/data
       - ./data/postgres/dumps:/dumps
     networks:
       - default
 
-## The traditional API
+  # The traditional API
   api-traditional:
     image: api.traditional:latest
     container_name: api-traditional
@@ -105,58 +104,93 @@ services:
     ports:
       - "5012:8080"
     depends_on:
-      - db-traditional-postgres
+      - db-main-postgres
     #  - elasticsearch
     networks:
       - default
 
-## The k6 test for the traditional API
-  k6-traditional:
-    image: grafana/k6
-    container_name: k6-traditional
+  # The cqrs API
+  api-cqrs:
+    image: api.cqrs:latest
+    container_name: api-cqrs
+    build:
+      context: .
+      dockerfile: Dockerfile-Cqrs
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    ports:
+      - "5023:8080"
+    depends_on:
+      - db-main-postgres
+    #  - elasticsearch
+    networks:
+      - default
+
+  # The k6 test for the traditional and cqrs API
+  k6-tests:
+    image: grafana/k6:0.51.0
+    container_name: k6-tests
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
     volumes:
       # Mount RootCategories
-      - ./tests/Traditional/Traditional.PerformanceTests/Assets/K6Tests/RootCategories/scripts:/scripts/RootCategories
-      - ./tests/Traditional/Traditional.PerformanceTests/Assets/K6Tests/RootCategories/results:/results/RootCategories
+      - ./tests/PerformanceTests/Assets/K6Tests/RootCategories/scripts:/scripts/RootCategories
+      - ./tests/PerformanceTests/Assets/K6Tests/RootCategories/results:/results/RootCategories
 
       # Mount Categories
-      - ./tests/Traditional/Traditional.PerformanceTests/Assets/K6Tests/Categories/scripts:/scripts/Categories
-      - ./tests/Traditional/Traditional.PerformanceTests/Assets/K6Tests/Categories/results:/results/Categories
+      - ./tests/PerformanceTests/Assets/K6Tests/Categories/scripts:/scripts/Categories
+      - ./tests/PerformanceTests/Assets/K6Tests/Categories/results:/results/Categories
 
       # Mount Attributes
-      - ./tests/Traditional/Traditional.PerformanceTests/Assets/K6Tests/Attributes/scripts:/scripts/Attributes
-      - ./tests/Traditional/Traditional.PerformanceTests/Assets/K6Tests/Attributes/results:/results/Attributes
+      - ./tests/PerformanceTests/Assets/K6Tests/Attributes/scripts:/scripts/Attributes
+      - ./tests/PerformanceTests/Assets/K6Tests/Attributes/results:/results/Attributes
     command:
-    # RootCategories
-      run /scripts/RootCategories/K6-GetRootCategories.js     --summary-export=/results/RootCategories/K6-GetRootCategories-Summary.json      --out json=/results/RootCategories/K6-GetRootCategories-Metric.jsonl
+      # RootCategories
+      run /scripts/RootCategories/K6-GetRootCategories.js     --summary-export=/results/RootCategories/K6-Traditional-GetRootCategories-Summary.json      --out json=/results/RootCategories/K6-Traditional-GetRootCategories-Metric.jsonl
 
-    # Categories
-      #run /scripts/Categories/K6-GetCategoryMapping.js       --summary-export=/results/Categories/K6-GetCategoryMapping-Summary.json         --out json=/results/Categories/K6-GetCategoryMapping-Metric.jsonl
-      #run /scripts/Categories/K6-GetChildrenOrTopLevel.js    --summary-export=/results/Categories/K6-GetChildrenOrTopLevel-Summary.json      --out json=/results/Categories/K6-GetChildrenOrTopLevel-Metric.jsonl
-      #run /scripts/Categories/K6-SearchCategories.js         --summary-export=/results/Categories/K6-SearchCategories-Summary.json           --out json=/results/Categories/K6-SearchCategories-Metric.jsonl
-      #run /scripts/Categories/K6-UpdateCategoryMapping.js    --summary-export=/results/Categories/K6-UpdateCategoryMapping-Summary.json      --out json=/results/Categories/K6-UpdateCategoryMapping-Metric.jsonl
+      # Categories
+      #run /scripts/Categories/K6-GetCategoryMapping.js       --summary-export=/results/Categories/K6-Traditional-GetCategoryMapping-Summary.json         --out json=/results/Categories/K6-Traditional-GetCategoryMapping-Metric.jsonl
+      #run /scripts/Categories/K6-GetChildrenOrTopLevel.js    --summary-export=/results/Categories/K6-Traditional-GetChildrenOrTopLevel-Summary.json      --out json=/results/Categories/K6-Traditional-GetChildrenOrTopLevel-Metric.jsonl
+      #run /scripts/Categories/K6-SearchCategories.js         --summary-export=/results/Categories/K6-Traditional-SearchCategories-Summary.json           --out json=/results/Categories/K6-Traditional-SearchCategories-Metric.jsonl
+      #run /scripts/Categories/K6-UpdateCategoryMapping.js    --summary-export=/results/Categories/K6-Traditional-UpdateCategoryMapping-Summary.json      --out json=/results/Categories/K6-Traditional-UpdateCategoryMapping-Metric.jsonl
 
-    # Attributes
-        #run /scripts/Attributes/K6-GetAttributes.js          --summary-export=/results/Attributes/K6-GetAttributes-Summary.json              --out json=/results/Attributes/K6-GetAttributes-Metric.jsonl
-        #run /scripts/Attributes/K6-GetLeafAttributes.js      --summary-export=/results/Attributes/K6-GetLeafAttributes-Summary.json          --out json=/results/Attributes/K6-GetLeafAttributes-Metric.jsonl
-        #run /scripts/Attributes/K6-GetSubAttributes.js       --summary-export=/results/Attributes/K6-GetSubAttributes-Summary.json           --out json=/results/Attributes/K6-GetSubAttributes-Metric.jsonl
-        #run /scripts/Attributes/K6-UpdateAttributeValues.js  --summary-export=/results/Attributes/K6-UpdateAttributeValues-Summary.json      --out json=/results/Attributes/K6-UpdateAttributeValues-Metric.jsonl
+      # Attributes
+      #run /scripts/Attributes/K6-GetAttributes.js          --summary-export=/results/Attributes/K6-Traditional-GetAttributes-Summary.json              --out json=/results/Attributes/K6-Traditional-GetAttributes-Metric.jsonl
+      #run /scripts/Attributes/K6-GetLeafAttributes.js      --summary-export=/results/Attributes/K6-Traditional-GetLeafAttributes-Summary.json          --out json=/results/Attributes/K6-Traditional-GetLeafAttributes-Metric.jsonl
+      #run /scripts/Attributes/K6-GetSubAttributes.js       --summary-export=/results/Attributes/K6-Traditional-GetSubAttributes-Summary.json           --out json=/results/Attributes/K6-Traditional-GetSubAttributes-Metric.jsonl
+      #run /scripts/Attributes/K6-UpdateAttributeValues.js  --summary-export=/results/Attributes/K6-Traditional-UpdateAttributeValues-Summary.json      --out json=/results/Attributes/K6-Traditional-UpdateAttributeValues-Metric.jsonl
     environment:
       - K6_WEB_DASHBOARD=true
-    # RootCategories
-      - K6_WEB_DASHBOARD_EXPORT=/results/RootCategories/K6-GetRootCategories-Report.html
 
-    # Categories
-      #- K6_WEB_DASHBOARD_EXPORT=/results/Categories/K6-GetCategoryMapping-Report.html
-      #- K6_WEB_DASHBOARD_EXPORT=/results/Categories/K6-GetChildrenOrTopLevel-Report.html
-      #- K6_WEB_DASHBOARD_EXPORT=/results/Categories/K6-SearchCategories-Report.html
-      #- K6_WEB_DASHBOARD_EXPORT=/results/Categories/K6-UpdateCategoryMapping-Report.html
+      # This env variable is used to set the port of the API in the test, so we can test the traditional and cqrs API with the same script
+      - API_PORT_TO_USE=5012 # Traditional API
+      #- API_PORT_TO_USE=5023 # CQRS API
 
-    # Attributes
-        #- K6_WEB_DASHBOARD_EXPORT=/results/Attributes/K6-GetAttributes-Report.html
-        #- K6_WEB_DASHBOARD_EXPORT=/results/Attributes/K6-GetLeafAttributes-Report.html
-        #- K6_WEB_DASHBOARD_EXPORT=/results/Attributes/K6-GetSubAttributes-Report.html
-        #- K6_WEB_DASHBOARD_EXPORT=/results/Attributes/K6-UpdateAttributeValues-Report.html
+      # This env variable is used to set the seed used for the random number generator in the test
+      - MY_SEED="hardcoded_seed"
+
+      # RootCategories
+      - K6_WEB_DASHBOARD_EXPORT=/results/RootCategories/K6-Traditional-GetRootCategories-Report.html
+
+      # Categories
+      #- K6_WEB_DASHBOARD_EXPORT=/results/Categories/K6-Traditional-GetCategoryMapping-Report.html
+      #- K6_WEB_DASHBOARD_EXPORT=/results/Categories/K6-Traditional-GetChildrenOrTopLevel-Report.html
+      #- K6_WEB_DASHBOARD_EXPORT=/results/Categories/K6-Traditional-SearchCategories-Report.html
+      #- K6_WEB_DASHBOARD_EXPORT=/results/Categories/K6-Traditional-UpdateCategoryMapping-Report.html
+
+      # Attributes
+      #- K6_WEB_DASHBOARD_EXPORT=/results/Attributes/K6-Traditional-GetAttributes-Report.html
+      #- K6_WEB_DASHBOARD_EXPORT=/results/Attributes/K6-Traditional-GetLeafAttributes-Report.html
+      #- K6_WEB_DASHBOARD_EXPORT=/results/Attributes/K6-Traditional-GetSubAttributes-Report.html
+      #- K6_WEB_DASHBOARD_EXPORT=/results/Attributes/K6-Traditional-UpdateAttributeValues-Report.html
     ports:
       - "5665:5665"
     networks:

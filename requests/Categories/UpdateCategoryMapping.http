@@ -1,0 +1,21 @@
+﻿### Update category mapping of an article
+
+PUT {{host}}/categories
+Accept: application/json
+Content-Type: application/json
+
+{
+    "RootCategoryId": 1,
+    "ArticleNumber": "1",
+    "CategoryNumber": 1
+}
+
+### Example response
+
+# [
+#   {
+#     "categoryNumber": 2,
+#     "categoryPath": "New Category"
+#   }
+# ]
+

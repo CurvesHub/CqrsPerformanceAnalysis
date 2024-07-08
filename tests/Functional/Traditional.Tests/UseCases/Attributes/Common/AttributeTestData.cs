@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using TestCommon.Constants;
-using TestCommon.Factories;
 using Traditional.Api.Common.DataAccess.Persistence;
 using Traditional.Api.UseCases.Articles.Persistence.Entities;
 using Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;
 using Traditional.Api.UseCases.Categories.Common.Persistence.Entities;
+using Traditional.Tests.TestCommon.Factories;
 using Attribute = Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
 namespace Traditional.Tests.UseCases.Attributes.Common;

@@ -6,22 +6,28 @@ EXPOSE 8081
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-# Copy the Directory.Build.props and Package.props from the solution root into src
+
+WORKDIR /solution
+# Copy the Directory.Build.props, Package.props and the editorconfig from the solution root
 COPY ["Directory.Build.props", "."]
 COPY ["Directory.Packages.props", "."]
-WORKDIR /src/Traditional
-# Copy the Directory.Build.props from the /src directory into /src/Traditional
+COPY [".editorconfig", "."]
+
+WORKDIR /solution/src
+# Copy the Directory.Build.props from the /src directory into /solution/src
 COPY ["src/Directory.Build.props", "."]
-# Copy the project files from /Traditional (where we are) into /src/Traditional
-COPY ["src/Traditional/Traditional.Api/Traditional.Api.csproj", "Traditional.Api/"]
-COPY ["src/Traditional/Traditional.Domain/Traditional.Domain.csproj", "Traditional.Domain/"]
-COPY ["src/Traditional/Traditional.Application/Traditional.Application.csproj", "Traditional.Application/"]
-COPY ["src/Traditional/Traditional.Infrastructure/Traditional.Infrastructure.csproj", "Traditional.Infrastructure/"]
-RUN dotnet restore "Traditional.Api/Traditional.Api.csproj"
-# Copy the rest of the files from /Traditional into /src/Traditional
-COPY ["src/Traditional", "."]
-WORKDIR /src/Traditional/Traditional.Api
+
+# Copy the project from /src
+COPY ["src/Traditional.Api/Traditional.Api.csproj", "Traditional.Api/"]
+
+WORKDIR /solution/src/Traditional.Api
+# Restore the solution
+RUN dotnet restore "Traditional.Api.csproj"
+
+# Copy the rest of the files
+COPY ["src/Traditional.Api", "."]
+
+# Build the project
 RUN dotnet build "Traditional.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

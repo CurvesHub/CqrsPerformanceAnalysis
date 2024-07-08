@@ -4,13 +4,14 @@ using ErrorOr;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using TestCommon.Constants;
-using TestCommon.Factories;
+using TestCommon.ErrorHandling;
 using Traditional.Api.UseCases.Articles.Errors;
 using Traditional.Api.UseCases.Categories.Common.Errors;
 using Traditional.Api.UseCases.Categories.Common.Persistence.Entities;
 using Traditional.Api.UseCases.Categories.UpdateCategoryMapping;
 using Traditional.Tests.TestCommon.BaseTest;
 using Traditional.Tests.TestCommon.ErrorHandling;
+using Traditional.Tests.TestCommon.Factories;
 
 namespace Traditional.Tests.UseCases.Categories.UpdateCategoryMapping;
 

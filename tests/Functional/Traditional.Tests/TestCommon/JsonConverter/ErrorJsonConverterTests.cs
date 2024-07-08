@@ -2,7 +2,7 @@ using System.Text.Json;
 using ErrorOr;
 using FluentAssertions;
 using JetBrains.Annotations;
-using Traditional.Tests.TestCommon.ErrorHandling;
+using TestCommon.ErrorHandling;
 
 namespace Traditional.Tests.TestCommon.JsonConverter;
 
