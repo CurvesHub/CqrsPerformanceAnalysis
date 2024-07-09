@@ -20,8 +20,8 @@ using TestCommon.ErrorHandling;
 
 namespace Cqrs.Tests.UseCases.Attributes.GetLeafAttributes;
 
-public class GetLeafAttributesEndpointTests(TraditionalApiFactory factory)
-    : BaseTestWithSharedTraditionalApiFactory(factory)
+public class GetLeafAttributesEndpointTests(CqrsApiFactory factory)
+    : BaseTestWithSharedCqrsApiFactory(factory)
 {
     private GetLeafAttributesRequest _getLeafAttributesRequest = new(
         TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID,
@@ -46,7 +46,7 @@ public class GetLeafAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetLeafAttributesAsync_WhenCalled_ShouldReturnLeafAttributesWithCorrectPaths(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, _, attribute, subAttribute) = await AttributeTestData.CreateTestDataWithSubAndLeafAttributes(dbContext);
 
         subAttribute.SubAttributes = AttributeFactory.AddSubAttributesTo(subAttribute, 2, attributeValueType);
@@ -71,7 +71,7 @@ public class GetLeafAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetLeafAttributesAsync_WhenOptionalSubAttributeHasLeafs_ShouldReturnLeafsAsOptionalButDependent(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, _, _, subAttribute) = await AttributeTestData.CreateTestDataWithSubAndLeafAttributes(dbContext);
 
         subAttribute.MinValues = 0;
@@ -101,7 +101,7 @@ public class GetLeafAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetLeafAttributesAsync_WhenLeafAttributeHasMaxValuesMinus1_ShouldReturnMaxValuesOfParentAttribute(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, _, _, subAttribute) = await AttributeTestData.CreateTestDataWithSubAndLeafAttributes(dbContext);
 
         subAttribute.MaxValues = 10;
@@ -128,7 +128,7 @@ public class GetLeafAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetLeafAttributesAsync_WhenSubAttributeTreeIsMultipleLayersDeep_ShouldReturnAllLeafsWithCorrectDependentsAndPaths(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, _, _, subAttribute) = await AttributeTestData.CreateTestDataWithSubAndLeafAttributes(dbContext);
 
         subAttribute.MinValues = 0;
@@ -163,7 +163,7 @@ public class GetLeafAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetLeafAttributesAsync_WhenAttributeHasSubAttributesWithDifferentDepth_ShouldReturnLeafAttributesOfAllLayers(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, _, _, subAttribute) = await AttributeTestData.CreateTestDataWithSubAndLeafAttributes(dbContext);
 
         subAttribute.SubAttributes = AttributeFactory.AddSubAttributesTo(subAttribute, 2, attributeValueType);
@@ -186,7 +186,7 @@ public class GetLeafAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetLeafAttributesAsync_WhenAttributeHasSubAttributes_ShouldReturnColorIfArticleIsVariant(bool isVariant)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute, subAttribute) = await AttributeTestData.CreateTestDataWithSubAndLeafAttributes(dbContext);
 
         subAttribute.SubAttributes = AttributeFactory.AddSubAttributesTo(subAttribute, 1, AttributeValueType.String);
@@ -220,7 +220,7 @@ public class GetLeafAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetLeafAttributesAsync_WhenProductTypeIsNotSetAndHasSimilarSubAttributesToSetProductType_ShouldReturnValuesOfSetProductType()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var germanRootCategory = await dbContext.RootCategories.SingleAsync(rootCategory => rootCategory.Id == TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID);
         var (category, article, _, subAttribute) = await AttributeTestData.CreateTestDataWithSubAndLeafAttributes(dbContext);
 
@@ -262,7 +262,7 @@ public class GetLeafAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetLeafAttributesAsync_WhenAttributeHasMapping_ShouldNotReturnAttributeOrAnyOfItsSubAttributes()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, _, _, subAttribute) = await AttributeTestData.CreateTestDataWithSubAndLeafAttributes(dbContext);
 
         subAttribute.SubAttributes = AttributeFactory.AddSubAttributesTo(subAttribute, 2, AttributeValueType.String);
@@ -303,7 +303,7 @@ public class GetLeafAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetLeafAttributesAsync_WhenMappedCategoryDoesNotExist_ShouldReturnMappedCategoriesForArticleNotFound()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var article = ArticleFactory.CreateArticle();
         await dbContext.Articles.AddAsync(article);
@@ -325,7 +325,7 @@ public class GetLeafAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetLeafAttributesAsync_WhenAttributeIdIsUnknown_ShouldReturnUnknownAttributeIdsNotFoundError()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         await AttributeTestData.CreateTestData(dbContext);
         await dbContext.SaveChangesAsync();
 

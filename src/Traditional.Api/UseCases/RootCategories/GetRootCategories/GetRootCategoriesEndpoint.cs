@@ -1,6 +1,7 @@
 using System.Net;
 using Traditional.Api.Common.Constants;
 using Traditional.Api.Common.Endpoints;
+using Traditional.Api.Common.Interfaces;
 using Traditional.Api.UseCases.RootCategories.Common.Persistence.Entities;
 
 namespace Traditional.Api.UseCases.RootCategories.GetRootCategories;
@@ -21,19 +22,16 @@ public class GetRootCategoriesEndpoint : IEndpoint
             .CacheOutput(builder => builder.Expire(TimeSpan.FromDays(1)));
     }
 
-    private static async Task<IResult> GetRootCategoriesAsync(GetRootCategoriesHandler handler)
+    private static async Task<IResult> GetRootCategoriesAsync(ICachedRepository<RootCategory> _rootCategoryRepository)
     {
-        var rootCategories = await handler.GetRootCategoriesAsync();
+        var rootCategories = await _rootCategoryRepository.GetAllAsync();
 
-        return Results.Ok(ToResponse(rootCategories));
-    }
-
-    private static IEnumerable<GetRootCategoryResponse> ToResponse(IEnumerable<RootCategory> rootCategories)
-    {
-        return rootCategories.Select(rootCategory =>
+        var response = rootCategories.Select(rootCategory =>
             new GetRootCategoryResponse(
                 rootCategory.Id,
                 rootCategory.LocaleCode,
                 rootCategory.LocaleCode is LocaleCode.de_DE));
+
+        return Results.Ok(response);
     }
 }

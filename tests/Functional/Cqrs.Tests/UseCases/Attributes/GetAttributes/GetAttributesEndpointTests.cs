@@ -20,8 +20,8 @@ using TestCommon.ErrorHandling;
 
 namespace Cqrs.Tests.UseCases.Attributes.GetAttributes;
 
-public class GetAttributesEndpointTests(TraditionalApiFactory factory)
-    : BaseTestWithSharedTraditionalApiFactory(factory)
+public class GetAttributesEndpointTests(CqrsApiFactory factory)
+    : BaseTestWithSharedCqrsApiFactory(factory)
 {
     private BaseRequest _baseRequest = new(
         TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID,
@@ -35,7 +35,7 @@ public class GetAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetAttributesAsync_WhenAttributeExists_ShouldReturnAttribute()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, _, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         attribute.ValueType = AttributeValueType.String;
@@ -77,7 +77,7 @@ public class GetAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetAttributesAsync_WhenAttributeIsVariationThemeAndArticleHasVariants_ShouldReturnMinValuesGreaterThanZero()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (category, _, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         attribute.MarketplaceAttributeIds = "variation_theme";
@@ -98,7 +98,7 @@ public class GetAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetAttributesAsync_WhenAttributeHasSubAttributes_ShouldNotReturnBaseAttribute()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, _, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var additionalAttributes = AttributeFactory.AddSubAttributesTo(attribute, 3).ToArray();
@@ -125,7 +125,7 @@ public class GetAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetAttributesAsync_WhenVariantsHaveDifferentSetProductTypes_ShouldReturnProductTypeWithMostArticlesAsSet()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var germanRootCategory = await dbContext.RootCategories.SingleAsync(rootCategory => rootCategory.Id == TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID);
         var (category, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
@@ -162,7 +162,7 @@ public class GetAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetAttributesAsync_WhenVariantsHaveNoAssignedProductTypes_ShouldReturnNoProductTypeAsAssigned()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var germanRootCategory = await dbContext.RootCategories.SingleAsync(rootCategory => rootCategory.Id == TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID);
         var (category, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
@@ -217,7 +217,7 @@ public class GetAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetAttributesAsync_WhenMappedCategoryDoesNotExist_ShouldReturnMappedCategoriesForArticleNotFound()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var article = ArticleFactory.CreateArticle();
         await dbContext.Articles.AddAsync(article);

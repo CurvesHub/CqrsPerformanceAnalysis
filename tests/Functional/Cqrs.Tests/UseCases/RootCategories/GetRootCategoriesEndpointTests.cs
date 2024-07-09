@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Cqrs.Api.UseCases.RootCategories.Common.Persistence.Entities;
-using Cqrs.Api.UseCases.RootCategories.GetRootCategories;
+using Cqrs.Api.UseCases.RootCategories.Queries.GetRootCategories;
 using Cqrs.Tests.TestCommon.BaseTest;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
@@ -10,14 +10,14 @@ using TestCommon.Constants;
 
 namespace Cqrs.Tests.UseCases.RootCategories;
 
-public class GetRootCategoriesEndpointTests(TraditionalApiFactory factory)
-    : BaseTestWithSharedTraditionalApiFactory(factory)
+public class GetRootCategoriesEndpointTests(CqrsApiFactory factory)
+    : BaseTestWithSharedCqrsApiFactory(factory)
 {
     [Fact]
     public async Task GetRootCategories_WhenDbIsSeeded_ShouldReturnRootCategories()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var expectedRootCategories = (await dbContext.RootCategories.ToListAsync())
             .Select(rootCategory => new GetRootCategoryResponse(
@@ -39,7 +39,7 @@ public class GetRootCategoriesEndpointTests(TraditionalApiFactory factory)
     public async Task GetRootCategories_WhenDbIsNotSeeded_ShouldReturnProblemDetailsWithInternalServerError()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         await dbContext.RootCategories.ExecuteDeleteAsync();
 
         // Act

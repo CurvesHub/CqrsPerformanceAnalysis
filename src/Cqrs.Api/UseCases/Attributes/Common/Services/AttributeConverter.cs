@@ -14,7 +14,7 @@ namespace Cqrs.Api.UseCases.Attributes.Common.Services;
 /// </summary>
 public class AttributeConverter(
     IArticleRepository _articleRepository,
-    ICachedRepository<AttributeMapping> _attributeMappingRepository)
+    ICachedReadRepository<AttributeMapping> _attributeMappingReadRepository)
 {
     private static readonly string[] ColorMarketplaceAttributeId = ["color"];
 
@@ -241,7 +241,7 @@ public class AttributeConverter(
             return attribute;
         }
 
-        _allAttributeMappings ??= await _attributeMappingRepository.GetAllAsync();
+        _allAttributeMappings ??= await _attributeMappingReadRepository.GetAllAsync();
         var baseAttributeIds = _allAttributeMappings.Select(mapping => mapping.AttributeReference.Split(",")[0]);
 
         if (hasVariants)

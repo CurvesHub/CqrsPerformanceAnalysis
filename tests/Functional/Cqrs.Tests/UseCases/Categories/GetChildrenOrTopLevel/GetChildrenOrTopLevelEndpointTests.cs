@@ -17,8 +17,8 @@ using TestCommon.ErrorHandling;
 
 namespace Cqrs.Tests.UseCases.Categories.GetChildrenOrTopLevel;
 
-public class GetChildrenOrTopLevelEndpointTests(TraditionalApiFactory factory)
-    : BaseTestWithSharedTraditionalApiFactory(factory)
+public class GetChildrenOrTopLevelEndpointTests(CqrsApiFactory factory)
+    : BaseTestWithSharedCqrsApiFactory(factory)
 {
     private GetChildrenOrTopLevelRequest _getChildrenOrTopLevelRequest = new(
         TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID,
@@ -212,7 +212,7 @@ public class GetChildrenOrTopLevelEndpointTests(TraditionalApiFactory factory)
 
     private async Task AddCategoriesWithGermanRoot(List<Category> categories, Article? article = null)
     {
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var germanRootCategory = await dbContext.RootCategories
             .SingleAsync(x => x.Id == TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID);

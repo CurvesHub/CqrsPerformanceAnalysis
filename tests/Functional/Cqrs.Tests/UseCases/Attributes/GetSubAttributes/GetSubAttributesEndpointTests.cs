@@ -20,8 +20,8 @@ using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attri
 
 namespace Cqrs.Tests.UseCases.Attributes.GetSubAttributes;
 
-public class GetSubAttributesEndpointTests(TraditionalApiFactory factory)
-    : BaseTestWithSharedTraditionalApiFactory(factory)
+public class GetSubAttributesEndpointTests(CqrsApiFactory factory)
+    : BaseTestWithSharedCqrsApiFactory(factory)
 {
     private GetSubAttributesRequest _getSubAttributesRequest = new(
         TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID,
@@ -40,7 +40,7 @@ public class GetSubAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetSubAttributesAsync_WhenAttributeIsRequiredButHasOptionalParent_ShouldReturnMinValuesZero(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         attribute.AttributeBooleanValues = [new AttributeBooleanValue(true) { Article = article }];
@@ -68,7 +68,7 @@ public class GetSubAttributesEndpointTests(TraditionalApiFactory factory)
         // Arrange
         const string material = "material";
 
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         attribute.AttributeBooleanValues = [new AttributeBooleanValue(true) { Article = article }];
@@ -129,7 +129,7 @@ public class GetSubAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetSubAttributesAsync_WhenAttributeHasSubAttributesWithValuesForDifferentVariants_ShouldReturnResponseWithValues(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (category, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttributes = AttributeFactory.AddSubAttributesTo(attribute, 2, attributeValueType).ToList();
@@ -254,7 +254,7 @@ public class GetSubAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetSubAttributesAsync_WhenMappedCategoryDoesNotExist_ShouldReturnMappedCategoriesForArticleNotFound()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var article = ArticleFactory.CreateArticle();
         await dbContext.Articles.AddAsync(article);
@@ -276,7 +276,7 @@ public class GetSubAttributesEndpointTests(TraditionalApiFactory factory)
     public async Task GetSubAttributesAsync_WhenAttributeIdIsUnknown_ShouldReturnUnknownAttributeIdsNotFoundError()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         await AttributeTestData.CreateTestData(dbContext);
         await dbContext.SaveChangesAsync();
 

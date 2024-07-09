@@ -10,7 +10,7 @@ namespace Cqrs.Api.UseCases.Categories.Common.Persistence.Repositories;
 
 /// <inheritdoc />
 [SuppressMessage("Performance", "MA0020:Use direct methods instead of LINQ methods", Justification = "Not possible with EF Core linq queries")]
-internal class CategoryRepository(TraditionalDbContext _dbContext) : ICategoryRepository
+internal class CategoryRepository(CqrsWriteDbContext _dbContext) : ICategoryRepository
 {
     /// <inheritdoc />
     public async Task<Category?> GetByNumberAndRootCategoryId(int rootCategoryId, long categoryNumber)

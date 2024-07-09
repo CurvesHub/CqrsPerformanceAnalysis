@@ -15,8 +15,8 @@ using TestCommon.ErrorHandling;
 
 namespace Cqrs.Tests.UseCases.Categories.UpdateCategoryMapping;
 
-public class UpdateCategoryMappingEndpointTests(TraditionalApiFactory factory)
-    : BaseTestWithSharedTraditionalApiFactory(factory)
+public class UpdateCategoryMappingEndpointTests(CqrsApiFactory factory)
+    : BaseTestWithSharedCqrsApiFactory(factory)
 {
     private UpdateCategoryMappingRequest _updateCategoryMappingRequest = new(
         TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID,
@@ -31,7 +31,7 @@ public class UpdateCategoryMappingEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateCategoryMappingAsync_WhenArticleNotFound_ShouldReturnNotFound()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var germanRootCategory = await dbContext.RootCategories
                 .SingleAsync(x => x.Id == TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID);
 
@@ -117,7 +117,7 @@ public class UpdateCategoryMappingEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateCategoryMappingAsync_WhenCategoryNotFound_ShouldReturnNotFound()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var article = ArticleFactory.CreateArticle();
 
         await dbContext.Articles.AddAsync(article);
@@ -170,7 +170,7 @@ public class UpdateCategoryMappingEndpointTests(TraditionalApiFactory factory)
         bool hasCategoriesOfDifferentRootCategory = false,
         int articleCount = 1)
     {
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var germanRootCategory = await dbContext.RootCategories
             .SingleAsync(x => x.Id == TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID);
@@ -225,7 +225,7 @@ public class UpdateCategoryMappingEndpointTests(TraditionalApiFactory factory)
         Category expectedNewCategory,
         bool hasCategoriesOfDifferentRootCategory = false)
     {
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var articles = await dbContext.Articles
             .Include(article => article.Categories)

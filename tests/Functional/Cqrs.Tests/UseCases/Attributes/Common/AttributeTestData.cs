@@ -19,7 +19,7 @@ public static class AttributeTestData
     /// </summary>
     /// <param name="dbContext">The db context to add the test data to.</param>
     /// <returns>A tuple containing the created category, article, and attribute.</returns>
-    public static async Task<(Category category, Article article, Attribute attribute)> CreateTestData(TraditionalDbContext dbContext)
+    public static async Task<(Category category, Article article, Attribute attribute)> CreateTestData(CqrsWriteDbContext dbContext)
     {
         var germanRootCategory = await dbContext.RootCategories.SingleAsync(rootCategory => rootCategory.Id == TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID);
         var category = CategoryFactory.CreateCategory(rootCategory: germanRootCategory);
@@ -46,7 +46,7 @@ public static class AttributeTestData
     /// </summary>
     /// <param name="dbContext">The db context to add the test data to.</param>
     /// <returns>A tuple containing the created category, article, attribute, sub attribute and leaf attributes.</returns>
-    public static async Task<(Category category, Article article, Attribute attribute, Attribute subAttribute)> CreateTestDataWithSubAndLeafAttributes(TraditionalDbContext dbContext)
+    public static async Task<(Category category, Article article, Attribute attribute, Attribute subAttribute)> CreateTestDataWithSubAndLeafAttributes(CqrsWriteDbContext dbContext)
     {
         var (category, article, attribute) = await CreateTestData(dbContext);
 

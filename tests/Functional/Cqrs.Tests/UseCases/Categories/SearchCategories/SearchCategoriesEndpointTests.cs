@@ -18,8 +18,8 @@ using TestCommon.ErrorHandling;
 
 namespace Cqrs.Tests.UseCases.Categories.SearchCategories;
 
-public class SearchCategoriesEndpointTests(TraditionalApiFactory factory)
-    : BaseTestWithSharedTraditionalApiFactory(factory)
+public class SearchCategoriesEndpointTests(CqrsApiFactory factory)
+    : BaseTestWithSharedCqrsApiFactory(factory)
 {
     private SearchCategoriesRequest _searchCategoriesRequest = new(
         TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID,
@@ -65,7 +65,7 @@ public class SearchCategoriesEndpointTests(TraditionalApiFactory factory)
             };
         }
 
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var allCategories = (await GetAndAddTestCategories(dbContext)).ToArray();
 
@@ -114,7 +114,7 @@ public class SearchCategoriesEndpointTests(TraditionalApiFactory factory)
             SearchTerm = "Furniture"
         };
 
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var allCategories = (await GetAndAddTestCategories(dbContext)).ToArray();
 
@@ -158,7 +158,7 @@ public class SearchCategoriesEndpointTests(TraditionalApiFactory factory)
             SearchTerm = "Shelves"
         };
 
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var allCategories = (await GetAndAddTestCategories(dbContext)).ToArray();
 
@@ -265,7 +265,7 @@ public class SearchCategoriesEndpointTests(TraditionalApiFactory factory)
             - "Furniture" results in two category trees (But the actual result will have to be merged for the response)
             - "Shelves" results in two category trees (But the actual result will have to be merged for the response)
         """)]
-    private static async Task<IEnumerable<Category>> GetAndAddTestCategories(TraditionalDbContext dbContext)
+    private static async Task<IEnumerable<Category>> GetAndAddTestCategories(CqrsWriteDbContext dbContext)
     {
         // All categories are under the German root category
         var germanRootCategory = await dbContext.RootCategories

@@ -9,7 +9,7 @@ using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attri
 namespace Cqrs.Api.Common.DataAccess.Persistence;
 
 /// <inheritdoc cref="Microsoft.EntityFrameworkCore.DbContext" />
-public class TraditionalDbContext(DbContextOptions<TraditionalDbContext> options) : DbContext(options)
+public class CqrsWriteDbContext(DbContextOptions<CqrsWriteDbContext> options) : DbContext(options)
 {
     /// <summary>
     /// Gets a db set of <see cref="Article"/>s.
@@ -65,9 +65,10 @@ public class TraditionalDbContext(DbContextOptions<TraditionalDbContext> options
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // TODO: Refactor the write context to use write models and read context to use read models
         ConfigureDecimalPrecisionAndEnumConversion(modelBuilder);
 
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(TraditionalDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CqrsWriteDbContext).Assembly);
 
         base.OnModelCreating(modelBuilder);
     }

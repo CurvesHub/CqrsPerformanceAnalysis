@@ -21,8 +21,8 @@ using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attri
 
 namespace Cqrs.Tests.UseCases.Attributes.UpdateAttributeValues;
 
-public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
-    : BaseTestWithSharedTraditionalApiFactory(factory)
+public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
+    : BaseTestWithSharedCqrsApiFactory(factory)
 {
     private readonly List<NewAttributeValue> _newAttributeValues = [];
 
@@ -69,7 +69,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenAttributeHasValidValues_ShouldSaveNewValues(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttribute = AttributeFactory.AddSubAttributesTo(attribute, 1, attributeValueType, optional: true)[0];
@@ -100,7 +100,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     {
         // Arrange
         int characteristicId, attributeId, subAttributeId, newProductTypeId, articleId;
-        await using (var dbContext = ResolveTraditionalDbContext())
+        await using (var dbContext = ResolveCqrsWriteDbContext())
         {
             var germanRootCategory = await dbContext.RootCategories.SingleAsync(rootCategory =>
                 rootCategory.Id == TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID);
@@ -146,7 +146,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenValueInDbIsInRequest_ShouldUpdateValue(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttribute = AttributeFactory.AddSubAttributesTo(attribute, 1, attributeValueType, optional: true)[0];
@@ -170,7 +170,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenValuesForMultipleSubAttributesInRequest_ShouldSaveValues(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttributes = AttributeFactory.AddSubAttributesTo(attribute, 1, AttributeValueType.Boolean);
@@ -194,7 +194,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenDifferentValuesForMultipleArticles_ShouldSaveValues(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var germanRootCategory = await dbContext.RootCategories.SingleAsync(rootCategory => rootCategory.Id == TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID);
         var (category, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
@@ -235,7 +235,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenValuesForMultipleSubAttributesInRequest_ShouldIgnoreValuesOfNoneProductTypeAttributesWithSubAttributes(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttribute = AttributeFactory.AddSubAttributesTo(attribute, 1, AttributeValueType.Boolean)[0];
@@ -261,7 +261,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenAttributeHasValuesOfOtherRootCategory_ShouldPreservedOtherValuesWhenSavingNewValues()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var article = ArticleFactory.CreateArticle();
         CreateHomeProductTypeOnDeTreeWithNumberOfItemsSet(article, dbContext);
 
@@ -279,7 +279,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
         await AssertStatusCodeForUpdateAttributeValuesAsync();
 
         // Assert
-        await using var newDbContext = ResolveTraditionalDbContext();
+        await using var newDbContext = ResolveCqrsWriteDbContext();
 
         var productTypes = await newDbContext.Attributes
             .Where(a => a.ParentAttribute == null)
@@ -338,7 +338,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenMappedCategoryDoesNotExist_ShouldReturnMappedCategoriesForArticleNotFound()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var article = ArticleFactory.CreateArticle();
         await dbContext.Articles.AddAsync(article);
@@ -360,7 +360,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenDuplicateAttributeId_ShouldReturnDuplicateAttributeIdError()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
         await dbContext.SaveChangesAsync();
 
@@ -383,7 +383,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenUnknownAttributeId_ShouldReturnUnknownAttributeIdError()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
         await dbContext.SaveChangesAsync();
 
@@ -406,7 +406,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenNoProductTypeIsSet_ShouldReturnNotEnoughValuesError()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
         await dbContext.SaveChangesAsync();
 
@@ -428,7 +428,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenMoreThanOneProductTypeIsSet_ShouldReturnTooManyValuesError()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var germanRootCategory = await dbContext.RootCategories.SingleAsync(rootCategory => rootCategory.Id == TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID);
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
@@ -463,7 +463,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenInvalidCharacteristicId_ShouldReturnCharacteristicIdNotFoundError(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var otherProductType = AttributeFactory.AddSubAttributesTo(attribute, 1, attributeValueType)[0];
@@ -492,7 +492,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenTooFewValuesForAttribute_ShouldReturnNotEnoughValuesError(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttribute = AttributeFactory.AddSubAttributesTo(attribute, 1, attributeValueType)[0];
@@ -520,7 +520,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenTooManyValuesForAttribute_ShouldReturnTooManyValuesError(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttribute = AttributeFactory.AddSubAttributesTo(attribute, 1, attributeValueType)[0];
@@ -547,7 +547,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenMissingRequiredAttribute_ShouldReturnRequiredAttributeMissingError(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttributes = AttributeFactory.AddSubAttributesTo(attribute, 2, attributeValueType);
@@ -576,7 +576,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenMissingRequiredAttributeForOneArticle_ShouldReturnAttributeMissingErrorWithSku(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (category, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttributes = AttributeFactory.AddSubAttributesTo(attribute, 2, attributeValueType);
@@ -609,7 +609,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenAttributeHasValueForOptionalSubAttributeButNotForRequiredSubAttribute_ShouldReturnAttributeMissingError(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttributes = AttributeFactory.AddSubAttributesTo(attribute, 2, attributeValueType);
@@ -640,7 +640,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenAttributeHasRequiredSubAttributeWithMissingRequiredSubSubAttributes_ShouldReturnAttributeMissingError(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttributes = AttributeFactory.AddSubAttributesTo(attribute, 1, attributeValueType);
@@ -673,7 +673,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
         const decimal maxLength = 2.000000m;
         const string valueAboveLimit = "99999";
 
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttribute = AttributeFactory.AddSubAttributesTo(attribute, 1, attributeValueType)[0];
@@ -705,7 +705,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
         const decimal minLength = 10.000000m;
         const string valueBelowLimit = "1";
 
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttribute = AttributeFactory.AddSubAttributesTo(attribute, 1, attributeValueType)[0];
@@ -733,7 +733,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenValueNotInAllowedValues_ShouldReturnNotInAllowedValuesError(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttribute = AttributeFactory.AddSubAttributesTo(attribute, 1, attributeValueType)[0];
@@ -763,7 +763,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenWrongAttributeValueType_ShouldReturnWrongValueTypeError(AttributeValueType attributeValueType)
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         var (_, article, attribute) = await AttributeTestData.CreateTestData(dbContext);
 
         var subAttribute = AttributeFactory.AddSubAttributesTo(attribute, 1, attributeValueType)[0];
@@ -807,7 +807,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
         errors.ShouldContainSingleEquivalentTo(testData.ExpectedError);
     }
 
-    private static (Attribute Home, Attribute MaterialValue) CreateAttributesForEnglishRootCategory(Article article, TraditionalDbContext dbContext)
+    private static (Attribute Home, Attribute MaterialValue) CreateAttributesForEnglishRootCategory(Article article, CqrsWriteDbContext dbContext)
     {
         var englishRootCategory = dbContext.RootCategories.Single(rootCategory => rootCategory.Id == TestConstants.RootCategory.ENGLISH_ROOT_CATEGORY_ID);
 
@@ -867,7 +867,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
         return (home, materialValue);
     }
 
-    private static void CreateHomeProductTypeOnDeTreeWithNumberOfItemsSet(Article article, TraditionalDbContext dbContext)
+    private static void CreateHomeProductTypeOnDeTreeWithNumberOfItemsSet(Article article, CqrsWriteDbContext dbContext)
     {
         var germanRootCategory = dbContext.RootCategories.Single(rootCategory => rootCategory.Id == TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID);
 
@@ -910,7 +910,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
 
     private async Task ArticleShouldNotHaveValueForAttribute(int attributeId, Article article)
     {
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var attribute = await dbContext.Attributes
             .Include(dbAttribute => dbAttribute.AttributeBooleanValues!)
@@ -945,7 +945,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
 
     private async Task ArticleShouldHaveCountAttributeValues(int articleId, int expectedBooleanCount, int expectedDecimalCount, int expectedIntCount, int expectedStringCount)
     {
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var counts = await dbContext.Articles
             .Where(a => a.Id == articleId)
@@ -970,7 +970,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
 
     private async Task AttributeShouldHaveCountAttributeValues(int attributeId, int expectedBooleanCount, int expectedDecimalCount, int expectedIntCount, int expectedStringCount)
     {
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var counts = await dbContext.Attributes
             .Where(a => a.Id == attributeId)
@@ -1003,7 +1003,7 @@ public class UpdateAttributeValuesEndpointTests(TraditionalApiFactory factory)
 
     private async Task AttributeInDbShouldHaveValue(Attribute attribute, string attributeValue, int articleId)
     {
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         attribute = await dbContext.Attributes
             .Include(attr => attr.AttributeBooleanValues)
             .Include(attr => attr.AttributeDecimalValues)

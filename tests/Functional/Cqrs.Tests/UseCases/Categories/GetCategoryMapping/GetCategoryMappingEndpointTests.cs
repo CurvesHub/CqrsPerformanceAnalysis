@@ -18,8 +18,8 @@ using TestCommon.ErrorHandling;
 
 namespace Cqrs.Tests.UseCases.Categories.GetCategoryMapping;
 
-public class GetCategoryMappingEndpointTests(TraditionalApiFactory factory)
-    : BaseTestWithSharedTraditionalApiFactory(factory)
+public class GetCategoryMappingEndpointTests(CqrsApiFactory factory)
+    : BaseTestWithSharedCqrsApiFactory(factory)
 {
     public record GetCategoryTestData(bool IsGermanRequest, bool WithEnglishCategory, GetCategoryMappingResponse ExpectedResponse);
 
@@ -120,7 +120,7 @@ public class GetCategoryMappingEndpointTests(TraditionalApiFactory factory)
     public async Task GetCategoryAsync_WhenMappedCategoryDoesNotExist_ShouldReturnMappedCategoriesForArticleNotFound()
     {
         // Arrange
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var article = ArticleFactory.CreateArticle();
         await dbContext.Articles.AddAsync(article);
@@ -191,7 +191,7 @@ public class GetCategoryMappingEndpointTests(TraditionalApiFactory factory)
 
     private async Task<string> AddArticleWithCategories(bool withEnglishCategory)
     {
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
 
         var germanRootCategory = await dbContext.RootCategories.SingleAsync(rootCategory => rootCategory.LocaleCode == LocaleCode.de_DE);
         var germanCategory = CategoryFactory.CreateCategory(1, path: "Garten", rootCategory: germanRootCategory);

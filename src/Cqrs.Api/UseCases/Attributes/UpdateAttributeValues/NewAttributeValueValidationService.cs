@@ -13,7 +13,7 @@ namespace Cqrs.Api.UseCases.Attributes.UpdateAttributeValues;
 /// <summary>
 /// Checks if the attributes given by the category specifics put endpoint are valid.
 /// </summary>
-public class NewAttributeValueValidationService(ICachedRepository<AttributeMapping> _attributeMappingRepository)
+public class NewAttributeValueValidationService(ICachedReadRepository<AttributeMapping> _attributeMappingReadRepository)
 {
     private List<AttributeMapping>? _allAttributeMappings;
 
@@ -278,7 +278,7 @@ public class NewAttributeValueValidationService(ICachedRepository<AttributeMappi
         }
 
         // 3. Get all attribute mappings and filter the sub attributes
-        _allAttributeMappings ??= await _attributeMappingRepository.GetAllAsync();
+        _allAttributeMappings ??= await _attributeMappingReadRepository.GetAllAsync();
         var baseAttributeIds = _allAttributeMappings.Select(mapping => mapping.AttributeReference.Split(",")[0]);
 
         var filteredSubAttributes = attribute.SubAttributes

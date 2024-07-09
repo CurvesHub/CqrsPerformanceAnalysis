@@ -9,26 +9,26 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Cqrs.Tests.Common.Persistence;
 
-public class CachedRepositoryTests : BaseTestWithSharedTraditionalApiFactory
+public class CachedReadRepositoryTests : BaseTestWithSharedCqrsApiFactory
 {
-    private readonly TraditionalDbContext _dbContext;
-    private readonly ICachedRepository<RootCategory> _repository;
+    private readonly CqrsWriteDbContext _cqrsWriteDbContext;
+    private readonly ICachedReadRepository<RootCategory> _cachedReadRepository;
 
-    public CachedRepositoryTests(TraditionalApiFactory factory)
+    public CachedReadRepositoryTests(CqrsApiFactory factory)
         : base(factory)
     {
-        _dbContext = ResolveTraditionalDbContext();
-        _repository = factory.Services.GetRequiredService<ICachedRepository<RootCategory>>();
+        _cqrsWriteDbContext = ResolveCqrsWriteDbContext();
+        _cachedReadRepository = factory.Services.GetRequiredService<ICachedReadRepository<RootCategory>>();
     }
 
     [Fact]
     public async Task GetAllAsync_WhenCalled_ShouldReturnAllItems()
     {
         // Arrange
-        var expected = await _dbContext.RootCategories.ToListAsync();
+        var expected = await _cqrsWriteDbContext.RootCategories.ToListAsync();
 
         // Act
-        var actual = await _repository.GetAllAsync();
+        var actual = await _cachedReadRepository.GetAllAsync();
 
         // Assert
         actual.Should().BeEquivalentTo(expected);
@@ -38,10 +38,10 @@ public class CachedRepositoryTests : BaseTestWithSharedTraditionalApiFactory
     public async Task GetAllAsync_WhenNoItemsExist_ShouldThrowException()
     {
         // Arrange
-        await _dbContext.RootCategories.ExecuteDeleteAsync();
+        await _cqrsWriteDbContext.RootCategories.ExecuteDeleteAsync();
 
         // Act
-        Func<Task> action = async () => await _repository.GetAllAsync();
+        Func<Task> action = async () => await _cachedReadRepository.GetAllAsync();
 
         // Assert
         await action.Should().ThrowAsync<SeededTableIsEmptyException>();
@@ -51,10 +51,10 @@ public class CachedRepositoryTests : BaseTestWithSharedTraditionalApiFactory
     public async Task GetByIdAsync_WhenCalled_ShouldReturnItem()
     {
         // Arrange
-        var expected = await _dbContext.RootCategories.FirstAsync();
+        var expected = await _cqrsWriteDbContext.RootCategories.FirstAsync();
 
         // Act
-        var actual = await _repository.GetByIdAsync(expected.Id);
+        var actual = await _cachedReadRepository.GetByIdAsync(expected.Id);
 
         // Assert
         actual.Should().BeEquivalentTo(expected);
@@ -64,10 +64,10 @@ public class CachedRepositoryTests : BaseTestWithSharedTraditionalApiFactory
     public async Task GetByIdAsync_WhenItemDoesNotExist_ShouldReturnNull()
     {
         // Arrange
-        var expected = await _dbContext.RootCategories.MaxAsync(e => e.Id) + 1;
+        var expected = await _cqrsWriteDbContext.RootCategories.MaxAsync(e => e.Id) + 1;
 
         // Act
-        var actual = await _repository.GetByIdAsync(expected);
+        var actual = await _cachedReadRepository.GetByIdAsync(expected);
 
         // Assert
         actual.Should().BeNull();

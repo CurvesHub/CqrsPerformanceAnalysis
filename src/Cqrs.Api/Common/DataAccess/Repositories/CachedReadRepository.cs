@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore;
 namespace Cqrs.Api.Common.DataAccess.Repositories;
 
 /// <inheritdoc />
-internal class CachedRepository<TItem>(
-    TraditionalDbContext _dbContext,
+internal class CachedReadRepository<TItem>(
+    CqrsReadDbContext _dbContext,
     Cache<TItem> _cache)
-    : ICachedRepository<TItem>
+    : ICachedReadRepository<TItem>
     where TItem : BaseEntity
 {
     /// <inheritdoc />

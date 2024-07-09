@@ -17,7 +17,6 @@ using Cqrs.Api.UseCases.Categories.GetChildrenOrTopLevel;
 using Cqrs.Api.UseCases.Categories.SearchCategories;
 using Cqrs.Api.UseCases.Categories.UpdateCategoryMapping;
 using Cqrs.Api.UseCases.RootCategories.Common.Persistence.Entities;
-using Cqrs.Api.UseCases.RootCategories.GetRootCategories;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -68,7 +67,6 @@ public static class DependencyInjection
         services.AddScoped<GetChildrenOrTopLevelHandler>();
         services.AddScoped<SearchCategoriesHandler>();
         services.AddScoped<UpdateCategoryMappingHandler>();
-        services.AddScoped<GetRootCategoriesHandler>();
 
         // Add attribute handlers
         services.AddScoped<GetAttributesHandler>();
@@ -92,7 +90,7 @@ public static class DependencyInjection
     /// <returns>The current service collection.</returns>
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext(configuration);
+        services.AddRequiredDbContexts(configuration);
 
         // Add caches
         services.AddMemoryCache();
@@ -103,26 +101,39 @@ public static class DependencyInjection
         services.AddScoped<IArticleRepository, ArticleRepository>();
 
         // Add category repositories
-        services.AddScoped<ICachedRepository<RootCategory>, CachedRepository<RootCategory>>();
+        services.AddScoped<ICachedReadRepository<RootCategory>, CachedReadRepository<RootCategory>>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
 
         // Add attribute repositories
         services.AddScoped<IAttributeRepository, AttributeRepository>();
-        services.AddScoped<ICachedRepository<AttributeMapping>, CachedRepository<AttributeMapping>>();
+        services.AddScoped<ICachedReadRepository<AttributeMapping>, CachedReadRepository<AttributeMapping>>();
 
         return services;
     }
 
-    private static void AddDbContext(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddRequiredDbContexts(this IServiceCollection services, IConfiguration configuration)
     {
         // Add db context
         var connectionString = string.Equals(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), "true", StringComparison.OrdinalIgnoreCase)
             ? configuration.GetConnectionString("DockerConnection")
             : configuration.GetConnectionString("LocalConnection");
 
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException("The connection string is not set.");
+        }
+
+        // TODO: When using a read replica a different connection string must be used!
+        return services
+            .AddDbContext<CqrsWriteDbContext>(OptionsAction(connectionString))
+            .AddDbContext<CqrsReadDbContext>(OptionsAction(connectionString));
+
         // Optional: Verify if the QuerySplittingBehavior is good for all queries if not just enable it for the specific queries by calling .AsSplitQuery()
-        services.AddDbContext<TraditionalDbContext>(options =>
-            options.UseNpgsql(connectionString, config =>
-                config.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
+        Action<DbContextOptionsBuilder> OptionsAction(string connectionStringToUse)
+        {
+            return options => options.UseNpgsql(
+                connectionString: connectionStringToUse + ";Include Error Detail=true",
+                npgsqlOptionsAction: config => config.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+        }
     }
 }

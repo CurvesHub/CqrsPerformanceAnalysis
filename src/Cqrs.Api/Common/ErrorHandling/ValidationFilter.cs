@@ -11,11 +11,11 @@ namespace Cqrs.Api.Common.ErrorHandling;
 /// Defines a validation filter which validates a <see cref="BaseRequest"/>.
 /// </summary>
 /// <param name="_requestValidator">The request validator.</param>
-/// <param name="_rootCategoryRepository">The root category repository.</param>
+/// <param name="_rootCategoryReadRepository">The root category repository.</param>
 /// <typeparam name="TRequest">The type of the request.</typeparam>
 public class ValidationFilter<TRequest>(
     IValidator<TRequest> _requestValidator,
-    ICachedRepository<RootCategory> _rootCategoryRepository)
+    ICachedReadRepository<RootCategory> _rootCategoryReadRepository)
     : IEndpointFilter
     where TRequest : BaseRequest
 {
@@ -45,7 +45,7 @@ public class ValidationFilter<TRequest>(
                 .LogErrorsAndReturnProblem(errors);
         }
 
-        if (await _rootCategoryRepository.GetByIdAsync(request.RootCategoryId) is null)
+        if (await _rootCategoryReadRepository.GetByIdAsync(request.RootCategoryId) is null)
         {
             return context.HttpContext.RequestServices.GetRequiredService<HttpProblemDetailsService>()
                 .LogErrorsAndReturnProblem([RootCategoryErrors.RootCategoryIdNotFound(request.RootCategoryId)]);

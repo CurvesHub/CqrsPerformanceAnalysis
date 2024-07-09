@@ -20,7 +20,6 @@ using Traditional.Api.UseCases.Categories.GetChildrenOrTopLevel;
 using Traditional.Api.UseCases.Categories.SearchCategories;
 using Traditional.Api.UseCases.Categories.UpdateCategoryMapping;
 using Traditional.Api.UseCases.RootCategories.Common.Persistence.Entities;
-using Traditional.Api.UseCases.RootCategories.GetRootCategories;
 
 namespace Traditional.Api;
 
@@ -68,7 +67,6 @@ public static class DependencyInjection
         services.AddScoped<GetChildrenOrTopLevelHandler>();
         services.AddScoped<SearchCategoriesHandler>();
         services.AddScoped<UpdateCategoryMappingHandler>();
-        services.AddScoped<GetRootCategoriesHandler>();
 
         // Add attribute handlers
         services.AddScoped<GetAttributesHandler>();

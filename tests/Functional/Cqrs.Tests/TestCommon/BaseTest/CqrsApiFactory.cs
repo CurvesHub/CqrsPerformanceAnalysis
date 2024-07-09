@@ -16,10 +16,10 @@ using Testcontainers.PostgreSql;
 namespace Cqrs.Tests.TestCommon.BaseTest;
 
 /// <summary>
-/// A custom WebApplicationFactory for the Traditional API in integration tests.
+/// A custom WebApplicationFactory for the Cqrs API in integration tests.
 /// </summary>
 [UsedImplicitly]
-public class TraditionalApiFactory : WebApplicationFactory<Cqrs.Api.Program>, IAsyncLifetime
+public class CqrsApiFactory : WebApplicationFactory<Cqrs.Api.Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
         .WithImage("postgres:16.2")
@@ -84,16 +84,24 @@ public class TraditionalApiFactory : WebApplicationFactory<Cqrs.Api.Program>, IA
         // NOTE: We know that each key is the entity name of an entity inherited from BaseEntity
         memoryCache.Remove("RootCategory");
         memoryCache.Remove("AttributeMapping");
-        memoryCache.Remove("AttributeCorrection");
     }
 
     /// <summary>
-    /// Resolves a new instance of <see cref="TraditionalDbContext"/> from the service provider.
+    /// Resolves a new instance of <see cref="CqrsWriteDbContext"/> from the service provider.
     /// </summary>
-    /// <returns>A new instance of <see cref="TraditionalDbContext"/>.</returns>
-    public TraditionalDbContext ResolveTraditionalDbContext()
+    /// <returns>A new instance of <see cref="CqrsWriteDbContext"/>.</returns>
+    public CqrsWriteDbContext ResolveCqrsWriteDbContext()
     {
-        return Services.CreateAsyncScope().ServiceProvider.GetRequiredService<TraditionalDbContext>();
+        return Services.CreateAsyncScope().ServiceProvider.GetRequiredService<CqrsWriteDbContext>();
+    }
+
+    /// <summary>
+    /// Resolves a new instance of <see cref="CqrsReadDbContext"/> from the service provider.
+    /// </summary>
+    /// <returns>A new instance of <see cref="CqrsReadDbContext"/>.</returns>
+    public CqrsReadDbContext ResolveCqrsReadDbContext()
+    {
+        return Services.CreateAsyncScope().ServiceProvider.GetRequiredService<CqrsReadDbContext>();
     }
 
     /// <inheritdoc/>
@@ -101,19 +109,25 @@ public class TraditionalApiFactory : WebApplicationFactory<Cqrs.Api.Program>, IA
     {
         builder.ConfigureTestServices(services =>
         {
-            services.RemoveAll<DbContextOptions<TraditionalDbContext>>();
-            services.RemoveAll<TraditionalDbContext>();
+            services
+                .RemoveAll<DbContextOptions<CqrsReadDbContext>>()
+                .RemoveAll<DbContextOptions<CqrsWriteDbContext>>()
+                .RemoveAll<CqrsReadDbContext>()
+                .RemoveAll<CqrsWriteDbContext>();
 
-            services.AddDbContext<TraditionalDbContext>(options =>
-                options.UseNpgsql(
-                    connectionString: _dbContainer.GetConnectionString() + ";Include Error Detail=true",
-                    npgsqlOptionsAction: config => config.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
+            Action<DbContextOptionsBuilder> optionsAction = options => options.UseNpgsql(
+                connectionString: _dbContainer.GetConnectionString() + ";Include Error Detail=true",
+                npgsqlOptionsAction: config => config.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+
+            services
+                .AddDbContext<CqrsReadDbContext>(optionsAction)
+                .AddDbContext<CqrsWriteDbContext>(optionsAction);
         });
     }
 
     private async Task InitializeDatabaseAsync()
     {
-        await using (var dbContext = ResolveTraditionalDbContext())
+        await using (var dbContext = ResolveCqrsWriteDbContext())
         {
             await dbContext.Database.EnsureCreatedAsync();
         }
@@ -131,7 +145,7 @@ public class TraditionalApiFactory : WebApplicationFactory<Cqrs.Api.Program>, IA
 
     private async Task SeedDataBase()
     {
-        await using var dbContext = ResolveTraditionalDbContext();
+        await using var dbContext = ResolveCqrsWriteDbContext();
         await dbContext.RootCategories.AddRangeAsync(RootCategoryConfigurations.GetSeedingData());
         await dbContext.AttributeMappings.AddRangeAsync(AttributeMappingConfigurations.GetSeedingData());
         await dbContext.SaveChangesAsync();

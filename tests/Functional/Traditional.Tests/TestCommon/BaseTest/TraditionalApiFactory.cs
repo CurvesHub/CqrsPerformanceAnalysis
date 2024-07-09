@@ -84,7 +84,6 @@ public class TraditionalApiFactory : WebApplicationFactory<Traditional.Api.Progr
         // NOTE: We know that each key is the entity name of an entity inherited from BaseEntity
         memoryCache.Remove("RootCategory");
         memoryCache.Remove("AttributeMapping");
-        memoryCache.Remove("AttributeCorrection");
     }
 
     /// <summary>

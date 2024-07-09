@@ -1,9 +1,10 @@
 using System.Net;
 using Cqrs.Api.Common.Constants;
 using Cqrs.Api.Common.Endpoints;
+using Cqrs.Api.Common.Interfaces;
 using Cqrs.Api.UseCases.RootCategories.Common.Persistence.Entities;
 
-namespace Cqrs.Api.UseCases.RootCategories.GetRootCategories;
+namespace Cqrs.Api.UseCases.RootCategories.Queries.GetRootCategories;
 
 /// <inheritdoc />
 public class GetRootCategoriesEndpoint : IEndpoint
@@ -21,19 +22,16 @@ public class GetRootCategoriesEndpoint : IEndpoint
             .CacheOutput(builder => builder.Expire(TimeSpan.FromDays(1)));
     }
 
-    private static async Task<IResult> GetRootCategoriesAsync(GetRootCategoriesHandler handler)
+    private static async Task<IResult> GetRootCategoriesAsync(ICachedReadRepository<RootCategory> rootCategoryReadRepository)
     {
-        var rootCategories = await handler.GetRootCategoriesAsync();
+        var rootCategories = await rootCategoryReadRepository.GetAllAsync();
 
-        return Results.Ok(ToResponse(rootCategories));
-    }
-
-    private static IEnumerable<GetRootCategoryResponse> ToResponse(IEnumerable<RootCategory> rootCategories)
-    {
-        return rootCategories.Select(rootCategory =>
+        var response = rootCategories.Select(rootCategory =>
             new GetRootCategoryResponse(
                 rootCategory.Id,
                 rootCategory.LocaleCode,
                 rootCategory.LocaleCode is LocaleCode.de_DE));
+
+        return Results.Ok(response);
     }
 }

@@ -3,26 +3,28 @@ using Cqrs.Api.Common.DataAccess.Persistence;
 namespace Cqrs.Tests.TestCommon.BaseTest;
 
 /// <summary>
-/// The base test class to inherit from when using a <see cref="TraditionalApiFactory"/>.
+/// The base test class to inherit from when using a <see cref="CqrsApiFactory"/>.
 /// </summary>
-[Collection(nameof(SharedTraditionalApiFactoryTestCollection))]
-public class BaseTestWithSharedTraditionalApiFactory : IAsyncLifetime
+[Collection(nameof(SharedCqrsApiFactoryTestCollection))]
+public class BaseTestWithSharedCqrsApiFactory : IAsyncLifetime
 {
     private readonly Func<Task> _resetDatabase;
     private readonly Func<Task> _resetCache;
-    private readonly Func<TraditionalDbContext> _resolveTraditionalDbContext;
+    private readonly Func<CqrsWriteDbContext> _resolveCqrsWriteDbContext;
+    private readonly Func<CqrsReadDbContext> _resolveCqrsReadDbContext;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="BaseTestWithSharedTraditionalApiFactory"/> class.
+    /// Initializes a new instance of the <see cref="BaseTestWithSharedCqrsApiFactory"/> class.
     /// </summary>
-    /// <param name="factory">The <see cref="TraditionalApiFactory"/>. It will be provided by xUnit.</param>
-    protected BaseTestWithSharedTraditionalApiFactory(TraditionalApiFactory factory)
+    /// <param name="factory">The <see cref="CqrsApiFactory"/>. It will be provided by xUnit.</param>
+    protected BaseTestWithSharedCqrsApiFactory(CqrsApiFactory factory)
     {
         Services = factory.Services;
         HttpClient = factory.HttpClient;
         _resetDatabase = () => factory.ResetDatabaseAsync(withReseed: true);
         _resetCache = factory.ResetMemoryCacheAsync;
-        _resolveTraditionalDbContext = factory.ResolveTraditionalDbContext;
+        _resolveCqrsWriteDbContext = factory.ResolveCqrsWriteDbContext;
+        _resolveCqrsReadDbContext = factory.ResolveCqrsReadDbContext;
     }
 
     /// <summary>
@@ -51,8 +53,14 @@ public class BaseTestWithSharedTraditionalApiFactory : IAsyncLifetime
     }
 
     /// <summary>
-    /// Gets the pre-configured <see cref="TraditionalDbContext"/>.
+    /// Gets the pre-configured <see cref="CqrsWriteDbContext"/>.
     /// </summary>
-    /// <returns>The newly created traditional database context.</returns>
-    protected TraditionalDbContext ResolveTraditionalDbContext() => _resolveTraditionalDbContext();
+    /// <returns>The newly created cqrs write database context.</returns>
+    protected CqrsWriteDbContext ResolveCqrsWriteDbContext() => _resolveCqrsWriteDbContext();
+
+    /// <summary>
+    /// Gets the pre-configured <see cref="CqrsReadDbContext"/>.
+    /// </summary>
+    /// <returns>The newly created cqrs read database context.</returns>
+    protected CqrsReadDbContext ResolveCqrsReadDbContext() => _resolveCqrsReadDbContext();
 }

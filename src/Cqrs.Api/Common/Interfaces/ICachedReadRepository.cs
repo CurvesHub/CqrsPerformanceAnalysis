@@ -3,10 +3,10 @@ using Cqrs.Api.Common.DataAccess.Entities;
 namespace Cqrs.Api.Common.Interfaces;
 
 /// <summary>
-/// Repository for cached items of a specific type.
+/// Read repository for cached items of a specific type.
 /// </summary>
 /// <typeparam name="TItem">The type of the item.</typeparam>
-public interface ICachedRepository<TItem>
+public interface ICachedReadRepository<TItem>
     where TItem : BaseEntity
 {
     /// <summary>

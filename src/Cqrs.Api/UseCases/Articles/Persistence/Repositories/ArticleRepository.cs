@@ -9,7 +9,7 @@ namespace Cqrs.Api.UseCases.Articles.Persistence.Repositories;
 
 /// <inheritdoc />
 [SuppressMessage("Performance", "MA0020:Use direct methods instead of LINQ methods", Justification = "Not possible with EF Core linq queries")]
-internal class ArticleRepository(TraditionalDbContext _dbContext) : IArticleRepository
+internal class ArticleRepository(CqrsWriteDbContext _dbContext) : IArticleRepository
 {
     /// <inheritdoc />
     public IAsyncEnumerable<Article> GetByNumberWithCategoriesByRootCategoryId(string articleNumber, int rootCategoryId)

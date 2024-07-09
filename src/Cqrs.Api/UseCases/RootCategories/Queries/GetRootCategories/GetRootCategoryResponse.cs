@@ -1,7 +1,7 @@
 using Cqrs.Api.UseCases.RootCategories.Common.Persistence.Entities;
 using JetBrains.Annotations;
 
-namespace Cqrs.Api.UseCases.RootCategories.GetRootCategories;
+namespace Cqrs.Api.UseCases.RootCategories.Queries.GetRootCategories;
 
 /// <summary>
 /// Represents the response for a single root category.

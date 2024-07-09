@@ -11,7 +11,7 @@ namespace Cqrs.Api.UseCases.Attributes.Common.Persistence.Repositories;
 
 /// <inheritdoc />
 [SuppressMessage("Performance", "MA0020:Use direct methods instead of LINQ methods", Justification = "Not possible with EF Core linq queries")]
-internal class AttributeRepository(TraditionalDbContext _dbContext) : IAttributeRepository
+internal class AttributeRepository(CqrsWriteDbContext _dbContext) : IAttributeRepository
 {
     /// <inheritdoc />
     public IAsyncEnumerable<Attribute> GetAttributesAndSubAttributesFlatRecursivelyAsNoTracking(IEnumerable<int> attributeIds)
