@@ -1,10 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using ErrorOr;
-using Traditional.Api.Common.Interfaces;
 using Traditional.Api.UseCases.Articles.Persistence.Entities;
+using Traditional.Api.UseCases.Articles.Persistence.Repositories;
 using Traditional.Api.UseCases.Attributes.Common.Errors;
 using Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;
+using Traditional.Api.UseCases.Attributes.Common.Persistence.Repositories;
 using Traditional.Api.UseCases.Attributes.Common.Services;
 using Attribute = Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 

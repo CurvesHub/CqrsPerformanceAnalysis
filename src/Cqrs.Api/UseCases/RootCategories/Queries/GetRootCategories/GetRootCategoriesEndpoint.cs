@@ -1,7 +1,7 @@
 using System.Net;
 using Cqrs.Api.Common.Constants;
+using Cqrs.Api.Common.DataAccess.Repositories;
 using Cqrs.Api.Common.Endpoints;
-using Cqrs.Api.Common.Interfaces;
 using Cqrs.Api.UseCases.RootCategories.Common.Persistence.Entities;
 
 namespace Cqrs.Api.UseCases.RootCategories.Queries.GetRootCategories;

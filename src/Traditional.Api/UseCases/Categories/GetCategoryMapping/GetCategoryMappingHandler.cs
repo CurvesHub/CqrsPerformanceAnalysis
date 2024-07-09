@@ -1,7 +1,7 @@
 using ErrorOr;
 using Traditional.Api.Common.BaseRequests;
-using Traditional.Api.Common.Interfaces;
 using Traditional.Api.UseCases.Articles.Errors;
+using Traditional.Api.UseCases.Articles.Persistence.Repositories;
 using Traditional.Api.UseCases.RootCategories.Common.Persistence.Entities;
 
 namespace Traditional.Api.UseCases.Categories.GetCategoryMapping;

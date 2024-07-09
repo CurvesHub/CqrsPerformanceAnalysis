@@ -1,5 +1,5 @@
 using Cqrs.Api.Common.BaseRequests;
-using Cqrs.Api.Common.Interfaces;
+using Cqrs.Api.Common.DataAccess.Repositories;
 using Cqrs.Api.UseCases.RootCategories.Common.Errors;
 using Cqrs.Api.UseCases.RootCategories.Common.Persistence.Entities;
 using ErrorOr;

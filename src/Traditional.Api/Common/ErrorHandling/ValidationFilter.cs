@@ -1,7 +1,7 @@
 using ErrorOr;
 using FluentValidation;
 using Traditional.Api.Common.BaseRequests;
-using Traditional.Api.Common.Interfaces;
+using Traditional.Api.Common.DataAccess.Repositories;
 using Traditional.Api.UseCases.RootCategories.Common.Errors;
 using Traditional.Api.UseCases.RootCategories.Common.Persistence.Entities;
 

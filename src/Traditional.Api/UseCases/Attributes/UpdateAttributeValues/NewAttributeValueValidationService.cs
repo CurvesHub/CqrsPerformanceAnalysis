@@ -1,6 +1,6 @@
 using System.Globalization;
 using ErrorOr;
-using Traditional.Api.Common.Interfaces;
+using Traditional.Api.Common.DataAccess.Repositories;
 using Traditional.Api.UseCases.Attributes.Common.Errors;
 using Traditional.Api.UseCases.Attributes.Common.Models;
 using Traditional.Api.UseCases.Attributes.Common.Persistence.Entities;

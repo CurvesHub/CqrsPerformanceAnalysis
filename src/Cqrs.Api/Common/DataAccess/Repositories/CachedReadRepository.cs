@@ -1,7 +1,6 @@
 using Cqrs.Api.Common.DataAccess.Entities;
 using Cqrs.Api.Common.DataAccess.Persistence;
 using Cqrs.Api.Common.Exceptions;
-using Cqrs.Api.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cqrs.Api.Common.DataAccess.Repositories;

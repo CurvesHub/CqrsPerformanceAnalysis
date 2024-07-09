@@ -1,7 +1,7 @@
 using ErrorOr;
-using Traditional.Api.Common.Interfaces;
 using Traditional.Api.UseCases.Categories.Common.Errors;
 using Traditional.Api.UseCases.Categories.Common.Persistence.Entities;
+using Traditional.Api.UseCases.Categories.Common.Persistence.Repositories;
 
 namespace Traditional.Api.UseCases.Categories.GetChildrenOrTopLevel;
 

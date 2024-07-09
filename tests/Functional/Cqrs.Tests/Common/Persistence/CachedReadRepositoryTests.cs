@@ -1,6 +1,6 @@
 using Cqrs.Api.Common.DataAccess.Persistence;
+using Cqrs.Api.Common.DataAccess.Repositories;
 using Cqrs.Api.Common.Exceptions;
-using Cqrs.Api.Common.Interfaces;
 using Cqrs.Api.UseCases.RootCategories.Common.Persistence.Entities;
 using Cqrs.Tests.TestCommon.BaseTest;
 using FluentAssertions;

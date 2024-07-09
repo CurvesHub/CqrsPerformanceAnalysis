@@ -4,7 +4,7 @@ using System.Net.Http.Json;
 using System.Web;
 using Cqrs.Api.Common.BaseRequests;
 using Cqrs.Api.UseCases.Articles.Errors;
-using Cqrs.Api.UseCases.Categories.GetCategoryMapping;
+using Cqrs.Api.UseCases.Categories.Queries.GetCategoryMapping;
 using Cqrs.Api.UseCases.RootCategories.Common.Errors;
 using Cqrs.Api.UseCases.RootCategories.Common.Persistence.Entities;
 using Cqrs.Tests.TestCommon.BaseTest;

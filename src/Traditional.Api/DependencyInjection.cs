@@ -5,7 +5,6 @@ using Traditional.Api.Common.DataAccess.Persistence;
 using Traditional.Api.Common.DataAccess.Repositories;
 using Traditional.Api.Common.Endpoints;
 using Traditional.Api.Common.ErrorHandling;
-using Traditional.Api.Common.Interfaces;
 using Traditional.Api.UseCases.Articles.Persistence.Repositories;
 using Traditional.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Traditional.Api.UseCases.Attributes.Common.Persistence.Repositories;

@@ -1,9 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using Cqrs.Api.Common.Interfaces;
 using Cqrs.Api.UseCases.Articles.Persistence.Entities;
+using Cqrs.Api.UseCases.Articles.Persistence.Repositories;
 using Cqrs.Api.UseCases.Attributes.Common.Errors;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;
+using Cqrs.Api.UseCases.Attributes.Common.Persistence.Repositories;
 using Cqrs.Api.UseCases.Attributes.Common.Services;
 using ErrorOr;
 using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
@@ -17,8 +18,8 @@ namespace Cqrs.Api.UseCases.Attributes.UpdateAttributeValues;
 public class UpdateAttributeValuesHandler(
     AttributeService _attributeService,
     NewAttributeValueValidationService _validationService,
-    IArticleRepository _articleRepository,
-    IAttributeRepository _attributeRepository,
+    IArticleWriteRepository _articleWriteRepository,
+    IAttributeWriteRepository _attributeWriteRepository,
     IServiceProvider _serviceProvider)
 {
     private static readonly string[] TrueStringArray = ["true"];
@@ -49,7 +50,7 @@ public class UpdateAttributeValuesHandler(
             .ToList();
 
         // 4. Get the marketplace attribute ids for the root attributes with new true boolean values
-        var productTypeMpIdsWithNewTrueValues = await _attributeRepository
+        var productTypeMpIdsWithNewTrueValues = await _attributeWriteRepository
             .GetProductTypeMpIdsByAttributeIds(attributeIdsForNewTrueValues)
             .ToListAsync();
 
@@ -70,7 +71,7 @@ public class UpdateAttributeValuesHandler(
         // 5. Get the attributes for the new attribute values
         var receivedAttributeIds = request.NewAttributeValues.Select(value => value.AttributeId).ToList();
 
-        var attributes = await _attributeRepository
+        var attributes = await _attributeWriteRepository
             .GetAttributesWithSubAttributesByIdOrMpIdAndByRootCategoryId(
                 productTypeMpIdsWithNewTrueValues.Single(),
                 receivedAttributeIds,
@@ -86,9 +87,9 @@ public class UpdateAttributeValuesHandler(
 
         // We need to create a new scope to avoid the DbContext being shared between tasks (threads) since the article repository is also used indirectly by the validation service
         await using var scope = _serviceProvider.CreateAsyncScope();
-        var secondArticleRepository = scope.ServiceProvider.GetRequiredService<IArticleRepository>();
+        var secondArticleRepository = scope.ServiceProvider.GetRequiredService<IArticleWriteRepository>();
 
-        if (ReferenceEquals(secondArticleRepository, _articleRepository))
+        if (ReferenceEquals(secondArticleRepository, _articleWriteRepository))
         {
             throw new InvalidOperationException("The article repository is not registered as a scoped/transient service. Therefore task parallelism is not possible.");
         }

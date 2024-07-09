@@ -2,8 +2,8 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Traditional.Api.Common.DataAccess.Persistence;
+using Traditional.Api.Common.DataAccess.Repositories;
 using Traditional.Api.Common.Exceptions;
-using Traditional.Api.Common.Interfaces;
 using Traditional.Api.UseCases.RootCategories.Common.Persistence.Entities;
 using Traditional.Tests.TestCommon.BaseTest;
 

@@ -1,5 +1,5 @@
 using Cqrs.Api.Common.BaseRequests;
-using Cqrs.Api.Common.Interfaces;
+using Cqrs.Api.UseCases.Attributes.Common.Persistence.Repositories;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
 using Cqrs.Api.UseCases.Attributes.Common.Services;
 using ErrorOr;
@@ -12,7 +12,7 @@ namespace Cqrs.Api.UseCases.Attributes.GetAttributes;
 public class GetAttributesHandler(
     AttributeService _attributeService,
     AttributeConverter _attributeConverter,
-    IAttributeRepository _attributeRepository)
+    IAttributeWriteRepository _attributeWriteRepository)
 {
     private const string TRUE_STRING = "true";
 
@@ -34,7 +34,7 @@ public class GetAttributesHandler(
         var (articleDtos, mappedCategoryId) = dtoOrError.Value;
 
         // 2. Fetch the attributes with sub attributes and boolean values
-        var attributeDtos = await _attributeRepository
+        var attributeDtos = await _attributeWriteRepository
             .GetAttributesWithSubAttributesAndBooleanValues(mappedCategoryId, articleDtos.ConvertAll(a => a.ArticleId))
             .ToListAsync();
 

@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Traditional.Api.Common.DataAccess.Persistence;
-using Traditional.Api.Common.Interfaces;
 using Traditional.Api.Common.Services;
 using Traditional.Api.UseCases.Categories.Common.Persistence.Entities;
 

@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Traditional.Api.Common.DataAccess.Persistence;
-using Traditional.Api.Common.Interfaces;
 using Traditional.Api.UseCases.Articles.Persistence.Entities;
 using Traditional.Api.UseCases.Attributes.Common.Models;
 

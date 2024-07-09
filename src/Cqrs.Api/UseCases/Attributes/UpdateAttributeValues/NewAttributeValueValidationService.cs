@@ -1,5 +1,5 @@
 using System.Globalization;
-using Cqrs.Api.Common.Interfaces;
+using Cqrs.Api.Common.DataAccess.Repositories;
 using Cqrs.Api.UseCases.Attributes.Common.Errors;
 using Cqrs.Api.UseCases.Attributes.Common.Models;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;

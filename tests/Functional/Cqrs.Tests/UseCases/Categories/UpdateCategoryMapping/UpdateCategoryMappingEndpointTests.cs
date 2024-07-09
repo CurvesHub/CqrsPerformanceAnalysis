@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using Cqrs.Api.UseCases.Articles.Errors;
+using Cqrs.Api.UseCases.Categories.Commands.UpdateCategoryMapping;
 using Cqrs.Api.UseCases.Categories.Common.Errors;
 using Cqrs.Api.UseCases.Categories.Common.Persistence.Entities;
-using Cqrs.Api.UseCases.Categories.UpdateCategoryMapping;
 using Cqrs.Tests.TestCommon.BaseTest;
 using Cqrs.Tests.TestCommon.ErrorHandling;
 using Cqrs.Tests.TestCommon.Factories;
@@ -18,7 +18,7 @@ namespace Cqrs.Tests.UseCases.Categories.UpdateCategoryMapping;
 public class UpdateCategoryMappingEndpointTests(CqrsApiFactory factory)
     : BaseTestWithSharedCqrsApiFactory(factory)
 {
-    private UpdateCategoryMappingRequest _updateCategoryMappingRequest = new(
+    private UpdateCategoryMappingCommand _updateCategoryMappingCommand = new(
         TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID,
         TestConstants.Article.ARTILCE_NUMBER,
         TestConstants.Category.CATEGORY_NUMBER);
@@ -43,13 +43,13 @@ public class UpdateCategoryMappingEndpointTests(CqrsApiFactory factory)
         await dbContext.Categories.AddAsync(office);
         await dbContext.SaveChangesAsync();
 
-        var expectedError = ArticleErrors.ArticleNotFound(_updateCategoryMappingRequest.ArticleNumber);
+        var expectedError = ArticleErrors.ArticleNotFound(_updateCategoryMappingCommand.ArticleNumber);
 
         // Act
         var response = await UpdateCategoryMappingAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateCategoryMappingRequest>
+        var errors = await ErrorResponseExtractor<UpdateCategoryMappingCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -60,7 +60,7 @@ public class UpdateCategoryMappingEndpointTests(CqrsApiFactory factory)
     {
         // Arrange
         var (articleIds, expectedNewCategory) = await SetupArticlesWithCategories(
-            _updateCategoryMappingRequest.CategoryNumber, addOldCategory: false);
+            _updateCategoryMappingCommand.CategoryNumber, addOldCategory: false);
 
         // Act and Assert
         await ResponseShouldOnlyContain(expectedNewCategory);
@@ -76,7 +76,7 @@ public class UpdateCategoryMappingEndpointTests(CqrsApiFactory factory)
     {
         // Arrange
         const long newCategoryNumber = TestConstants.Category.CATEGORY_NUMBER + 1;
-        _updateCategoryMappingRequest = _updateCategoryMappingRequest with
+        _updateCategoryMappingCommand = _updateCategoryMappingCommand with
         {
             CategoryNumber = newCategoryNumber
         };
@@ -95,7 +95,7 @@ public class UpdateCategoryMappingEndpointTests(CqrsApiFactory factory)
     {
         // Arrange
         const long newCategoryNumber = TestConstants.Category.CATEGORY_NUMBER + 1;
-        _updateCategoryMappingRequest = _updateCategoryMappingRequest with
+        _updateCategoryMappingCommand = _updateCategoryMappingCommand with
         {
             CategoryNumber = newCategoryNumber
         };
@@ -123,13 +123,13 @@ public class UpdateCategoryMappingEndpointTests(CqrsApiFactory factory)
         await dbContext.Articles.AddAsync(article);
         await dbContext.SaveChangesAsync();
 
-        var expectedError = CategoryErrors.CategoryNotFound(_updateCategoryMappingRequest.CategoryNumber, _updateCategoryMappingRequest.RootCategoryId);
+        var expectedError = CategoryErrors.CategoryNotFound(_updateCategoryMappingCommand.CategoryNumber, _updateCategoryMappingCommand.RootCategoryId);
 
         // Act
         var response = await UpdateCategoryMappingAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateCategoryMappingRequest>
+        var errors = await ErrorResponseExtractor<UpdateCategoryMappingCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -145,7 +145,7 @@ public class UpdateCategoryMappingEndpointTests(CqrsApiFactory factory)
     public async Task UpdateCategoryMappingAsync_WhenRequestIsNotValid_ShouldReturnBadRequestWithValidationError(long categoryNumber)
     {
         // Arrange
-        _updateCategoryMappingRequest = _updateCategoryMappingRequest with
+        _updateCategoryMappingCommand = _updateCategoryMappingCommand with
         {
             CategoryNumber = categoryNumber
         };
@@ -158,7 +158,7 @@ public class UpdateCategoryMappingEndpointTests(CqrsApiFactory factory)
         var response = await UpdateCategoryMappingAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateCategoryMappingRequest>
+        var errors = await ErrorResponseExtractor<UpdateCategoryMappingCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -273,7 +273,7 @@ public class UpdateCategoryMappingEndpointTests(CqrsApiFactory factory)
         var response = await UpdateCategoryMappingAsync();
         response.EnsureSuccessStatusCode();
 
-        var newCategory = await response.Content.ReadFromJsonAsync<UpdateCategoryMappingResponse>();
+        var newCategory = await response.Content.ReadFromJsonAsync<UpdatedCategoryMappingResponse>();
         newCategory.Should().NotBeNull();
 
         newCategory!.CategoryNumber.Should().Be(expectedNewCategory.CategoryNumber);
@@ -284,6 +284,6 @@ public class UpdateCategoryMappingEndpointTests(CqrsApiFactory factory)
     {
         return await HttpClient.PutAsJsonAsync(
             EndpointRoutes.Categories.UPDATE_CATEGORY_MAPPING,
-            _updateCategoryMappingRequest);
+            _updateCategoryMappingCommand);
     }
 }

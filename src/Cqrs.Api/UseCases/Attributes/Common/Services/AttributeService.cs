@@ -1,7 +1,9 @@
 using Cqrs.Api.Common.BaseRequests;
-using Cqrs.Api.Common.Interfaces;
 using Cqrs.Api.UseCases.Articles.Errors;
+using Cqrs.Api.UseCases.Articles.Persistence.Repositories;
 using Cqrs.Api.UseCases.Attributes.Common.Models;
+using Cqrs.Api.UseCases.Attributes.Common.Persistence.Repositories;
+using Cqrs.Api.UseCases.Categories.Common.Persistence.Repositories;
 using ErrorOr;
 using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
@@ -10,13 +12,13 @@ namespace Cqrs.Api.UseCases.Attributes.Common.Services;
 /// <summary>
 /// Provides attribute related functionality.
 /// </summary>
-/// <param name="_categoryRepository">The category repository.</param>
-/// <param name="_articleRepository">The article repository.</param>
-/// <param name="_attributeRepository">The attribute repository.</param>
+/// <param name="_categoryWriteRepository">The category repository.</param>
+/// <param name="_articleWriteRepository">The article repository.</param>
+/// <param name="_attributeWriteRepository">The attribute repository.</param>
 public class AttributeService(
-    ICategoryRepository _categoryRepository,
-    IArticleRepository _articleRepository,
-    IAttributeRepository _attributeRepository)
+    ICategoryWriteRepository _categoryWriteRepository,
+    IArticleWriteRepository _articleWriteRepository,
+    IAttributeWriteRepository _attributeWriteRepository)
 {
     /// <summary>
     /// Get the article DTOs and the mapped category id for the requested article number.
@@ -25,14 +27,14 @@ public class AttributeService(
     /// <returns>A <see cref="ErrorOr.Error"/> or a tuple of the article DTOs and the mapped category id.</returns>
     public async Task<ErrorOr<(List<ArticleDto>, int CategoryId)>> GetArticleDtosAndMappedCategoryIdAsync(BaseRequest request)
     {
-        var articleDtos = await _articleRepository.GetArticleDtos(request.ArticleNumber).ToListAsync();
+        var articleDtos = await _articleWriteRepository.GetArticleDtos(request.ArticleNumber).ToListAsync();
 
         if (articleDtos.Count == 0)
         {
             return ArticleErrors.ArticleNotFound(request.ArticleNumber);
         }
 
-        var mappedCategoryId = await _categoryRepository.GetMappedCategoryIdByRootCategoryId(request.ArticleNumber, request.RootCategoryId);
+        var mappedCategoryId = await _categoryWriteRepository.GetMappedCategoryIdByRootCategoryId(request.ArticleNumber, request.RootCategoryId);
 
         if (mappedCategoryId is null)
         {
@@ -54,7 +56,7 @@ public class AttributeService(
             int rootCategoryId,
             List<int> productTypeIds)
     {
-        var setProductTypeId = await _attributeRepository
+        var setProductTypeId = await _attributeWriteRepository
             .GetFirstAttributeIdsForTrueProductTypesByArticleIdsAndRootCategoryId(articleIds, rootCategoryId);
 
         if (setProductTypeId is not null)
@@ -64,11 +66,11 @@ public class AttributeService(
 
         productTypeIds = productTypeIds.Distinct().ToList();
 
-        var attributes = await _attributeRepository
+        var attributes = await _attributeWriteRepository
             .GetAttributesAndSubAttributesFlatRecursivelyAsNoTracking(productTypeIds)
             .ToListAsync();
 
-        var attributeValueDtos = await _attributeRepository
+        var attributeValueDtos = await _attributeWriteRepository
                 .LoadAttributeValueDataAsync(attributes.Select(attribute => attribute.Id), articleIds);
 
         return attributes.ConvertAll(attribute =>

@@ -2,7 +2,6 @@ using Cqrs.Api.Common.DataAccess.Persistence;
 using Cqrs.Api.Common.DataAccess.Repositories;
 using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
-using Cqrs.Api.Common.Interfaces;
 using Cqrs.Api.UseCases.Articles.Persistence.Repositories;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Repositories;
@@ -11,11 +10,11 @@ using Cqrs.Api.UseCases.Attributes.GetAttributes;
 using Cqrs.Api.UseCases.Attributes.GetLeafAttributes;
 using Cqrs.Api.UseCases.Attributes.GetSubAttributes;
 using Cqrs.Api.UseCases.Attributes.UpdateAttributeValues;
+using Cqrs.Api.UseCases.Categories.Commands.UpdateCategoryMapping;
 using Cqrs.Api.UseCases.Categories.Common.Persistence.Repositories;
-using Cqrs.Api.UseCases.Categories.GetCategoryMapping;
-using Cqrs.Api.UseCases.Categories.GetChildrenOrTopLevel;
-using Cqrs.Api.UseCases.Categories.SearchCategories;
-using Cqrs.Api.UseCases.Categories.UpdateCategoryMapping;
+using Cqrs.Api.UseCases.Categories.Queries.GetCategoryMapping;
+using Cqrs.Api.UseCases.Categories.Queries.GetChildrenOrTopLevel;
+using Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
 using Cqrs.Api.UseCases.RootCategories.Common.Persistence.Entities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -66,7 +65,7 @@ public static class DependencyInjection
         services.AddScoped<GetCategoryMappingHandler>();
         services.AddScoped<GetChildrenOrTopLevelHandler>();
         services.AddScoped<SearchCategoriesHandler>();
-        services.AddScoped<UpdateCategoryMappingHandler>();
+        services.AddScoped<UpdateCategoryMappingCommandHandler>();
 
         // Add attribute handlers
         services.AddScoped<GetAttributesHandler>();
@@ -98,14 +97,14 @@ public static class DependencyInjection
         services.AddSingleton<Cache<AttributeMapping>>();
 
         // Add article repository
-        services.AddScoped<IArticleRepository, ArticleRepository>();
+        services.AddScoped<IArticleWriteRepository, ArticleWriteRepository>();
 
         // Add category repositories
         services.AddScoped<ICachedReadRepository<RootCategory>, CachedReadRepository<RootCategory>>();
-        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<ICategoryWriteRepository, CategoryWriteRepository>();
 
         // Add attribute repositories
-        services.AddScoped<IAttributeRepository, AttributeRepository>();
+        services.AddScoped<IAttributeWriteRepository, AttributeWriteRepository>();
         services.AddScoped<ICachedReadRepository<AttributeMapping>, CachedReadRepository<AttributeMapping>>();
 
         return services;

@@ -273,7 +273,7 @@ public class UpdateCategoryMappingEndpointTests(TraditionalApiFactory factory)
         var response = await UpdateCategoryMappingAsync();
         response.EnsureSuccessStatusCode();
 
-        var newCategory = await response.Content.ReadFromJsonAsync<UpdateCategoryMappingResponse>();
+        var newCategory = await response.Content.ReadFromJsonAsync<UpdatedCategoryMappingResponse>();
         newCategory.Should().NotBeNull();
 
         newCategory!.CategoryNumber.Should().Be(expectedNewCategory.CategoryNumber);

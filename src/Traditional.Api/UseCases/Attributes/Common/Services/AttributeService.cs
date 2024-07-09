@@ -1,8 +1,10 @@
 using ErrorOr;
 using Traditional.Api.Common.BaseRequests;
-using Traditional.Api.Common.Interfaces;
 using Traditional.Api.UseCases.Articles.Errors;
+using Traditional.Api.UseCases.Articles.Persistence.Repositories;
 using Traditional.Api.UseCases.Attributes.Common.Models;
+using Traditional.Api.UseCases.Attributes.Common.Persistence.Repositories;
+using Traditional.Api.UseCases.Categories.Common.Persistence.Repositories;
 using Attribute = Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
 namespace Traditional.Api.UseCases.Attributes.Common.Services;

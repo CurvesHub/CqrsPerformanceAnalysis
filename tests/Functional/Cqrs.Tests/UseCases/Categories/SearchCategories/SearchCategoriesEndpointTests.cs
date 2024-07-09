@@ -6,7 +6,7 @@ using System.Web;
 using Cqrs.Api.Common.DataAccess.Persistence;
 using Cqrs.Api.UseCases.Categories.Common.Errors;
 using Cqrs.Api.UseCases.Categories.Common.Persistence.Entities;
-using Cqrs.Api.UseCases.Categories.SearchCategories;
+using Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
 using Cqrs.Tests.TestCommon.BaseTest;
 using Cqrs.Tests.TestCommon.ErrorHandling;
 using Cqrs.Tests.TestCommon.Factories;

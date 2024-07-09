@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
-using Traditional.Api.Common.Interfaces;
+using Traditional.Api.Common.DataAccess.Repositories;
+using Traditional.Api.UseCases.Articles.Persistence.Repositories;
 using Traditional.Api.UseCases.Attributes.Common.Models;
 using Traditional.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;

@@ -1,5 +1,5 @@
 using System.Globalization;
-using Cqrs.Api.UseCases.Categories.SearchCategories;
+using Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
 using ErrorOr;
 
 namespace Cqrs.Api.UseCases.Categories.Common.Errors;

@@ -1,7 +1,7 @@
 using System.Net;
 using Traditional.Api.Common.Constants;
+using Traditional.Api.Common.DataAccess.Repositories;
 using Traditional.Api.Common.Endpoints;
-using Traditional.Api.Common.Interfaces;
 using Traditional.Api.UseCases.RootCategories.Common.Persistence.Entities;
 
 namespace Traditional.Api.UseCases.RootCategories.GetRootCategories;

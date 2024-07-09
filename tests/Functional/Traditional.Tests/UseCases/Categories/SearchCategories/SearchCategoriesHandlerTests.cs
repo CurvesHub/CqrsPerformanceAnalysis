@@ -2,7 +2,7 @@ using System.ComponentModel;
 using FluentAssertions;
 using NSubstitute;
 using TestCommon.Constants;
-using Traditional.Api.Common.Interfaces;
+using Traditional.Api.UseCases.Categories.Common.Persistence.Repositories;
 using Traditional.Api.UseCases.Categories.SearchCategories;
 
 namespace Traditional.Tests.UseCases.Categories.SearchCategories;

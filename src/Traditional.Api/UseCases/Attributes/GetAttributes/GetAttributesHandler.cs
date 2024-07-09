@@ -1,6 +1,6 @@
 using ErrorOr;
 using Traditional.Api.Common.BaseRequests;
-using Traditional.Api.Common.Interfaces;
+using Traditional.Api.UseCases.Attributes.Common.Persistence.Repositories;
 using Traditional.Api.UseCases.Attributes.Common.Responses;
 using Traditional.Api.UseCases.Attributes.Common.Services;
 

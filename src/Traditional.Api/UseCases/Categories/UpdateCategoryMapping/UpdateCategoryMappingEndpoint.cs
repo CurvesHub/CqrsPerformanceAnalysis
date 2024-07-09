@@ -18,7 +18,7 @@ public class UpdateCategoryMappingEndpoint : IEndpoint
             .WithTags(EndpointTags.CATEGORIES)
             .WithSummary("Updates the category mapping of an article and returns the new associated category.")
             .Accepts<UpdateCategoryMappingRequest>(isOptional: false, contentType: "application/json")
-            .Produces<UpdateCategoryMappingResponse>((int)HttpStatusCode.Created)
+            .Produces<UpdatedCategoryMappingResponse>((int)HttpStatusCode.Created)
             .ProducesProblem((int)HttpStatusCode.NotFound)
             .ProducesProblem((int)HttpStatusCode.BadRequest)
             .ProducesProblem((int)HttpStatusCode.InternalServerError)
@@ -38,9 +38,9 @@ public class UpdateCategoryMappingEndpoint : IEndpoint
             problemDetailsService.LogErrorsAndReturnProblem);
     }
 
-    private static UpdateCategoryMappingResponse ToResponse(Category category)
+    private static UpdatedCategoryMappingResponse ToResponse(Category category)
     {
-        return new UpdateCategoryMappingResponse(
+        return new UpdatedCategoryMappingResponse(
                 category.CategoryNumber,
                 category.Path);
     }

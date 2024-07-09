@@ -1,6 +1,6 @@
 using System.ComponentModel;
-using Cqrs.Api.Common.Interfaces;
-using Cqrs.Api.UseCases.Categories.SearchCategories;
+using Cqrs.Api.UseCases.Categories.Common.Persistence.Repositories;
+using Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
 using FluentAssertions;
 using NSubstitute;
 using TestCommon.Constants;
@@ -28,7 +28,7 @@ public class SearchCategoriesHandlerTests
             CategoryNumber: null,
             SearchTerm: null);
 
-        var handler = new SearchCategoriesHandler(Substitute.For<ICategoryRepository>());
+        var handler = new SearchCategoriesHandler(Substitute.For<ICategoryWriteRepository>());
 
         // Act
         Func<Task> act = async () => await handler.SearchCategoriesAsync(request);

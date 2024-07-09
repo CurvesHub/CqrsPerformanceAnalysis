@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Traditional.Api.Common.DataAccess.Entities;
 using Traditional.Api.Common.DataAccess.Persistence;
 using Traditional.Api.Common.Exceptions;
-using Traditional.Api.Common.Interfaces;
 
 namespace Traditional.Api.Common.DataAccess.Repositories;
 
