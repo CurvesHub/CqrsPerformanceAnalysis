@@ -26,10 +26,10 @@ public class GetCategoryMappingEndpoint : IEndpoint
 
     private static async Task<IResult> GetCategoryMappingAsync(
         [AsParameters] BaseRequest request,
-        [FromServices] GetCategoryMappingHandler handler,
+        [FromServices] GetCategoryMappingQueryHandler queryHandler,
         [FromServices] HttpProblemDetailsService problemDetailsService)
     {
-        var result = await handler.GetCategoryMappingAsync(request);
+        var result = await queryHandler.GetCategoryMappingAsync(request);
 
         return result.Match(
             Results.Ok,

@@ -24,16 +24,16 @@ public class GetChildrenOrTopLevelEndpoint : IEndpoint
             .ProducesProblem((int)HttpStatusCode.NotFound)
             .ProducesProblem((int)HttpStatusCode.BadRequest)
             .ProducesProblem((int)HttpStatusCode.InternalServerError)
-            .AddEndpointFilter<ValidationFilter<GetChildrenOrTopLevelRequest>>()
+            .AddEndpointFilter<ValidationFilter<GetChildrenOrTopLevelQuery>>()
             .WithOpenApi();
     }
 
     private static async Task<IResult> GetChildrenAsync(
-        [AsParameters] GetChildrenOrTopLevelRequest request,
-        [FromServices] GetChildrenOrTopLevelHandler handler,
+        [AsParameters] GetChildrenOrTopLevelQuery query,
+        [FromServices] GetChildrenOrTopLevelQueryHandler queryHandler,
         [FromServices] HttpProblemDetailsService problemDetailsService)
     {
-        var result = await handler.GetChildrenAsync(request);
+        var result = await queryHandler.GetChildrenAsync(query);
 
         return result.Match(
             categories => Results.Ok(ToResponse(categories)),

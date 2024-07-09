@@ -35,7 +35,7 @@ public static class CategoryErrors
     /// </summary>
     /// <param name="request">The request which did not return any results.</param>
     /// <returns>A not found <see cref="ErrorOr.Error"/>.</returns>
-    public static Error NoResultsForCategorySearch(SearchCategoriesRequest request)
+    public static Error NoResultsForCategorySearch(SearchCategoriesQuery request)
         => Error.NotFound(
             code: "NoResultsForCategorySearch",
             description: "The category search did not return any results for the request.",

@@ -9,7 +9,7 @@ namespace Cqrs.Api.UseCases.Categories.Queries.GetCategoryMapping;
 /// <summary>
 /// Handler for querying category mapping for articles.
 /// </summary>
-public class GetCategoryMappingHandler(IArticleWriteRepository _articleWriteRepository)
+public class GetCategoryMappingQueryHandler(IArticleReadRepository _articleReadRepository)
 {
     /// <summary>
     /// Gets the associated category for the article based on the request.
@@ -19,7 +19,7 @@ public class GetCategoryMappingHandler(IArticleWriteRepository _articleWriteRepo
     public async Task<ErrorOr<GetCategoryMappingResponse>> GetCategoryMappingAsync(BaseRequest request)
     {
         // 1. Get the first article (all variants are in the same category) with the categories (one category per RootCategory possible)
-        var article = await _articleWriteRepository.GetFirstByNumberWithCategories(request.ArticleNumber);
+        var article = await _articleReadRepository.GetFirstByNumberWithCategories(request.ArticleNumber);
 
         if (article is null)
         {

@@ -8,13 +8,13 @@ namespace Cqrs.Api.UseCases.Categories.Commands.UpdateCategoryMapping;
 /// Defines the validation rules for the <see cref="UpdateCategoryMappingCommand"/> class.
 /// </summary>
 [UsedImplicitly]
-public class UpdateCategoryMappingRequestValidator : AbstractValidator<UpdateCategoryMappingCommand>
+public class UpdateCategoryMappingCommandValidator : AbstractValidator<UpdateCategoryMappingCommand>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="UpdateCategoryMappingRequestValidator"/> class.
+    /// Initializes a new instance of the <see cref="UpdateCategoryMappingCommandValidator"/> class.
     /// </summary>
     /// <param name="baseValidator">The validator for the <see cref="BaseRequest"/> class.</param>
-    public UpdateCategoryMappingRequestValidator(IValidator<BaseRequest> baseValidator)
+    public UpdateCategoryMappingCommandValidator(IValidator<BaseRequest> baseValidator)
     {
         Include(baseValidator);
 

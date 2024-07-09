@@ -7,7 +7,7 @@ using TestCommon.Constants;
 
 namespace Cqrs.Tests.UseCases.Categories.SearchCategories;
 
-public class SearchCategoriesHandlerTests
+public class SearchCategoriesQueryHandlerTests
 {
     [Fact]
     [Description(
@@ -22,13 +22,13 @@ public class SearchCategoriesHandlerTests
     public async Task SearchCategoriesAsync_WhenValidatorFailsAndRequestIsInvalid_ShouldThrowException()
     {
         // Arrange
-        var request = new SearchCategoriesRequest(
+        var request = new SearchCategoriesQuery(
             TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID,
             TestConstants.Article.ARTILCE_NUMBER,
             CategoryNumber: null,
             SearchTerm: null);
 
-        var handler = new SearchCategoriesHandler(Substitute.For<ICategoryWriteRepository>());
+        var handler = new SearchCategoriesQueryHandler(Substitute.For<ICategoryReadRepository>());
 
         // Act
         Func<Task> act = async () => await handler.SearchCategoriesAsync(request);

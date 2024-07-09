@@ -11,7 +11,7 @@ namespace Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
 /// <param name="CategoryNumber">The requested category number, if any is specified.</param>
 /// <param name="SearchTerm">The requested case-insensitive search term, if any is specified.</param>
 [PublicAPI]
-public record SearchCategoriesRequest(
+public record SearchCategoriesQuery(
     int RootCategoryId,
     string ArticleNumber,
     long? CategoryNumber = null,

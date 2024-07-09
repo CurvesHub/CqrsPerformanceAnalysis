@@ -10,7 +10,7 @@ namespace Cqrs.Api.UseCases.Categories.Queries.GetChildrenOrTopLevel;
 /// <param name="ArticleNumber">The requested article number.</param>
 /// <param name="CategoryNumber">The category number of the requested category, if any is specified.</param>
 [PublicAPI]
-public record GetChildrenOrTopLevelRequest(
+public record GetChildrenOrTopLevelQuery(
     int RootCategoryId,
     string ArticleNumber,
     long? CategoryNumber)

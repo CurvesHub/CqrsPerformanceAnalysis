@@ -8,36 +8,36 @@ namespace Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
 /// <summary>
 /// Provides functionality to search for categories.
 /// </summary>
-public class SearchCategoriesHandler(ICategoryWriteRepository _categoryWriteRepository)
+public class SearchCategoriesQueryHandler(ICategoryReadRepository _categoryReadRepository)
 {
     /// <summary>
     /// Searches for categories based on the request.
     /// </summary>
-    /// <param name="request">Provides the information for the search.</param>
+    /// <param name="query">Provides the information for the search.</param>
     /// <returns>An <see cref="ErrorOr.Error"/> or a list of <see cref="Category"/>s with all their children.</returns>
     public async Task<ErrorOr<IEnumerable<Category>>> SearchCategoriesAsync(
-        SearchCategoriesRequest request)
+        SearchCategoriesQuery query)
     {
         // 1. Retrieve the category and all its parents up to the top level category
-        var allCategories = IsSearchTermRequested(request)
-            ? await _categoryWriteRepository.SearchParentsRecursiveBySearchTerm(request.RootCategoryId, request.SearchTerm!).ToListAsync()
-            : await _categoryWriteRepository.SearchParentsRecursiveByCategoryNumber(request.RootCategoryId, request.CategoryNumber!.Value).ToListAsync();
+        var allCategories = IsSearchTermRequested(query)
+            ? await _categoryReadRepository.SearchParentsRecursiveBySearchTerm(query.RootCategoryId, query.SearchTerm!).ToListAsync()
+            : await _categoryReadRepository.SearchParentsRecursiveByCategoryNumber(query.RootCategoryId, query.CategoryNumber!.Value).ToListAsync();
 
         if (allCategories.Count == 0)
         {
-            return CategoryErrors.NoResultsForCategorySearch(request);
+            return CategoryErrors.NoResultsForCategorySearch(query);
         }
 
         // 2. Retrieve the mapped category for the article
-        var mappedCategory = await _categoryWriteRepository.GetMappedCategoryByRootCategoryId(
-            request.ArticleNumber,
-            request.RootCategoryId);
+        var mappedCategory = await _categoryReadRepository.GetMappedCategoryByRootCategoryId(
+            query.ArticleNumber,
+            query.RootCategoryId);
 
         // 3. Add each child to each parent category
-        if (IsSearchTermRequested(request))
+        if (IsSearchTermRequested(query))
         {
             // For every by the search term requested category: add each child to each parent
-            foreach (var category in allCategories.Where(category => category.Name.Contains(request.SearchTerm!, StringComparison.InvariantCultureIgnoreCase)))
+            foreach (var category in allCategories.Where(category => category.Name.Contains(query.SearchTerm!, StringComparison.InvariantCultureIgnoreCase)))
             {
                 AddEachChildToEachParent(allCategories, category.CategoryNumber, mappedCategory?.CategoryNumber);
             }
@@ -45,7 +45,7 @@ public class SearchCategoriesHandler(ICategoryWriteRepository _categoryWriteRepo
         else
         {
             // For the one requested category: add each child to each parent
-            AddEachChildToEachParent(allCategories, request.CategoryNumber!.Value, mappedCategory?.CategoryNumber);
+            AddEachChildToEachParent(allCategories, query.CategoryNumber!.Value, mappedCategory?.CategoryNumber);
         }
 
         // 4. Each category has now its requested children, so we can return the top level categories
@@ -54,14 +54,14 @@ public class SearchCategoriesHandler(ICategoryWriteRepository _categoryWriteRepo
             .ToErrorOr();
     }
 
-    private static bool IsSearchTermRequested(SearchCategoriesRequest request)
+    private static bool IsSearchTermRequested(SearchCategoriesQuery query)
     {
-        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        if (!string.IsNullOrWhiteSpace(query.SearchTerm))
         {
             return true;
         }
 
-        if (request.CategoryNumber is not null and not 0)
+        if (query.CategoryNumber is not null and not 0)
         {
             return false;
         }

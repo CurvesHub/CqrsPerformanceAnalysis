@@ -5,16 +5,16 @@ using JetBrains.Annotations;
 namespace Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
 
 /// <summary>
-/// Defines the validation rules for the <see cref="SearchCategoriesRequest"/> class.
+/// Defines the validation rules for the <see cref="SearchCategoriesQuery"/> class.
 /// </summary>
 [UsedImplicitly]
-public class SearchCategoriesRequestValidator : AbstractValidator<SearchCategoriesRequest>
+public class SearchCategoriesQueryValidator : AbstractValidator<SearchCategoriesQuery>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="SearchCategoriesRequestValidator"/> class.
+    /// Initializes a new instance of the <see cref="SearchCategoriesQueryValidator"/> class.
     /// </summary>
     /// <param name="baseValidator">The validator for the <see cref="BaseRequest"/> class.</param>
-    public SearchCategoriesRequestValidator(IValidator<BaseRequest> baseValidator)
+    public SearchCategoriesQueryValidator(IValidator<BaseRequest> baseValidator)
     {
         Include(baseValidator);
 

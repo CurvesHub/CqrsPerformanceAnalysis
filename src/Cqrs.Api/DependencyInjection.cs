@@ -62,9 +62,9 @@ public static class DependencyInjection
         services.AddValidatorsFromAssemblyContaining(typeof(DependencyInjection));
 
         // Add category handlers
-        services.AddScoped<GetCategoryMappingHandler>();
-        services.AddScoped<GetChildrenOrTopLevelHandler>();
-        services.AddScoped<SearchCategoriesHandler>();
+        services.AddScoped<GetCategoryMappingQueryHandler>();
+        services.AddScoped<GetChildrenOrTopLevelQueryHandler>();
+        services.AddScoped<SearchCategoriesQueryHandler>();
         services.AddScoped<UpdateCategoryMappingCommandHandler>();
 
         // Add attribute handlers
@@ -98,13 +98,16 @@ public static class DependencyInjection
 
         // Add article repository
         services.AddScoped<IArticleWriteRepository, ArticleWriteRepository>();
+        services.AddScoped<IArticleReadRepository, ArticleReadRepository>();
 
         // Add category repositories
         services.AddScoped<ICachedReadRepository<RootCategory>, CachedReadRepository<RootCategory>>();
         services.AddScoped<ICategoryWriteRepository, CategoryWriteRepository>();
+        services.AddScoped<ICategoryReadRepository, CategoryReadRepository>();
 
         // Add attribute repositories
         services.AddScoped<IAttributeWriteRepository, AttributeWriteRepository>();
+        services.AddScoped<IAttributeReadRepository, AttributeReadRepository>();
         services.AddScoped<ICachedReadRepository<AttributeMapping>, CachedReadRepository<AttributeMapping>>();
 
         return services;

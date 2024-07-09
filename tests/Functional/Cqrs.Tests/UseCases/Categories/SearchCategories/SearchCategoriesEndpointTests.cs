@@ -21,7 +21,7 @@ namespace Cqrs.Tests.UseCases.Categories.SearchCategories;
 public class SearchCategoriesEndpointTests(CqrsApiFactory factory)
     : BaseTestWithSharedCqrsApiFactory(factory)
 {
-    private SearchCategoriesRequest _searchCategoriesRequest = new(
+    private SearchCategoriesQuery _searchCategoriesRequest = new(
         TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID,
         TestConstants.Article.ARTILCE_NUMBER,
         CategoryNumber: null,
@@ -201,7 +201,7 @@ public class SearchCategoriesEndpointTests(CqrsApiFactory factory)
         var response = await SearchCategoriesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<SearchCategoriesRequest>
+        var errors = await ErrorResponseExtractor<SearchCategoriesQuery>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -237,7 +237,7 @@ public class SearchCategoriesEndpointTests(CqrsApiFactory factory)
         var response = await SearchCategoriesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<SearchCategoriesRequest>
+        var errors = await ErrorResponseExtractor<SearchCategoriesQuery>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);

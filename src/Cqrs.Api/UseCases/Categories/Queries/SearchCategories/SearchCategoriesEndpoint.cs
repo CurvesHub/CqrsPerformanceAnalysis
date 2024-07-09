@@ -25,16 +25,16 @@ public class SearchCategoriesEndpoint : IEndpoint
             .ProducesProblem((int)HttpStatusCode.NotFound)
             .ProducesProblem((int)HttpStatusCode.BadRequest)
             .ProducesProblem((int)HttpStatusCode.InternalServerError)
-            .AddEndpointFilter<ValidationFilter<SearchCategoriesRequest>>()
+            .AddEndpointFilter<ValidationFilter<SearchCategoriesQuery>>()
             .WithOpenApi();
     }
 
     private static async Task<IResult> SearchCategoriesAsync(
-        [AsParameters] SearchCategoriesRequest request,
-        [FromServices] SearchCategoriesHandler handler,
+        [AsParameters] SearchCategoriesQuery query,
+        [FromServices] SearchCategoriesQueryHandler queryHandler,
         [FromServices] HttpProblemDetailsService problemDetailsService)
     {
-        var result = await handler.SearchCategoriesAsync(request);
+        var result = await queryHandler.SearchCategoriesAsync(query);
 
         return result.Match(
             categories => Results.Ok(ToResponse(categories)),

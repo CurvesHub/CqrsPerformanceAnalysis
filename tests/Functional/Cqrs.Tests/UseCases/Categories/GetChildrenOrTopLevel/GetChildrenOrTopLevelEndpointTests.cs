@@ -20,7 +20,7 @@ namespace Cqrs.Tests.UseCases.Categories.GetChildrenOrTopLevel;
 public class GetChildrenOrTopLevelEndpointTests(CqrsApiFactory factory)
     : BaseTestWithSharedCqrsApiFactory(factory)
 {
-    private GetChildrenOrTopLevelRequest _getChildrenOrTopLevelRequest = new(
+    private GetChildrenOrTopLevelQuery _getChildrenOrTopLevelQuery = new(
         TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID,
         TestConstants.Article.ARTILCE_NUMBER,
         CategoryNumber: null);
@@ -69,7 +69,7 @@ public class GetChildrenOrTopLevelEndpointTests(CqrsApiFactory factory)
         var category = CategoryFactory.CreateCategory();
         await AddCategoriesWithGermanRoot([category]);
 
-        _getChildrenOrTopLevelRequest = _getChildrenOrTopLevelRequest with
+        _getChildrenOrTopLevelQuery = _getChildrenOrTopLevelQuery with
         {
             CategoryNumber = category.CategoryNumber
         };
@@ -98,7 +98,7 @@ public class GetChildrenOrTopLevelEndpointTests(CqrsApiFactory factory)
         var children = CategoryFactory.CreateCategories(2, parent: parentCategory, isLeaf: true).ToList();
         await AddCategoriesWithGermanRoot([.. children, parentCategory]);
 
-        _getChildrenOrTopLevelRequest = _getChildrenOrTopLevelRequest with
+        _getChildrenOrTopLevelQuery = _getChildrenOrTopLevelQuery with
         {
             CategoryNumber = parentCategory.CategoryNumber
         };
@@ -158,7 +158,7 @@ public class GetChildrenOrTopLevelEndpointTests(CqrsApiFactory factory)
     public async Task GetGetChildrenOrTopLevelAsync_WhenNeitherParentNorChildCategoriesExist_ShouldReturnErrorOrEmptyList(bool isCategoryNumberNull)
     {
         // Arrange
-        _getChildrenOrTopLevelRequest = _getChildrenOrTopLevelRequest with
+        _getChildrenOrTopLevelQuery = _getChildrenOrTopLevelQuery with
         {
             CategoryNumber = isCategoryNumberNull
                 ? null
@@ -166,14 +166,14 @@ public class GetChildrenOrTopLevelEndpointTests(CqrsApiFactory factory)
         };
 
         var expectedError = isCategoryNumberNull
-            ? CategoryErrors.CategoriesNotFound(_getChildrenOrTopLevelRequest.RootCategoryId)
-            : CategoryErrors.CategoryNotFound(_getChildrenOrTopLevelRequest.CategoryNumber!.Value, _getChildrenOrTopLevelRequest.RootCategoryId);
+            ? CategoryErrors.CategoriesNotFound(_getChildrenOrTopLevelQuery.RootCategoryId)
+            : CategoryErrors.CategoryNotFound(_getChildrenOrTopLevelQuery.CategoryNumber!.Value, _getChildrenOrTopLevelQuery.RootCategoryId);
 
         // Act
         var response = await GetChildrenOrTopLevelAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<GetChildrenOrTopLevelRequest>
+        var errors = await ErrorResponseExtractor<GetChildrenOrTopLevelQuery>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -255,12 +255,12 @@ public class GetChildrenOrTopLevelEndpointTests(CqrsApiFactory factory)
 
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
 
-            query["RootCategoryId"] = _getChildrenOrTopLevelRequest.RootCategoryId.ToString(CultureInfo.InvariantCulture);
-            query["ArticleNumber"] = _getChildrenOrTopLevelRequest.ArticleNumber;
+            query["RootCategoryId"] = _getChildrenOrTopLevelQuery.RootCategoryId.ToString(CultureInfo.InvariantCulture);
+            query["ArticleNumber"] = _getChildrenOrTopLevelQuery.ArticleNumber;
 
-            if (_getChildrenOrTopLevelRequest.CategoryNumber is not null)
+            if (_getChildrenOrTopLevelQuery.CategoryNumber is not null)
             {
-                query["CategoryNumber"] = _getChildrenOrTopLevelRequest
+                query["CategoryNumber"] = _getChildrenOrTopLevelQuery
                     .CategoryNumber?.ToString(CultureInfo.InvariantCulture);
             }
 
