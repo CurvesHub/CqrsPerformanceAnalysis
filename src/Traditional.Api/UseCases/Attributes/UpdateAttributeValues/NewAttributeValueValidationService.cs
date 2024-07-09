@@ -2,10 +2,10 @@ using System.Globalization;
 using ErrorOr;
 using Traditional.Api.Common.DataAccess.Repositories;
 using Traditional.Api.UseCases.Attributes.Common.Errors;
+using Traditional.Api.UseCases.Attributes.Common.Extensions;
 using Traditional.Api.UseCases.Attributes.Common.Models;
 using Traditional.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;
-using Traditional.Api.UseCases.Attributes.Common.Services;
 using Attribute = Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
 namespace Traditional.Api.UseCases.Attributes.UpdateAttributeValues;

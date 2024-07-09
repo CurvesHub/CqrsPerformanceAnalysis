@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Cqrs.Api.Common.DataAccess.Persistence;
-using Cqrs.Api.Common.Services;
+using Cqrs.Api.Common.Extensions;
 using Cqrs.Api.UseCases.Attributes.Common.Models;
 using Microsoft.EntityFrameworkCore;
 using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
@@ -80,26 +80,5 @@ internal class AttributeReadRepository(CqrsReadDbContext _dbContext) : IAttribut
                 && value.Attribute!.RootCategoryId == rootCategoryId)
             .Select(value => value.AttributeId)
             .FirstOrDefaultAsync();
-    }
-
-    /// <inheritdoc />
-    public IAsyncEnumerable<Attribute> GetAttributesWithSubAttributesByIdOrMpIdAndByRootCategoryId(string productTypeMpId, IEnumerable<int> attributeIds, int rootCategoryId)
-    {
-        return _dbContext.Attributes
-            .Where(attribute =>
-                attribute.RootCategoryId == rootCategoryId
-                && (attributeIds.Contains(attribute.Id)
-                    || attribute.ProductType == productTypeMpId))
-            .Include(a => a.SubAttributes)
-            .ToAsyncEnumerable();
-    }
-
-    /// <inheritdoc />
-    public IAsyncEnumerable<string> GetProductTypeMpIdsByAttributeIds(IEnumerable<int> attributeIds)
-    {
-        return _dbContext.Attributes
-            .Where(attribute => attributeIds.Contains(attribute.Id) && attribute.ParentAttributeId == null)
-            .Select(attribute => attribute.MarketplaceAttributeIds)
-            .ToAsyncEnumerable();
     }
 }

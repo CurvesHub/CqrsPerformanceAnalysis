@@ -9,7 +9,7 @@ namespace Cqrs.Api.UseCases.Attributes.Queries.GetLeafAttributes;
 /// <summary>
 /// Handles the attribute requests.
 /// </summary>
-public class GetLeafAttributesQueryHandler(AttributeReadService _attributeReadService, AttributeConverter _attributeConverter)
+public class GetLeafAttributesQueryHandler(AttributeReadService _attributeReadService, AttributeReadConverter _attributeReadConverter)
 {
     /// <summary>
     /// Handles the GET request for category specific leafAttributes.
@@ -45,7 +45,7 @@ public class GetLeafAttributesQueryHandler(AttributeReadService _attributeReadSe
         }
 
         // 4. Convert the attribute to a response and return it
-        return await _attributeConverter.ConvertAllLeafAttributes(
+        return await _attributeReadConverter.ConvertAllLeafAttributes(
             query.ArticleNumber,
             attribute,
             attributeDtos,

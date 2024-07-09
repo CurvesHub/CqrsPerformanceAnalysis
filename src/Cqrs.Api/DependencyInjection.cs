@@ -75,9 +75,8 @@ public static class DependencyInjection
 
         // Add Services
         services.AddScoped<NewAttributeValueValidationService>();
-        services.AddScoped<AttributeWriteService>();
         services.AddScoped<AttributeReadService>();
-        services.AddScoped<AttributeConverter>();
+        services.AddScoped<AttributeReadConverter>();
 
         return services;
     }

@@ -2,19 +2,19 @@ using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
-using Cqrs.Api.Common.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
+using Traditional.Api.Common.DataAccess.Entities;
 
-namespace Cqrs.Api.Common.Services;
+namespace Traditional.Api.Common.Extensions;
 
 /// <summary>
 /// Contains extension methods for recursive queries via recursive common table expressions.
 /// </summary>
-public static class RecursiveQueryService // Optional: Implement Benchmarks for performance comparison with other methods
+public static class RecursiveQueryExtensions // Optional: Implement Benchmarks for performance comparison with other methods
 {
     /// <summary>
     /// Returns an IQueryable with a recursive query on the given <paramref name="dbSet"/> via a recursive common table expression.

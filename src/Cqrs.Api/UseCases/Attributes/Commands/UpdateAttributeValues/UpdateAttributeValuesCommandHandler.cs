@@ -1,11 +1,14 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Cqrs.Api.Common.BaseRequests;
+using Cqrs.Api.UseCases.Articles.Errors;
 using Cqrs.Api.UseCases.Articles.Persistence.Entities;
 using Cqrs.Api.UseCases.Articles.Persistence.Repositories;
 using Cqrs.Api.UseCases.Attributes.Common.Errors;
+using Cqrs.Api.UseCases.Attributes.Common.Models;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Repositories;
-using Cqrs.Api.UseCases.Attributes.Common.Services;
+using Cqrs.Api.UseCases.Categories.Common.Persistence.Repositories;
 using ErrorOr;
 using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
@@ -16,7 +19,7 @@ namespace Cqrs.Api.UseCases.Attributes.Commands.UpdateAttributeValues;
 /// </summary>
 [SuppressMessage("Design", "MA0042:Do not use blocking calls in an async method", Justification = "The task is awaited by Task.WhenAll().")]
 public class UpdateAttributeValuesCommandHandler(
-    AttributeWriteService _attributeWriteService,
+    ICategoryWriteRepository _categoryWriteRepository,
     NewAttributeValueValidationService _validationService,
     IArticleWriteRepository _articleWriteRepository,
     IAttributeWriteRepository _attributeWriteRepository,
@@ -33,7 +36,7 @@ public class UpdateAttributeValuesCommandHandler(
         UpdateAttributeValuesCommand command)
     {
         // 1. Fetch the article DTOs
-        var dtoOrError = await _attributeWriteService.GetArticleDtosAndMappedCategoryIdAsync(command);
+        var dtoOrError = await GetArticleDtosAndMappedCategoryIdAsync(command);
 
         if (dtoOrError.IsError)
         {
@@ -185,5 +188,29 @@ public class UpdateAttributeValuesCommandHandler(
                     throw new NotSupportedException();
             }
         }
+    }
+
+    /// <summary>
+    /// Get the article DTOs and the mapped category id for the requested article number.
+    /// </summary>
+    /// <param name="query">The request.</param>
+    /// <returns>A <see cref="ErrorOr.Error"/> or a tuple of the article DTOs and the mapped category id.</returns>
+    private async Task<ErrorOr<(List<ArticleDto>, int CategoryId)>> GetArticleDtosAndMappedCategoryIdAsync(BaseQuery query)
+    {
+        var articleDtos = await _articleWriteRepository.GetArticleDtos(query.ArticleNumber).ToListAsync();
+
+        if (articleDtos.Count == 0)
+        {
+            return ArticleErrors.ArticleNotFound(query.ArticleNumber);
+        }
+
+        var mappedCategoryId = await _categoryWriteRepository.GetMappedCategoryIdByRootCategoryId(query.ArticleNumber, query.RootCategoryId);
+
+        if (mappedCategoryId is null)
+        {
+            return ArticleErrors.MappedCategoriesForArticleNotFound(query.ArticleNumber, query.RootCategoryId);
+        }
+
+        return (articleDtos, mappedCategoryId.Value);
     }
 }

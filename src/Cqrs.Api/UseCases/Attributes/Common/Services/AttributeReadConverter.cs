@@ -5,6 +5,7 @@ using Cqrs.Api.UseCases.Articles.Persistence.Repositories;
 using Cqrs.Api.UseCases.Attributes.Common.Models;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;
+using Cqrs.Api.UseCases.Attributes.Common.Persistence.Extensions;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
 using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
@@ -13,8 +14,8 @@ namespace Cqrs.Api.UseCases.Attributes.Common.Services;
 /// <summary>
 /// Converts database attributes into dtos for the category specifics get endpoint.
 /// </summary>
-public class AttributeConverter(
-    IArticleWriteRepository _articleWriteRepository,
+public class AttributeReadConverter(
+    IArticleReadRepository _articleReadRepository,
     ICachedReadRepository<AttributeMapping> _attributeMappingReadRepository)
 {
     private static readonly string[] ColorMarketplaceAttributeId = ["color"];
@@ -39,7 +40,7 @@ public class AttributeConverter(
         // 1. Get the variant information for the article
         if (!_articleVariantInformation.TryGetValue(articleNumber, out var hasVariants))
         {
-            hasVariants = await _articleWriteRepository.HasArticleVariantsAsync(articleNumber);
+            hasVariants = await _articleReadRepository.HasArticleVariantsAsync(articleNumber);
             _articleVariantInformation[articleNumber] = hasVariants;
         }
 
@@ -112,7 +113,7 @@ public class AttributeConverter(
         // 1. Get the variant information for the article
         if (!_articleVariantInformation.TryGetValue(articleNumber, out var hasVariants))
         {
-            hasVariants = await _articleWriteRepository.HasArticleVariantsAsync(articleNumber);
+            hasVariants = await _articleReadRepository.HasArticleVariantsAsync(articleNumber);
             _articleVariantInformation[articleNumber] = hasVariants;
         }
 

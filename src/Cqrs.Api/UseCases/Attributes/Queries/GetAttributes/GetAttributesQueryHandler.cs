@@ -11,7 +11,7 @@ namespace Cqrs.Api.UseCases.Attributes.Queries.GetAttributes;
 /// </summary>
 public class GetAttributesQueryHandler(
     AttributeReadService _attributeReadService,
-    AttributeConverter _attributeConverter,
+    AttributeReadConverter _attributeReadConverter,
     IAttributeReadRepository _attributeReadRepository)
 {
     private const string TRUE_STRING = "true";
@@ -45,7 +45,7 @@ public class GetAttributesQueryHandler(
 
         foreach (var attributeDto in attributeDtos)
         {
-            var responseDto = await _attributeConverter.ConvertAttributeToResponse(
+            var responseDto = await _attributeReadConverter.ConvertAttributeToResponse(
                 query.ArticleNumber,
                 attributeDto.Attribute,
                 attributeDto.ArticleIdsWithBoolValues,

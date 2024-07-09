@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Traditional.Api.Common.DataAccess.Persistence;
-using Traditional.Api.Common.Services;
+using Traditional.Api.Common.Extensions;
 using Traditional.Api.UseCases.Attributes.Common.Models;
 using Attribute = Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 

@@ -8,7 +8,7 @@ namespace Cqrs.Api.UseCases.Attributes.Queries.GetSubAttributes;
 /// <summary>
 /// Handles the attribute requests.
 /// </summary>
-public class GetSubAttributesQueryHandler(AttributeReadService _attributeReadService, AttributeConverter _attributeConverter)
+public class GetSubAttributesQueryHandler(AttributeReadService _attributeReadService, AttributeReadConverter _attributeReadConverter)
 {
     /// <summary>
     /// Handles the GET request for category specific subAttributes.
@@ -49,7 +49,7 @@ public class GetSubAttributesQueryHandler(AttributeReadService _attributeReadSer
         List<GetAttributesResponse> responseDtos = new(attributeIds.Count);
         foreach (var tuple in attributeIds.Select(attributeId => attributeDtos.First(tuple => tuple.Attribute.Id == attributeId)))
         {
-            var responseDto = await _attributeConverter.ConvertAttributeToResponse(
+            var responseDto = await _attributeReadConverter.ConvertAttributeToResponse(
                 query.ArticleNumber,
                 tuple.Attribute,
                 tuple.AttributeValueDtos,

@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Cqrs.Api.Common.DataAccess.Persistence;
-using Cqrs.Api.Common.Services;
+using Cqrs.Api.Common.Extensions;
 using Cqrs.Api.UseCases.Categories.Common.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 

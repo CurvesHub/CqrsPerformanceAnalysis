@@ -20,15 +20,6 @@ internal class ArticleWriteRepository(CqrsWriteDbContext _dbContext) : IArticleW
             .AsAsyncEnumerable();
     }
 
-    /// <inheritdoc />
-    public Task<Article?> GetFirstByNumberWithCategories(string articleNumber)
-    {
-        return _dbContext.Articles
-            .Include(article => article.Categories)!
-            .ThenInclude(category => category.RootCategory)
-            .FirstOrDefaultAsync(article => article.ArticleNumber == articleNumber);
-    }
-
     /// <inheritdoc/>
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -43,12 +34,6 @@ internal class ArticleWriteRepository(CqrsWriteDbContext _dbContext) : IArticleW
             .Where(a => a.ArticleNumber == articleNumber)
             .Select(article => new ArticleDto(article.Id, article.CharacteristicId))
             .ToAsyncEnumerable();
-    }
-
-    /// <inheritdoc/>
-    public async Task<bool> HasArticleVariantsAsync(string articleNumber)
-    {
-        return await _dbContext.Articles.AnyAsync(article => article.ArticleNumber == articleNumber && article.CharacteristicId > 0);
     }
 
     /// <inheritdoc/>

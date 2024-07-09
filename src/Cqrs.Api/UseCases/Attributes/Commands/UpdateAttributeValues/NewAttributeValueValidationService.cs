@@ -4,7 +4,7 @@ using Cqrs.Api.UseCases.Attributes.Common.Errors;
 using Cqrs.Api.UseCases.Attributes.Common.Models;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;
-using Cqrs.Api.UseCases.Attributes.Common.Services;
+using Cqrs.Api.UseCases.Attributes.Common.Persistence.Extensions;
 using ErrorOr;
 using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
