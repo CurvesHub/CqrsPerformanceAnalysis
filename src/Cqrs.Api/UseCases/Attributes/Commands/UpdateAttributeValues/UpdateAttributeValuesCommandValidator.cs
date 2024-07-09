@@ -3,22 +3,21 @@ using Cqrs.Api.Common.BaseRequests;
 using FluentValidation;
 using JetBrains.Annotations;
 
-namespace Cqrs.Api.UseCases.Attributes.UpdateAttributeValues;
+namespace Cqrs.Api.UseCases.Attributes.Commands.UpdateAttributeValues;
 
 /// <summary>
-/// Defines the validation rules for the <see cref="UpdateAttributeValuesRequest"/>.
+/// Defines the validation rules for the <see cref="UpdateAttributeValuesCommand"/>.
 /// </summary>
 [UsedImplicitly]
 [SuppressMessage("ReSharper", "ConditionalAccessQualifierIsNonNullableAccordingToAPIContract", Justification = "False Positive, when the request does not include the property, it is null.")]
-public class UpdateAttributeValuesRequestValidator
-    : AbstractValidator<UpdateAttributeValuesRequest>
+public class UpdateAttributeValuesCommandValidator : AbstractValidator<UpdateAttributeValuesCommand>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="UpdateAttributeValuesRequestValidator"/> class.
-    /// Defines the validation rules for the <see cref="UpdateAttributeValuesRequest"/>.
+    /// Initializes a new instance of the <see cref="UpdateAttributeValuesCommandValidator"/> class.
+    /// Defines the validation rules for the <see cref="UpdateAttributeValuesCommand"/>.
     /// </summary>
-    /// <param name="baseValidator">The validator for the <see cref="BaseRequest"/> class.</param>
-    public UpdateAttributeValuesRequestValidator(IValidator<BaseRequest> baseValidator)
+    /// <param name="baseValidator">The validator for the <see cref="BaseQuery"/> class.</param>
+    public UpdateAttributeValuesCommandValidator(IValidator<BaseQuery> baseValidator)
     {
         Include(baseValidator);
 

@@ -7,7 +7,7 @@ using Cqrs.Api.UseCases.Attributes.Common.Errors;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
-using Cqrs.Api.UseCases.Attributes.GetLeafAttributes;
+using Cqrs.Api.UseCases.Attributes.Queries.GetLeafAttributes;
 using Cqrs.Tests.TestCommon.BaseTest;
 using Cqrs.Tests.TestCommon.ErrorHandling;
 using Cqrs.Tests.TestCommon.Factories;
@@ -23,7 +23,7 @@ namespace Cqrs.Tests.UseCases.Attributes.GetLeafAttributes;
 public class GetLeafAttributesEndpointTests(CqrsApiFactory factory)
     : BaseTestWithSharedCqrsApiFactory(factory)
 {
-    private GetLeafAttributesRequest _getLeafAttributesRequest = new(
+    private GetLeafAttributesQuery _getLeafAttributesQuery = new(
         TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID,
         TestConstants.Article.ARTILCE_NUMBER,
         TestConstants.Attribute.ATTRIBUTE_ID);
@@ -52,7 +52,7 @@ public class GetLeafAttributesEndpointTests(CqrsApiFactory factory)
         subAttribute.SubAttributes = AttributeFactory.AddSubAttributesTo(subAttribute, 2, attributeValueType);
         await dbContext.SaveChangesAsync();
 
-        _getLeafAttributesRequest = _getLeafAttributesRequest with { AttributeId = attribute.Id.ToString(CultureInfo.InvariantCulture) };
+        _getLeafAttributesQuery = _getLeafAttributesQuery with { AttributeId = attribute.Id.ToString(CultureInfo.InvariantCulture) };
 
         // Act
         var responses = await GetAttributesResponseAsync();
@@ -285,15 +285,15 @@ public class GetLeafAttributesEndpointTests(CqrsApiFactory factory)
     public async Task GetLeafAttributesAsync_WhenArticleDoesNotExist_ShouldReturnArticleNotFoundError()
     {
         // Arrange
-        _getLeafAttributesRequest = _getLeafAttributesRequest with { ArticleNumber = "99" };
+        _getLeafAttributesQuery = _getLeafAttributesQuery with { ArticleNumber = "99" };
 
-        var expectedError = ArticleErrors.ArticleNotFound(_getLeafAttributesRequest.ArticleNumber);
+        var expectedError = ArticleErrors.ArticleNotFound(_getLeafAttributesQuery.ArticleNumber);
 
         // Act
         var response = await GetLeafAttributesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<GetLeafAttributesRequest>
+        var errors = await ErrorResponseExtractor<GetLeafAttributesQuery>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -309,13 +309,13 @@ public class GetLeafAttributesEndpointTests(CqrsApiFactory factory)
         await dbContext.Articles.AddAsync(article);
         await dbContext.SaveChangesAsync();
 
-        var expectedError = ArticleErrors.MappedCategoriesForArticleNotFound(_getLeafAttributesRequest.ArticleNumber, _getLeafAttributesRequest.RootCategoryId);
+        var expectedError = ArticleErrors.MappedCategoriesForArticleNotFound(_getLeafAttributesQuery.ArticleNumber, _getLeafAttributesQuery.RootCategoryId);
 
         // Act
         var response = await GetLeafAttributesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<GetLeafAttributesRequest>
+        var errors = await ErrorResponseExtractor<GetLeafAttributesQuery>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -329,16 +329,16 @@ public class GetLeafAttributesEndpointTests(CqrsApiFactory factory)
         await AttributeTestData.CreateTestData(dbContext);
         await dbContext.SaveChangesAsync();
 
-        _getLeafAttributesRequest = _getLeafAttributesRequest with { AttributeId = "99" };
+        _getLeafAttributesQuery = _getLeafAttributesQuery with { AttributeId = "99" };
 
         // Act
         var result = await GetLeafAttributesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<GetLeafAttributesRequest>
+        var errors = await ErrorResponseExtractor<GetLeafAttributesQuery>
             .ValidateResponseAndGetErrorsAsync(result, HttpStatusCode.NotFound);
 
-        errors.ShouldContainSingleEquivalentTo(AttributeErrors.AttributeIdsNotFound([99], _getLeafAttributesRequest.RootCategoryId));
+        errors.ShouldContainSingleEquivalentTo(AttributeErrors.AttributeIdsNotFound([99], _getLeafAttributesQuery.RootCategoryId));
     }
 
     /*--------------------------------------------------------------------------------------------------
@@ -354,7 +354,7 @@ public class GetLeafAttributesEndpointTests(CqrsApiFactory factory)
     public async Task GetLeafAttributesAsync_WhenRequestIsNotValid_ShouldReturnValidationError(string attributeId)
     {
         // Arrange
-        _getLeafAttributesRequest = _getLeafAttributesRequest with { AttributeId = attributeId };
+        _getLeafAttributesQuery = _getLeafAttributesQuery with { AttributeId = attributeId };
 
         var expectedError = Error.Validation(
             code: "AttributeId",
@@ -364,7 +364,7 @@ public class GetLeafAttributesEndpointTests(CqrsApiFactory factory)
         var response = await GetLeafAttributesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<GetLeafAttributesRequest>
+        var errors = await ErrorResponseExtractor<GetLeafAttributesQuery>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -394,9 +394,9 @@ public class GetLeafAttributesEndpointTests(CqrsApiFactory factory)
 
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
 
-            query["rootCategoryId"] = _getLeafAttributesRequest.RootCategoryId.ToString(CultureInfo.InvariantCulture);
-            query["articleNumber"] = _getLeafAttributesRequest.ArticleNumber;
-            query["attributeId"] = _getLeafAttributesRequest.AttributeId;
+            query["rootCategoryId"] = _getLeafAttributesQuery.RootCategoryId.ToString(CultureInfo.InvariantCulture);
+            query["articleNumber"] = _getLeafAttributesQuery.ArticleNumber;
+            query["attributeId"] = _getLeafAttributesQuery.AttributeId;
 
             uriBuilder.Query = query.ToString();
             return uriBuilder.Uri.PathAndQuery;

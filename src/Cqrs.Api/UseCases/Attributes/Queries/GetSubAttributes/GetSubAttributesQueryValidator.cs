@@ -3,21 +3,21 @@ using Cqrs.Api.Common.BaseRequests;
 using FluentValidation;
 using JetBrains.Annotations;
 
-namespace Cqrs.Api.UseCases.Attributes.GetSubAttributes;
+namespace Cqrs.Api.UseCases.Attributes.Queries.GetSubAttributes;
 
 /// <summary>
-/// Defines the validation rules for the <see cref="GetSubAttributesRequest"/>.
+/// Defines the validation rules for the <see cref="GetSubAttributesQuery"/>.
 /// </summary>
 [UsedImplicitly]
-public class GetSubAttributesRequestValidator
-    : AbstractValidator<GetSubAttributesRequest>
+public class GetSubAttributesQueryValidator
+    : AbstractValidator<GetSubAttributesQuery>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="GetSubAttributesRequestValidator"/> class.
-    /// Defines the validation rules for the <see cref="GetSubAttributesRequest"/>.
+    /// Initializes a new instance of the <see cref="GetSubAttributesQueryValidator"/> class.
+    /// Defines the validation rules for the <see cref="GetSubAttributesQuery"/>.
     /// </summary>
-    /// <param name="baseValidator">The validator for the <see cref="BaseRequest"/> class.</param>
-    public GetSubAttributesRequestValidator(IValidator<BaseRequest> baseValidator)
+    /// <param name="baseValidator">The validator for the <see cref="BaseQuery"/> class.</param>
+    public GetSubAttributesQueryValidator(IValidator<BaseQuery> baseValidator)
     {
         Include(baseValidator);
 

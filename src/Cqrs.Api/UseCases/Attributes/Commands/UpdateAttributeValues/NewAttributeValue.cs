@@ -1,6 +1,6 @@
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
 
-namespace Cqrs.Api.UseCases.Attributes.UpdateAttributeValues;
+namespace Cqrs.Api.UseCases.Attributes.Commands.UpdateAttributeValues;
 
 /// <summary>
 /// Represents a new value to set for an attribute.

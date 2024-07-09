@@ -14,4 +14,4 @@ public record UpdateCategoryMappingCommand(
     int RootCategoryId,
     string ArticleNumber,
     long CategoryNumber)
-    : BaseRequest(RootCategoryId, ArticleNumber);
+    : BaseQuery(RootCategoryId, ArticleNumber);

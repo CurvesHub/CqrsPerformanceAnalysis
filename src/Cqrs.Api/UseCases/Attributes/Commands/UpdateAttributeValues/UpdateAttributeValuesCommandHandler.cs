@@ -9,14 +9,14 @@ using Cqrs.Api.UseCases.Attributes.Common.Services;
 using ErrorOr;
 using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
-namespace Cqrs.Api.UseCases.Attributes.UpdateAttributeValues;
+namespace Cqrs.Api.UseCases.Attributes.Commands.UpdateAttributeValues;
 
 /// <summary>
 /// Handles the attribute requests.
 /// </summary>
 [SuppressMessage("Design", "MA0042:Do not use blocking calls in an async method", Justification = "The task is awaited by Task.WhenAll().")]
-public class UpdateAttributeValuesHandler(
-    AttributeService _attributeService,
+public class UpdateAttributeValuesCommandHandler(
+    AttributeWriteService _attributeWriteService,
     NewAttributeValueValidationService _validationService,
     IArticleWriteRepository _articleWriteRepository,
     IAttributeWriteRepository _attributeWriteRepository,
@@ -27,13 +27,13 @@ public class UpdateAttributeValuesHandler(
     /// <summary>
     /// Handles the request to update the attribute values of an article.
     /// </summary>
-    /// <param name="request">The request.</param>
+    /// <param name="command">The request.</param>
     /// <returns>An <see cref="ErrorOr.Error"/> or a <see cref="Updated"/> result.</returns>
     public async Task<ErrorOr<Updated>> UpdateAttributeValuesAsync(
-        UpdateAttributeValuesRequest request)
+        UpdateAttributeValuesCommand command)
     {
         // 1. Fetch the article DTOs
-        var dtoOrError = await _attributeService.GetArticleDtosAndMappedCategoryIdAsync(request);
+        var dtoOrError = await _attributeWriteService.GetArticleDtosAndMappedCategoryIdAsync(command);
 
         if (dtoOrError.IsError)
         {
@@ -43,7 +43,7 @@ public class UpdateAttributeValuesHandler(
         var (articleDtos, _) = dtoOrError.Value;
 
         // 3. Get the attribute ids for the new true boolean values
-        var attributeIdsForNewTrueValues = request.NewAttributeValues
+        var attributeIdsForNewTrueValues = command.NewAttributeValues
             .Where(value => value.InnerValues.TrueForAll(innerValue =>
                 innerValue.Values.SequenceEqual(TrueStringArray, StringComparer.OrdinalIgnoreCase)))
             .Select(value => value.AttributeId)
@@ -59,44 +59,44 @@ public class UpdateAttributeValuesHandler(
         {
             return productTypeMpIdsWithNewTrueValues.Count is 0
                 ? AttributeErrors.NotEnoughValues(
-                    request.NewAttributeValues[0].AttributeId,
+                    command.NewAttributeValues[0].AttributeId,
                     productTypeMpIdsWithNewTrueValues.Count,
                     1)
                 : AttributeErrors.TooManyValues(
-                request.NewAttributeValues[0].AttributeId,
+                command.NewAttributeValues[0].AttributeId,
                 productTypeMpIdsWithNewTrueValues.Count,
                 1);
         }
 
         // 5. Get the attributes for the new attribute values
-        var receivedAttributeIds = request.NewAttributeValues.Select(value => value.AttributeId).ToList();
+        var receivedAttributeIds = command.NewAttributeValues.Select(value => value.AttributeId).ToList();
 
         var attributes = await _attributeWriteRepository
             .GetAttributesWithSubAttributesByIdOrMpIdAndByRootCategoryId(
                 productTypeMpIdsWithNewTrueValues.Single(),
                 receivedAttributeIds,
-                request.RootCategoryId)
+                command.RootCategoryId)
             .ToListAsync();
 
         // 6. Validate the new attribute values and get the articles in parallel
         var validationTask = _validationService.ValidateAttributes(
-            request.ArticleNumber,
+            command.ArticleNumber,
             attributes,
-            request.NewAttributeValues.ToList(),
+            command.NewAttributeValues.ToList(),
             articleDtos);
 
         // We need to create a new scope to avoid the DbContext being shared between tasks (threads) since the article repository is also used indirectly by the validation service
         await using var scope = _serviceProvider.CreateAsyncScope();
-        var secondArticleRepository = scope.ServiceProvider.GetRequiredService<IArticleWriteRepository>();
+        var secondArticleWriteRepository = scope.ServiceProvider.GetRequiredService<IArticleWriteRepository>();
 
-        if (ReferenceEquals(secondArticleRepository, _articleWriteRepository))
+        if (ReferenceEquals(secondArticleWriteRepository, _articleWriteRepository))
         {
             throw new InvalidOperationException("The article repository is not registered as a scoped/transient service. Therefore task parallelism is not possible.");
         }
 
-        var articlesTask = secondArticleRepository.GetByNumberWithAttributeValuesByRootCategoryId(
-            request.ArticleNumber,
-            request.RootCategoryId)
+        var articlesTask = secondArticleWriteRepository.GetByNumberWithAttributeValuesByRootCategoryId(
+            command.ArticleNumber,
+            command.RootCategoryId)
             .ToListAsync()
             .AsTask();
 
@@ -118,10 +118,10 @@ public class UpdateAttributeValuesHandler(
 
         // 7. Remove the old attribute values and add the new attribute values to the articles
         RemoveAttributeValuesFromArticle(articles);
-        AddNewAttributeValuesToArticles(request.NewAttributeValues, articles, attributes);
+        AddNewAttributeValuesToArticles(command.NewAttributeValues, articles, attributes);
 
         // 8. Save the changes and return the updated result
-        await secondArticleRepository.SaveChangesAsync();
+        await secondArticleWriteRepository.SaveChangesAsync();
         return Result.Updated;
     }
 

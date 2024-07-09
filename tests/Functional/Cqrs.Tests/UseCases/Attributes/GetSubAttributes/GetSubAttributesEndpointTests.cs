@@ -7,7 +7,7 @@ using Cqrs.Api.UseCases.Articles.Errors;
 using Cqrs.Api.UseCases.Attributes.Common.Errors;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
-using Cqrs.Api.UseCases.Attributes.GetSubAttributes;
+using Cqrs.Api.UseCases.Attributes.Queries.GetSubAttributes;
 using Cqrs.Tests.TestCommon.BaseTest;
 using Cqrs.Tests.TestCommon.ErrorHandling;
 using Cqrs.Tests.TestCommon.Factories;
@@ -23,7 +23,7 @@ namespace Cqrs.Tests.UseCases.Attributes.GetSubAttributes;
 public class GetSubAttributesEndpointTests(CqrsApiFactory factory)
     : BaseTestWithSharedCqrsApiFactory(factory)
 {
-    private GetSubAttributesRequest _getSubAttributesRequest = new(
+    private GetSubAttributesQuery _getSubAttributesQuery = new(
         TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID,
         TestConstants.Article.ARTILCE_NUMBER,
         TestConstants.Attribute.ATTRIBUTE_IDS);
@@ -50,7 +50,7 @@ public class GetSubAttributesEndpointTests(CqrsApiFactory factory)
         await dbContext.Attributes.AddRangeAsync(subAttribute, subSubAttribute);
         await dbContext.SaveChangesAsync();
 
-        _getSubAttributesRequest = _getSubAttributesRequest with { AttributeIds = subSubAttribute.Id.ToString(CultureInfo.InvariantCulture) };
+        _getSubAttributesQuery = _getSubAttributesQuery with { AttributeIds = subSubAttribute.Id.ToString(CultureInfo.InvariantCulture) };
 
         // Act
         var responses = await GetAttributesResponseAsync();
@@ -91,13 +91,13 @@ public class GetSubAttributesEndpointTests(CqrsApiFactory factory)
         await dbContext.SaveChangesAsync();
 
         // Act
-        _getSubAttributesRequest = _getSubAttributesRequest with { AttributeIds = attribute.Id.ToString(CultureInfo.InvariantCulture) };
+        _getSubAttributesQuery = _getSubAttributesQuery with { AttributeIds = attribute.Id.ToString(CultureInfo.InvariantCulture) };
         var productTypeResponses = await GetAttributesResponseAsync();
 
-        _getSubAttributesRequest = _getSubAttributesRequest with { AttributeIds = gripAttribute.Id.ToString(CultureInfo.InvariantCulture) };
+        _getSubAttributesQuery = _getSubAttributesQuery with { AttributeIds = gripAttribute.Id.ToString(CultureInfo.InvariantCulture) };
         var gripResponses = await GetAttributesResponseAsync();
 
-        _getSubAttributesRequest = _getSubAttributesRequest with { AttributeIds = gripMaterialDbAttribute.Id.ToString(CultureInfo.InvariantCulture) };
+        _getSubAttributesQuery = _getSubAttributesQuery with { AttributeIds = gripMaterialDbAttribute.Id.ToString(CultureInfo.InvariantCulture) };
         var gripMaterialResponses = await GetAttributesResponseAsync();
 
         // Assert
@@ -148,13 +148,13 @@ public class GetSubAttributesEndpointTests(CqrsApiFactory factory)
         await dbContext.SaveChangesAsync();
 
         // Act
-        _getSubAttributesRequest = _getSubAttributesRequest with { AttributeIds = attribute.Id.ToString(CultureInfo.InvariantCulture) };
+        _getSubAttributesQuery = _getSubAttributesQuery with { AttributeIds = attribute.Id.ToString(CultureInfo.InvariantCulture) };
         var responses1 = await GetAttributesResponseAsync();
 
         responses1.Should().HaveCount(1);
         responses1[0].SubAttributes.Should().NotBeNullOrEmpty();
 
-        _getSubAttributesRequest = _getSubAttributesRequest with { AttributeIds = string.Join(',', responses1[0].SubAttributes!) };
+        _getSubAttributesQuery = _getSubAttributesQuery with { AttributeIds = string.Join(',', responses1[0].SubAttributes!) };
         var responses2 = await GetAttributesResponseAsync();
 
         // Assert
@@ -236,15 +236,15 @@ public class GetSubAttributesEndpointTests(CqrsApiFactory factory)
     public async Task GetSubAttributesAsync_WhenArticleDoesNotExist_ShouldReturnArticleNotFoundError()
     {
         // Arrange
-        _getSubAttributesRequest = _getSubAttributesRequest with { ArticleNumber = "99" };
+        _getSubAttributesQuery = _getSubAttributesQuery with { ArticleNumber = "99" };
 
-        var expectedError = ArticleErrors.ArticleNotFound(_getSubAttributesRequest.ArticleNumber);
+        var expectedError = ArticleErrors.ArticleNotFound(_getSubAttributesQuery.ArticleNumber);
 
         // Act
         var response = await GetSubAttributesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<GetSubAttributesRequest>
+        var errors = await ErrorResponseExtractor<GetSubAttributesQuery>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -260,13 +260,13 @@ public class GetSubAttributesEndpointTests(CqrsApiFactory factory)
         await dbContext.Articles.AddAsync(article);
         await dbContext.SaveChangesAsync();
 
-        var expectedError = ArticleErrors.MappedCategoriesForArticleNotFound(_getSubAttributesRequest.ArticleNumber, _getSubAttributesRequest.RootCategoryId);
+        var expectedError = ArticleErrors.MappedCategoriesForArticleNotFound(_getSubAttributesQuery.ArticleNumber, _getSubAttributesQuery.RootCategoryId);
 
         // Act
         var response = await GetSubAttributesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<GetSubAttributesRequest>
+        var errors = await ErrorResponseExtractor<GetSubAttributesQuery>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -280,16 +280,16 @@ public class GetSubAttributesEndpointTests(CqrsApiFactory factory)
         await AttributeTestData.CreateTestData(dbContext);
         await dbContext.SaveChangesAsync();
 
-        _getSubAttributesRequest = _getSubAttributesRequest with { AttributeIds = "99" };
+        _getSubAttributesQuery = _getSubAttributesQuery with { AttributeIds = "99" };
 
         // Act
         var result = await GetSubAttributesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<GetSubAttributesRequest>
+        var errors = await ErrorResponseExtractor<GetSubAttributesQuery>
             .ValidateResponseAndGetErrorsAsync(result, HttpStatusCode.NotFound);
 
-        errors.ShouldContainSingleEquivalentTo(AttributeErrors.AttributeIdsNotFound([99], _getSubAttributesRequest.RootCategoryId));
+        errors.ShouldContainSingleEquivalentTo(AttributeErrors.AttributeIdsNotFound([99], _getSubAttributesQuery.RootCategoryId));
     }
 
     /*--------------------------------------------------------------------------------------------------
@@ -308,7 +308,7 @@ public class GetSubAttributesEndpointTests(CqrsApiFactory factory)
     public async Task GetSubAttributesAsync_WhenRequestIsNotValid_ShouldReturnValidationError(string attributeIds)
     {
         // Arrange
-        _getSubAttributesRequest = _getSubAttributesRequest with { AttributeIds = attributeIds };
+        _getSubAttributesQuery = _getSubAttributesQuery with { AttributeIds = attributeIds };
 
         var expectedError = Error.Validation(
             code: "AttributeIds",
@@ -318,7 +318,7 @@ public class GetSubAttributesEndpointTests(CqrsApiFactory factory)
         var response = await GetSubAttributesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<GetSubAttributesRequest>
+        var errors = await ErrorResponseExtractor<GetSubAttributesQuery>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -330,15 +330,15 @@ public class GetSubAttributesEndpointTests(CqrsApiFactory factory)
     public async Task GetSubAttributesAsync_WhenRequestIsValid_ShouldNotReturnValidationError(string attributeIds)
     {
         // Arrange
-        _getSubAttributesRequest = _getSubAttributesRequest with { AttributeIds = attributeIds };
+        _getSubAttributesQuery = _getSubAttributesQuery with { AttributeIds = attributeIds };
 
-        var expectedError = ArticleErrors.ArticleNotFound(_getSubAttributesRequest.ArticleNumber);
+        var expectedError = ArticleErrors.ArticleNotFound(_getSubAttributesQuery.ArticleNumber);
 
         // Act
         var response = await GetSubAttributesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<GetSubAttributesRequest>
+        var errors = await ErrorResponseExtractor<GetSubAttributesQuery>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -368,9 +368,9 @@ public class GetSubAttributesEndpointTests(CqrsApiFactory factory)
 
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
 
-            query["rootCategoryId"] = _getSubAttributesRequest.RootCategoryId.ToString(CultureInfo.InvariantCulture);
-            query["articleNumber"] = _getSubAttributesRequest.ArticleNumber;
-            query["attributeIds"] = _getSubAttributesRequest.AttributeIds;
+            query["rootCategoryId"] = _getSubAttributesQuery.RootCategoryId.ToString(CultureInfo.InvariantCulture);
+            query["articleNumber"] = _getSubAttributesQuery.ArticleNumber;
+            query["attributeIds"] = _getSubAttributesQuery.AttributeIds;
 
             uriBuilder.Query = query.ToString();
             return uriBuilder.Uri.PathAndQuery;

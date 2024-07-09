@@ -14,16 +14,16 @@ public class GetCategoryMappingQueryHandler(IArticleReadRepository _articleReadR
     /// <summary>
     /// Gets the associated category for the article based on the request.
     /// </summary>
-    /// <param name="request">The request.</param>
+    /// <param name="query">The request.</param>
     /// <returns>An error or an <see cref="GetCategoryMappingResponse"/>.</returns>
-    public async Task<ErrorOr<GetCategoryMappingResponse>> GetCategoryMappingAsync(BaseRequest request)
+    public async Task<ErrorOr<GetCategoryMappingResponse>> GetCategoryMappingAsync(BaseQuery query)
     {
         // 1. Get the first article (all variants are in the same category) with the categories (one category per RootCategory possible)
-        var article = await _articleReadRepository.GetFirstByNumberWithCategories(request.ArticleNumber);
+        var article = await _articleReadRepository.GetFirstByNumberWithCategories(query.ArticleNumber);
 
         if (article is null)
         {
-            return ArticleErrors.ArticleNotFound(request.ArticleNumber);
+            return ArticleErrors.ArticleNotFound(query.ArticleNumber);
         }
 
         // 2. Get German mapped category for the default path and number if it exists
@@ -31,11 +31,11 @@ public class GetCategoryMappingQueryHandler(IArticleReadRepository _articleReadR
             category.RootCategory!.LocaleCode == LocaleCode.de_DE);
 
         // 3. Get the requested mapped category
-        var requestedMappedCategory = article.Categories?.SingleOrDefault(x => x.RootCategoryId == request.RootCategoryId);
+        var requestedMappedCategory = article.Categories?.SingleOrDefault(x => x.RootCategoryId == query.RootCategoryId);
 
         if (requestedMappedCategory is null && germanMappedCategory is null)
         {
-            return ArticleErrors.MappedCategoriesForArticleNotFound(request.ArticleNumber, request.RootCategoryId);
+            return ArticleErrors.MappedCategoriesForArticleNotFound(query.ArticleNumber, query.RootCategoryId);
         }
 
         return new GetCategoryMappingResponse(

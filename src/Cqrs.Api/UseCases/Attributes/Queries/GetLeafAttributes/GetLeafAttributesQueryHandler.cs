@@ -4,22 +4,22 @@ using Cqrs.Api.UseCases.Attributes.Common.Responses;
 using Cqrs.Api.UseCases.Attributes.Common.Services;
 using ErrorOr;
 
-namespace Cqrs.Api.UseCases.Attributes.GetLeafAttributes;
+namespace Cqrs.Api.UseCases.Attributes.Queries.GetLeafAttributes;
 
 /// <summary>
 /// Handles the attribute requests.
 /// </summary>
-public class GetLeafAttributesHandler(AttributeService _attributeService, AttributeConverter _attributeConverter)
+public class GetLeafAttributesQueryHandler(AttributeReadService _attributeReadService, AttributeConverter _attributeConverter)
 {
     /// <summary>
     /// Handles the GET request for category specific leafAttributes.
     /// </summary>
-    /// <param name="request">The request.</param>
+    /// <param name="query">The request.</param>
     /// <returns>A list of category specific leaf attributes of the article in the category tree.</returns>
-    public async Task<ErrorOr<List<GetAttributesResponse>>> GetLeafAttributesAsync(GetLeafAttributesRequest request)
+    public async Task<ErrorOr<List<GetAttributesResponse>>> GetLeafAttributesAsync(GetLeafAttributesQuery query)
     {
         // 1. Fetch the article DTOs
-        var dtoOrError = await _attributeService.GetArticleDtosAndMappedCategoryIdAsync(request);
+        var dtoOrError = await _attributeReadService.GetArticleDtosAndMappedCategoryIdAsync(query);
 
         if (dtoOrError.IsError)
         {
@@ -29,11 +29,11 @@ public class GetLeafAttributesHandler(AttributeService _attributeService, Attrib
         var (articleDtos, _) = dtoOrError.Value;
 
         // 2. Parse the attribute id from the request and get the attribute
-        var attributeId = int.Parse(request.AttributeId, CultureInfo.InvariantCulture);
+        var attributeId = int.Parse(query.AttributeId, CultureInfo.InvariantCulture);
 
-        var attributeDtos = await _attributeService.GetAttributesAndSubAttributesWithValuesAsync(
+        var attributeDtos = await _attributeReadService.GetAttributesAndSubAttributesWithValuesAsync(
                 articleDtos.ConvertAll(a => a.ArticleId),
-                request.RootCategoryId,
+                query.RootCategoryId,
                 [attributeId]);
 
         // 4. Get the requested attribute and return an error if it is unknown
@@ -41,12 +41,12 @@ public class GetLeafAttributesHandler(AttributeService _attributeService, Attrib
 
         if (attribute is null)
         {
-            return AttributeErrors.AttributeIdsNotFound([attributeId], request.RootCategoryId);
+            return AttributeErrors.AttributeIdsNotFound([attributeId], query.RootCategoryId);
         }
 
         // 4. Convert the attribute to a response and return it
         return await _attributeConverter.ConvertAllLeafAttributes(
-            request.ArticleNumber,
+            query.ArticleNumber,
             attribute,
             attributeDtos,
             articleDtos);

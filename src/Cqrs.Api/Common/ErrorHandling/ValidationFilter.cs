@@ -8,7 +8,7 @@ using FluentValidation;
 namespace Cqrs.Api.Common.ErrorHandling;
 
 /// <summary>
-/// Defines a validation filter which validates a <see cref="BaseRequest"/>.
+/// Defines a validation filter which validates a <see cref="BaseQuery"/>.
 /// </summary>
 /// <param name="_requestValidator">The request validator.</param>
 /// <param name="_rootCategoryReadRepository">The root category repository.</param>
@@ -17,7 +17,7 @@ public class ValidationFilter<TRequest>(
     IValidator<TRequest> _requestValidator,
     ICachedReadRepository<RootCategory> _rootCategoryReadRepository)
     : IEndpointFilter
-    where TRequest : BaseRequest
+    where TRequest : BaseQuery
 {
     /// <inheritdoc />
     /// <remarks>

@@ -1,40 +1,39 @@
 using System.Net;
-using Cqrs.Api.Common.BaseRequests;
 using Cqrs.Api.Common.Constants;
 using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Cqrs.Api.UseCases.Attributes.GetAttributes;
+namespace Cqrs.Api.UseCases.Attributes.Queries.GetSubAttributes;
 
 /// <inheritdoc />
-public class GetAttributesEndpoint : IEndpoint
+public class GetSubAttributesEndpoint : IEndpoint
 {
     /// <inheritdoc />
     public void MapEndpoint(IEndpointRouteBuilder endpoints)
     {
         endpoints
-            .MapGet("attributes", GetAttributesAsync)
+            .MapGet("attributes/subAttributes", GetSubAttributesAsync)
             .WithTags(EndpointTags.ATTRIBUTES)
-            .WithSummary("Returns a list of category specific attributes ordered by the min values based on the request.")
+            .WithSummary("Returns a list of category specific sub attributes ordered by the min values based on the request.")
             .Produces<IEnumerable<GetAttributesResponse>>()
             .ProducesProblem((int)HttpStatusCode.NotFound)
             .ProducesProblem((int)HttpStatusCode.BadRequest)
             .ProducesProblem((int)HttpStatusCode.InternalServerError)
-            .AddEndpointFilter<ValidationFilter<BaseRequest>>()
+            .AddEndpointFilter<ValidationFilter<GetSubAttributesQuery>>()
             .WithOpenApi();
     }
 
-    private static async Task<IResult> GetAttributesAsync(
-        [AsParameters] BaseRequest request,
-        [FromServices] GetAttributesHandler handler,
+    private static async Task<IResult> GetSubAttributesAsync(
+        [AsParameters] GetSubAttributesQuery query,
+        [FromServices] GetSubAttributesQueryHandler queryHandler,
         [FromServices] HttpProblemDetailsService problemDetailsService)
     {
-        var result = await handler.GetAttributesAsync(request);
+        var result = await queryHandler.GetSubAttributesAsync(query);
 
         return result.Match(
-            responses => Results.Ok(responses.OrderBy(response => response.MinValues)),
+            responses => Results.Ok(responses.OrderByDescending(response => response.MinValues)),
             problemDetailsService.LogErrorsAndReturnProblem);
     }
 }

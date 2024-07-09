@@ -5,15 +5,15 @@ using JetBrains.Annotations;
 namespace Cqrs.Api.Common.BaseRequests;
 
 /// <summary>
-/// Defines the validation rules for the <see cref="BaseRequest"/> class.
+/// Defines the validation rules for the <see cref="BaseQuery"/> class.
 /// </summary>
 [UsedImplicitly]
-public class BaseRequestValidator : AbstractValidator<BaseRequest>
+public class BaseQueryValidator : AbstractValidator<BaseQuery>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="BaseRequestValidator"/> class.
+    /// Initializes a new instance of the <see cref="BaseQueryValidator"/> class.
     /// </summary>
-    public BaseRequestValidator()
+    public BaseQueryValidator()
     {
         RuleFor(x => x.RootCategoryId)
             .GreaterThan(0)

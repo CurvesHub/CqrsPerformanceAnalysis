@@ -4,27 +4,27 @@ using Cqrs.Api.UseCases.Attributes.Common.Responses;
 using Cqrs.Api.UseCases.Attributes.Common.Services;
 using ErrorOr;
 
-namespace Cqrs.Api.UseCases.Attributes.GetAttributes;
+namespace Cqrs.Api.UseCases.Attributes.Queries.GetAttributes;
 
 /// <summary>
-/// Handles the <see cref="BaseRequest"/> request.
+/// Handles the <see cref="BaseQuery"/> request.
 /// </summary>
-public class GetAttributesHandler(
-    AttributeService _attributeService,
+public class GetAttributesQueryHandler(
+    AttributeReadService _attributeReadService,
     AttributeConverter _attributeConverter,
-    IAttributeWriteRepository _attributeWriteRepository)
+    IAttributeReadRepository _attributeReadRepository)
 {
     private const string TRUE_STRING = "true";
 
     /// <summary>
     /// Handles the GET request for category specific attributes.
     /// </summary>
-    /// <param name="request">The request.</param>
+    /// <param name="query">The request.</param>
     /// <returns>A list of category specific attributes of the article in the category tree.</returns>
-    public async Task<ErrorOr<List<GetAttributesResponse>>> GetAttributesAsync(BaseRequest request)
+    public async Task<ErrorOr<List<GetAttributesResponse>>> GetAttributesAsync(BaseQuery query)
     {
         // 1. Fetch the article DTOs and the mapped category Id
-        var dtoOrError = await _attributeService.GetArticleDtosAndMappedCategoryIdAsync(request);
+        var dtoOrError = await _attributeReadService.GetArticleDtosAndMappedCategoryIdAsync(query);
 
         if (dtoOrError.IsError)
         {
@@ -34,7 +34,7 @@ public class GetAttributesHandler(
         var (articleDtos, mappedCategoryId) = dtoOrError.Value;
 
         // 2. Fetch the attributes with sub attributes and boolean values
-        var attributeDtos = await _attributeWriteRepository
+        var attributeDtos = await _attributeReadRepository
             .GetAttributesWithSubAttributesAndBooleanValues(mappedCategoryId, articleDtos.ConvertAll(a => a.ArticleId))
             .ToListAsync();
 
@@ -46,7 +46,7 @@ public class GetAttributesHandler(
         foreach (var attributeDto in attributeDtos)
         {
             var responseDto = await _attributeConverter.ConvertAttributeToResponse(
-                request.ArticleNumber,
+                query.ArticleNumber,
                 attributeDto.Attribute,
                 attributeDto.ArticleIdsWithBoolValues,
                 articleDtos);

@@ -14,4 +14,4 @@ public record GetChildrenOrTopLevelQuery(
     int RootCategoryId,
     string ArticleNumber,
     long? CategoryNumber)
-    : BaseRequest(RootCategoryId, ArticleNumber);
+    : BaseQuery(RootCategoryId, ArticleNumber);

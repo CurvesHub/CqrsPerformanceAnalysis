@@ -8,4 +8,4 @@ namespace Cqrs.Api.Common.BaseRequests;
 /// <param name="RootCategoryId">The requested root category id.</param>
 /// <param name="ArticleNumber">The requested article number.</param>
 [PublicAPI]
-public record BaseRequest(int RootCategoryId, string ArticleNumber);
+public record BaseQuery(int RootCategoryId, string ArticleNumber);

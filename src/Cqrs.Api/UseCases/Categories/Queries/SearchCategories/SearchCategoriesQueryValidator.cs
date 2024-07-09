@@ -13,8 +13,8 @@ public class SearchCategoriesQueryValidator : AbstractValidator<SearchCategories
     /// <summary>
     /// Initializes a new instance of the <see cref="SearchCategoriesQueryValidator"/> class.
     /// </summary>
-    /// <param name="baseValidator">The validator for the <see cref="BaseRequest"/> class.</param>
-    public SearchCategoriesQueryValidator(IValidator<BaseRequest> baseValidator)
+    /// <param name="baseValidator">The validator for the <see cref="BaseQuery"/> class.</param>
+    public SearchCategoriesQueryValidator(IValidator<BaseQuery> baseValidator)
     {
         Include(baseValidator);
 

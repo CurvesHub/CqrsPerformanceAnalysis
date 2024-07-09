@@ -15,7 +15,7 @@ namespace Cqrs.Api.UseCases.Attributes.Common.Services;
 /// <param name="_categoryWriteRepository">The category repository.</param>
 /// <param name="_articleWriteRepository">The article repository.</param>
 /// <param name="_attributeWriteRepository">The attribute repository.</param>
-public class AttributeService(
+public class AttributeWriteService(
     ICategoryWriteRepository _categoryWriteRepository,
     IArticleWriteRepository _articleWriteRepository,
     IAttributeWriteRepository _attributeWriteRepository)
@@ -23,22 +23,22 @@ public class AttributeService(
     /// <summary>
     /// Get the article DTOs and the mapped category id for the requested article number.
     /// </summary>
-    /// <param name="request">The request.</param>
+    /// <param name="query">The request.</param>
     /// <returns>A <see cref="ErrorOr.Error"/> or a tuple of the article DTOs and the mapped category id.</returns>
-    public async Task<ErrorOr<(List<ArticleDto>, int CategoryId)>> GetArticleDtosAndMappedCategoryIdAsync(BaseRequest request)
+    public async Task<ErrorOr<(List<ArticleDto>, int CategoryId)>> GetArticleDtosAndMappedCategoryIdAsync(BaseQuery query)
     {
-        var articleDtos = await _articleWriteRepository.GetArticleDtos(request.ArticleNumber).ToListAsync();
+        var articleDtos = await _articleWriteRepository.GetArticleDtos(query.ArticleNumber).ToListAsync();
 
         if (articleDtos.Count == 0)
         {
-            return ArticleErrors.ArticleNotFound(request.ArticleNumber);
+            return ArticleErrors.ArticleNotFound(query.ArticleNumber);
         }
 
-        var mappedCategoryId = await _categoryWriteRepository.GetMappedCategoryIdByRootCategoryId(request.ArticleNumber, request.RootCategoryId);
+        var mappedCategoryId = await _categoryWriteRepository.GetMappedCategoryIdByRootCategoryId(query.ArticleNumber, query.RootCategoryId);
 
         if (mappedCategoryId is null)
         {
-            return ArticleErrors.MappedCategoriesForArticleNotFound(request.ArticleNumber, request.RootCategoryId);
+            return ArticleErrors.MappedCategoriesForArticleNotFound(query.ArticleNumber, query.RootCategoryId);
         }
 
         return (articleDtos, mappedCategoryId.Value);

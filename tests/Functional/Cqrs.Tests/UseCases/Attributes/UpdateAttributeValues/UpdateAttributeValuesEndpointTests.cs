@@ -4,10 +4,10 @@ using System.Net.Http.Json;
 using Cqrs.Api.Common.DataAccess.Persistence;
 using Cqrs.Api.UseCases.Articles.Errors;
 using Cqrs.Api.UseCases.Articles.Persistence.Entities;
+using Cqrs.Api.UseCases.Attributes.Commands.UpdateAttributeValues;
 using Cqrs.Api.UseCases.Attributes.Common.Errors;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
-using Cqrs.Api.UseCases.Attributes.UpdateAttributeValues;
 using Cqrs.Tests.TestCommon.BaseTest;
 using Cqrs.Tests.TestCommon.ErrorHandling;
 using Cqrs.Tests.TestCommon.Factories;
@@ -26,7 +26,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
 {
     private readonly List<NewAttributeValue> _newAttributeValues = [];
 
-    private UpdateAttributeValuesRequest _updateAttributeValuesRequest = new(
+    private UpdateAttributeValuesCommand _updateAttributeValuesCommand = new(
         TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID,
         TestConstants.Article.ARTILCE_NUMBER,
         []);
@@ -273,7 +273,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         AddNewAttributeValues(homeEnglish.Id, article.CharacteristicId, "True");
         AddNewAttributeValues(materialValueEnglish.Id, article.CharacteristicId, "Other");
 
-        _updateAttributeValuesRequest = _updateAttributeValuesRequest with { RootCategoryId = TestConstants.RootCategory.ENGLISH_ROOT_CATEGORY_ID };
+        _updateAttributeValuesCommand = _updateAttributeValuesCommand with { RootCategoryId = TestConstants.RootCategory.ENGLISH_ROOT_CATEGORY_ID };
 
         // Act
         await AssertStatusCodeForUpdateAttributeValuesAsync();
@@ -320,15 +320,15 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenArticleDoesNotExist_ShouldReturnArticleNotFoundError()
     {
         // Arrange
-        _updateAttributeValuesRequest = _updateAttributeValuesRequest with { ArticleNumber = "99" };
+        _updateAttributeValuesCommand = _updateAttributeValuesCommand with { ArticleNumber = "99" };
 
-        var expectedError = ArticleErrors.ArticleNotFound(_updateAttributeValuesRequest.ArticleNumber);
+        var expectedError = ArticleErrors.ArticleNotFound(_updateAttributeValuesCommand.ArticleNumber);
 
         // Act
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -344,13 +344,13 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         await dbContext.Articles.AddAsync(article);
         await dbContext.SaveChangesAsync();
 
-        var expectedError = ArticleErrors.MappedCategoriesForArticleNotFound(_updateAttributeValuesRequest.ArticleNumber, _updateAttributeValuesRequest.RootCategoryId);
+        var expectedError = ArticleErrors.MappedCategoriesForArticleNotFound(_updateAttributeValuesCommand.ArticleNumber, _updateAttributeValuesCommand.RootCategoryId);
 
         // Act
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -373,7 +373,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -396,7 +396,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -418,7 +418,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -452,7 +452,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -481,7 +481,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -509,7 +509,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -536,7 +536,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -565,7 +565,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -598,7 +598,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -629,7 +629,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -659,7 +659,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -691,7 +691,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -722,7 +722,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -750,7 +750,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -780,7 +780,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
         var response = await UpdateAttributeValuesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -795,13 +795,13 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
     public async Task UpdateAttributeValuesAsync_WhenRequestIsNotValid_ShouldReturnValidationError(InvalidRequestWithExpectedError testData)
     {
         // Arrange
-        var request = _updateAttributeValuesRequest with { NewAttributeValues = testData.NewAttributeValues.ToArray() };
+        var request = _updateAttributeValuesCommand with { NewAttributeValues = testData.NewAttributeValues.ToArray() };
 
         // Act
         var response = await HttpClient.PutAsJsonAsync(EndpointRoutes.Attributes.UPDATE_ATTRIBUTE_VALUES, request);
 
         // Assert
-        var errors = await ErrorResponseExtractor<UpdateAttributeValuesRequest>
+        var errors = await ErrorResponseExtractor<UpdateAttributeValuesCommand>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldContainSingleEquivalentTo(testData.ExpectedError);
@@ -1088,7 +1088,7 @@ public class UpdateAttributeValuesEndpointTests(CqrsApiFactory factory)
             _newAttributeValues.Add(new NewAttributeValue(int.Parse(TestConstants.Attribute.ATTRIBUTE_ID, CultureInfo.InvariantCulture), [new VariantAttributeValues(TestConstants.Article.CHARACTERISTIC_ID, ["True"])]));
         }
 
-        var request = _updateAttributeValuesRequest with { NewAttributeValues = _newAttributeValues.ToArray() };
+        var request = _updateAttributeValuesCommand with { NewAttributeValues = _newAttributeValues.ToArray() };
 
         return await HttpClient.PutAsJsonAsync(
             EndpointRoutes.Attributes.UPDATE_ATTRIBUTE_VALUES,

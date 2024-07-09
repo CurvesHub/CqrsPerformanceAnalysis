@@ -13,11 +13,11 @@ public class GetChildrenOrTopLevelQueryValidator : AbstractValidator<GetChildren
     /// <summary>
     /// Initializes a new instance of the <see cref="GetChildrenOrTopLevelQueryValidator"/> class.
     /// </summary>
-    /// <param name="baseValidator">The validator for the <see cref="BaseRequest"/> class.</param>
+    /// <param name="baseValidator">The validator for the <see cref="BaseQuery"/> class.</param>
     /// <remarks>
     /// Since the <see cref="GetChildrenOrTopLevelQuery.CategoryNumber"/> is nullable, we only need to validate the base request.
     /// </remarks>
-    public GetChildrenOrTopLevelQueryValidator(IValidator<BaseRequest> baseValidator)
+    public GetChildrenOrTopLevelQueryValidator(IValidator<BaseQuery> baseValidator)
     {
         Include(baseValidator);
     }

@@ -20,16 +20,16 @@ public class GetCategoryMappingEndpoint : IEndpoint
             .Produces<GetCategoryMappingResponse>()
             .ProducesProblem((int)HttpStatusCode.NotFound)
             .ProducesProblem((int)HttpStatusCode.InternalServerError)
-            .AddEndpointFilter<ValidationFilter<BaseRequest>>()
+            .AddEndpointFilter<ValidationFilter<BaseQuery>>()
             .WithOpenApi();
     }
 
     private static async Task<IResult> GetCategoryMappingAsync(
-        [AsParameters] BaseRequest request,
+        [AsParameters] BaseQuery query,
         [FromServices] GetCategoryMappingQueryHandler queryHandler,
         [FromServices] HttpProblemDetailsService problemDetailsService)
     {
-        var result = await queryHandler.GetCategoryMappingAsync(request);
+        var result = await queryHandler.GetCategoryMappingAsync(query);
 
         return result.Match(
             Results.Ok,

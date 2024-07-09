@@ -4,7 +4,7 @@ using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Cqrs.Api.UseCases.Attributes.UpdateAttributeValues;
+namespace Cqrs.Api.UseCases.Attributes.Commands.UpdateAttributeValues;
 
 /// <inheritdoc />
 public class UpdateAttributeValuesEndpoint : IEndpoint
@@ -16,21 +16,21 @@ public class UpdateAttributeValuesEndpoint : IEndpoint
             .MapPut("attributes", UpdateAttributeValuesAsync)
             .WithTags(EndpointTags.ATTRIBUTES)
             .WithSummary("Updates the category specific attributes of an article.")
-            .Accepts<UpdateAttributeValuesRequest>(isOptional: false, contentType: "application/json")
+            .Accepts<UpdateAttributeValuesCommand>(isOptional: false, contentType: "application/json")
             .Produces((int)HttpStatusCode.NoContent)
             .ProducesProblem((int)HttpStatusCode.NotFound)
             .ProducesProblem((int)HttpStatusCode.BadRequest)
             .ProducesProblem((int)HttpStatusCode.InternalServerError)
-            .AddEndpointFilter<ValidationFilter<UpdateAttributeValuesRequest>>()
+            .AddEndpointFilter<ValidationFilter<UpdateAttributeValuesCommand>>()
             .WithOpenApi();
     }
 
     private static async Task<IResult> UpdateAttributeValuesAsync(
-        [FromBody] UpdateAttributeValuesRequest request,
-        [FromServices] UpdateAttributeValuesHandler handler,
+        [FromBody] UpdateAttributeValuesCommand command,
+        [FromServices] UpdateAttributeValuesCommandHandler commandHandler,
         [FromServices] HttpProblemDetailsService problemDetailsService)
     {
-        var result = await handler.UpdateAttributeValuesAsync(request);
+        var result = await commandHandler.UpdateAttributeValuesAsync(command);
 
         return result.Match(
             _ => Results.NoContent(),

@@ -16,4 +16,4 @@ public record SearchCategoriesQuery(
     string ArticleNumber,
     long? CategoryNumber = null,
     string? SearchTerm = null)
-    : BaseRequest(RootCategoryId, ArticleNumber);
+    : BaseQuery(RootCategoryId, ArticleNumber);

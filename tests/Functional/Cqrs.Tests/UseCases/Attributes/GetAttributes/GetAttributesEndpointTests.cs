@@ -23,7 +23,7 @@ namespace Cqrs.Tests.UseCases.Attributes.GetAttributes;
 public class GetAttributesEndpointTests(CqrsApiFactory factory)
     : BaseTestWithSharedCqrsApiFactory(factory)
 {
-    private BaseRequest _baseRequest = new(
+    private BaseQuery _baseQuery = new(
         TestConstants.RootCategory.GERMAN_ROOT_CATEGORY_ID,
         TestConstants.Article.ARTILCE_NUMBER);
 
@@ -199,15 +199,15 @@ public class GetAttributesEndpointTests(CqrsApiFactory factory)
     public async Task GetAttributesAsync_WhenArticleDoesNotExist_ShouldReturnArticleNotFoundError()
     {
         // Arrange
-        _baseRequest = _baseRequest with { ArticleNumber = "99" };
+        _baseQuery = _baseQuery with { ArticleNumber = "99" };
 
-        var expectedError = ArticleErrors.ArticleNotFound(_baseRequest.ArticleNumber);
+        var expectedError = ArticleErrors.ArticleNotFound(_baseQuery.ArticleNumber);
 
         // Act
         var response = await GetAttributesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<BaseRequest>
+        var errors = await ErrorResponseExtractor<BaseQuery>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -223,13 +223,13 @@ public class GetAttributesEndpointTests(CqrsApiFactory factory)
         await dbContext.Articles.AddAsync(article);
         await dbContext.SaveChangesAsync();
 
-        var expectedError = ArticleErrors.MappedCategoriesForArticleNotFound(_baseRequest.ArticleNumber, _baseRequest.RootCategoryId);
+        var expectedError = ArticleErrors.MappedCategoriesForArticleNotFound(_baseQuery.ArticleNumber, _baseQuery.RootCategoryId);
 
         // Act
         var response = await GetAttributesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<BaseRequest>
+        var errors = await ErrorResponseExtractor<BaseQuery>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -246,7 +246,7 @@ public class GetAttributesEndpointTests(CqrsApiFactory factory)
     public async Task GetAttributesAsync_WhenRequestIsNotValid_ShouldReturnValidationError(int rootCategoryId, string articleNumber)
     {
         // Arrange
-        _baseRequest = new BaseRequest(rootCategoryId, articleNumber);
+        _baseQuery = new BaseQuery(rootCategoryId, articleNumber);
 
         Error[] expectedErrors =
         [
@@ -262,7 +262,7 @@ public class GetAttributesEndpointTests(CqrsApiFactory factory)
         var response = await GetAttributesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<BaseRequest>
+        var errors = await ErrorResponseExtractor<BaseQuery>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.BadRequest);
 
         errors.ShouldBeEquivalentTo(expectedErrors);
@@ -272,15 +272,15 @@ public class GetAttributesEndpointTests(CqrsApiFactory factory)
     public async Task GetAttributesAsync_WhenRequestRootCategoryIsValidButDoesNotExist_ShouldReturnNotFoundError()
     {
         // Arrange
-        _baseRequest = _baseRequest with { RootCategoryId = 99 };
+        _baseQuery = _baseQuery with { RootCategoryId = 99 };
 
-        var expectedError = RootCategoryErrors.RootCategoryIdNotFound(_baseRequest.RootCategoryId);
+        var expectedError = RootCategoryErrors.RootCategoryIdNotFound(_baseQuery.RootCategoryId);
 
         // Act
         var response = await GetAttributesAsync();
 
         // Assert
-        var errors = await ErrorResponseExtractor<BaseRequest>
+        var errors = await ErrorResponseExtractor<BaseQuery>
             .ValidateResponseAndGetErrorsAsync(response, HttpStatusCode.NotFound);
 
         errors.ShouldContainSingleEquivalentTo(expectedError);
@@ -323,8 +323,8 @@ public class GetAttributesEndpointTests(CqrsApiFactory factory)
 
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
 
-            query["rootCategoryId"] = _baseRequest.RootCategoryId.ToString(CultureInfo.InvariantCulture);
-            query["articleNumber"] = _baseRequest.ArticleNumber;
+            query["rootCategoryId"] = _baseQuery.RootCategoryId.ToString(CultureInfo.InvariantCulture);
+            query["articleNumber"] = _baseQuery.ArticleNumber;
 
             uriBuilder.Query = query.ToString();
             return uriBuilder.Uri.PathAndQuery;

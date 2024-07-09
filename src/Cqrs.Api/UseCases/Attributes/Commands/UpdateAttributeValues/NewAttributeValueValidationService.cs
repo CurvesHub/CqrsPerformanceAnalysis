@@ -8,7 +8,7 @@ using Cqrs.Api.UseCases.Attributes.Common.Services;
 using ErrorOr;
 using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
-namespace Cqrs.Api.UseCases.Attributes.UpdateAttributeValues;
+namespace Cqrs.Api.UseCases.Attributes.Commands.UpdateAttributeValues;
 
 /// <summary>
 /// Checks if the attributes given by the category specifics put endpoint are valid.

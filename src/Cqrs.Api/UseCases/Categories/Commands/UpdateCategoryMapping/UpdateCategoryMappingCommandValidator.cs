@@ -13,8 +13,8 @@ public class UpdateCategoryMappingCommandValidator : AbstractValidator<UpdateCat
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateCategoryMappingCommandValidator"/> class.
     /// </summary>
-    /// <param name="baseValidator">The validator for the <see cref="BaseRequest"/> class.</param>
-    public UpdateCategoryMappingCommandValidator(IValidator<BaseRequest> baseValidator)
+    /// <param name="baseValidator">The validator for the <see cref="BaseQuery"/> class.</param>
+    public UpdateCategoryMappingCommandValidator(IValidator<BaseQuery> baseValidator)
     {
         Include(baseValidator);
 

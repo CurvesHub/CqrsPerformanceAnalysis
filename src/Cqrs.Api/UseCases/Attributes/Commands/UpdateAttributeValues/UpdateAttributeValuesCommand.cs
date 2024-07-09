@@ -1,7 +1,7 @@
 using Cqrs.Api.Common.BaseRequests;
 using JetBrains.Annotations;
 
-namespace Cqrs.Api.UseCases.Attributes.UpdateAttributeValues;
+namespace Cqrs.Api.UseCases.Attributes.Commands.UpdateAttributeValues;
 
 /// <summary>
 /// Represents the request to put category specific attributes.
@@ -10,8 +10,8 @@ namespace Cqrs.Api.UseCases.Attributes.UpdateAttributeValues;
 /// <param name="ArticleNumber">Gets the requested article number.</param>
 /// <param name="NewAttributeValues">Gets the new attribute values that should be assigned to the given article.</param>
 [PublicAPI]
-public record UpdateAttributeValuesRequest(
+public record UpdateAttributeValuesCommand(
     int RootCategoryId,
     string ArticleNumber,
     NewAttributeValue[] NewAttributeValues)
-    : BaseRequest(RootCategoryId, ArticleNumber);
+    : BaseQuery(RootCategoryId, ArticleNumber);
