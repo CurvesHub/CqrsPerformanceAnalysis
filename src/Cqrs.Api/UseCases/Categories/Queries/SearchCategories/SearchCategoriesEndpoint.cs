@@ -2,7 +2,6 @@ using System.Net;
 using Cqrs.Api.Common.Constants;
 using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
-using Cqrs.Api.UseCases.Categories.Common.Persistence.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
@@ -42,16 +41,16 @@ public class SearchCategoriesEndpoint : IEndpoint
     }
 
     private static IEnumerable<SearchCategoriesResponse> ToResponse(
-        IEnumerable<Category> categories)
+        IEnumerable<SearchCategoryDto> categories)
     {
         return categories.Select(category =>
             new SearchCategoriesResponse(
                 category.CategoryNumber,
-                category.Name,
+                category.Label,
                 category.IsSelected,
                 category.IsLeaf)
             {
-                Children = category.Children is not null && category.Children.Count is not 0
+                Children = category.Children.Count is not 0
                     ? ToResponse(category.Children)
                     : []
             })

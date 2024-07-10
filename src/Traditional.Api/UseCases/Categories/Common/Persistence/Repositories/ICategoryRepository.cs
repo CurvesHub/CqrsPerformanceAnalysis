@@ -16,22 +16,6 @@ public interface ICategoryRepository
     Task<Category?> GetByNumberAndRootCategoryId(int rootCategoryId, long categoryNumber);
 
     /// <summary>
-    /// Searches for the parents of a category recursively by the category number.
-    /// </summary>
-    /// <param name="rootCategoryId">The root category id to search for.</param>
-    /// <param name="categoryNumber">The category number to search for.</param>
-    /// <returns>An <see cref="IAsyncEnumerable{Category}"/> of <see cref="Category"/>s.</returns>
-    IAsyncEnumerable<Category> SearchParentsRecursiveByCategoryNumber(int rootCategoryId, long categoryNumber);
-
-    /// <summary>
-    /// Searches for the parents of a category recursively by the search term.
-    /// </summary>
-    /// <param name="rootCategoryId">The root category id to search for.</param>
-    /// <param name="searchTerm">The search term to search for.</param>
-    /// <returns>An <see cref="IAsyncEnumerable{Category}"/> of <see cref="Category"/>s.</returns>
-    IAsyncEnumerable<Category> SearchParentsRecursiveBySearchTerm(int rootCategoryId, string searchTerm);
-
-    /// <summary>
     /// Gets the mapped category by the root category id.
     /// </summary>
     /// <param name="articleNumber">The article number to search for.</param>

@@ -1,4 +1,8 @@
+using System.Linq.Expressions;
 using ErrorOr;
+using Microsoft.EntityFrameworkCore;
+using Traditional.Api.Common.DataAccess.Persistence;
+using Traditional.Api.Common.Extensions;
 using Traditional.Api.UseCases.Categories.Common.Errors;
 using Traditional.Api.UseCases.Categories.Common.Persistence.Entities;
 using Traditional.Api.UseCases.Categories.Common.Persistence.Repositories;
@@ -8,7 +12,7 @@ namespace Traditional.Api.UseCases.Categories.SearchCategories;
 /// <summary>
 /// Provides functionality to search for categories.
 /// </summary>
-public class SearchCategoriesHandler(ICategoryRepository _categoryRepository)
+public class SearchCategoriesHandler(TraditionalDbContext _dbContext, ICategoryRepository _categoryRepository)
 {
     /// <summary>
     /// Searches for categories based on the request.
@@ -20,8 +24,8 @@ public class SearchCategoriesHandler(ICategoryRepository _categoryRepository)
     {
         // 1. Retrieve the category and all its parents up to the top level category
         var allCategories = IsSearchTermRequested(request)
-            ? await _categoryRepository.SearchParentsRecursiveBySearchTerm(request.RootCategoryId, request.SearchTerm!).ToListAsync()
-            : await _categoryRepository.SearchParentsRecursiveByCategoryNumber(request.RootCategoryId, request.CategoryNumber!.Value).ToListAsync();
+            ? await SearchParentsRecursiveBySearchTerm(request.RootCategoryId, request.SearchTerm!).ToListAsync()
+            : await SearchParentsRecursiveByCategoryNumber(request.RootCategoryId, request.CategoryNumber!.Value).ToListAsync();
 
         if (allCategories.Count == 0)
         {
@@ -105,5 +109,45 @@ public class SearchCategoriesHandler(ICategoryRepository _categoryRepository)
             // Set the parent category as the new current root
             currentRoot = parentCategory;
         }
+    }
+
+    /// <summary>
+    /// Searches for the parents of a category recursively by the category number.
+    /// </summary>
+    /// <param name="rootCategoryId">The root category id to search for.</param>
+    /// <param name="categoryNumber">The category number to search for.</param>
+    /// <returns>An <see cref="IAsyncEnumerable{Category}"/> of <see cref="Category"/>s.</returns>
+    private IAsyncEnumerable<Category> SearchParentsRecursiveByCategoryNumber(int rootCategoryId, long categoryNumber)
+    {
+        return SearchParentsRecursive(category =>
+            category.RootCategoryId == rootCategoryId
+            && category.CategoryNumber == categoryNumber);
+    }
+
+    /// <summary>
+    /// Searches for the parents of a category recursively by the search term.
+    /// </summary>
+    /// <param name="rootCategoryId">The root category id to search for.</param>
+    /// <param name="searchTerm">The search term to search for.</param>
+    /// <returns>An <see cref="IAsyncEnumerable{Category}"/> of <see cref="Category"/>s.</returns>
+    private IAsyncEnumerable<Category> SearchParentsRecursiveBySearchTerm(int rootCategoryId, string searchTerm)
+    {
+        return SearchParentsRecursive(category =>
+            category.RootCategoryId == rootCategoryId
+#pragma warning disable RCS1155, MA0011, CA1862
+            // We cant use the culture invariant here because entity framework core does not support it
+            && category.Name.ToLower().Contains(searchTerm.ToLower()));
+#pragma warning restore CA1862, MA0011, RCS1155
+    }
+
+    private IAsyncEnumerable<Category> SearchParentsRecursive(Expression<Func<Category, bool>> initialFilter)
+    {
+        // Hint: Implement integration tests or benchmarks to evaluate the performance of recursive queries
+        return _dbContext.Categories.RecursiveCteQuery(
+                initialFilter: initialFilter,
+                navigationProperty: category => category.Parent)
+            .Include(category => category.Parent)
+            .AsNoTracking()
+            .AsAsyncEnumerable();
     }
 }

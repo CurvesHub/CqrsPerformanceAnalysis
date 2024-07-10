@@ -1,8 +1,8 @@
 using System.ComponentModel;
-using Cqrs.Api.UseCases.Categories.Common.Persistence.Repositories;
+using Cqrs.Api.Common.DataAccess.Persistence;
 using Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
 using FluentAssertions;
-using NSubstitute;
+using Microsoft.EntityFrameworkCore;
 using TestCommon.Constants;
 
 namespace Cqrs.Tests.UseCases.Categories.SearchCategories;
@@ -28,7 +28,7 @@ public class SearchCategoriesQueryHandlerTests
             CategoryNumber: null,
             SearchTerm: null);
 
-        var handler = new SearchCategoriesQueryHandler(Substitute.For<ICategoryReadRepository>());
+        var handler = new SearchCategoriesQueryHandler(new CqrsReadDbContext(new DbContextOptions<CqrsReadDbContext>()));
 
         // Act
         Func<Task> act = async () => await handler.SearchCategoriesAsync(request);

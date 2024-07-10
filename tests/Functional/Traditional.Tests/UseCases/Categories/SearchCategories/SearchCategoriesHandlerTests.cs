@@ -1,7 +1,9 @@
 using System.ComponentModel;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 using TestCommon.Constants;
+using Traditional.Api.Common.DataAccess.Persistence;
 using Traditional.Api.UseCases.Categories.Common.Persistence.Repositories;
 using Traditional.Api.UseCases.Categories.SearchCategories;
 
@@ -28,7 +30,9 @@ public class SearchCategoriesHandlerTests
             CategoryNumber: null,
             SearchTerm: null);
 
-        var handler = new SearchCategoriesHandler(Substitute.For<ICategoryRepository>());
+        var handler = new SearchCategoriesHandler(
+            new TraditionalDbContext(new DbContextOptions<TraditionalDbContext>()),
+            Substitute.For<ICategoryRepository>());
 
         // Act
         Func<Task> act = async () => await handler.SearchCategoriesAsync(request);
