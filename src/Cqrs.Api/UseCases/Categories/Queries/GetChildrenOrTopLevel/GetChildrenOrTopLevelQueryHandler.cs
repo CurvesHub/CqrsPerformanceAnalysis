@@ -1,78 +1,104 @@
+using System.Diagnostics.CodeAnalysis;
+using Cqrs.Api.Common.DataAccess.Persistence;
 using Cqrs.Api.UseCases.Categories.Common.Errors;
 using Cqrs.Api.UseCases.Categories.Common.Persistence.Entities;
-using Cqrs.Api.UseCases.Categories.Common.Persistence.Repositories;
 using ErrorOr;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cqrs.Api.UseCases.Categories.Queries.GetChildrenOrTopLevel;
 
 /// <summary>
 /// Provides functionality to get child categories or the top level categories based on the request.
 /// </summary>
-public class GetChildrenOrTopLevelQueryHandler(ICategoryReadRepository _categoryReadRepository)
+[SuppressMessage("Performance", "MA0020:Use direct methods instead of LINQ methods", Justification = "Not possible with EF Core linq queries")]
+public class GetChildrenOrTopLevelQueryHandler(CqrsReadDbContext _dbContext)
 {
     /// <summary>
     /// Gets the child categories or the top level categories (without their children) based on the request.
     /// </summary>
     /// <param name="query">Provides the information for which categories should be retrieved.</param>
     /// <returns>An <see cref="ErrorOr.Error"/> or a list of <see cref="Category"/>s.</returns>
-    public async Task<ErrorOr<IEnumerable<Category>>> GetChildrenAsync(GetChildrenOrTopLevelQuery query)
+    public async Task<ErrorOr<IOrderedEnumerable<GetChildrenOrTopLevelResponse>>> GetChildrenAsync(GetChildrenOrTopLevelQuery query)
     {
         // 1. Retrieve the requested categories
-        List<Category> categories;
+        List<GetChildrenOrTopLevelResponse> responses;
 
         if (query.CategoryNumber is null or 0)
         {
             // If the category number is null or 0, then the first level of the category tree is requested
-            categories = await _categoryReadRepository.GetTopLevelCategories(query.RootCategoryId).ToListAsync();
+            responses = await GetTopLevelCategories(query.RootCategoryId, query.ArticleNumber).ToListAsync();
 
-            if (categories.Count is 0)
+            if (responses.Count is 0)
             {
                 return CategoryErrors.CategoriesNotFound(query.RootCategoryId);
             }
         }
         else
         {
-            var parentCategory = await _categoryReadRepository.GetByNumberAndRootCategoryId(query.RootCategoryId, query.CategoryNumber.Value);
-
             // If the parent category is not found return a not found error
-            if (parentCategory is null)
+            if (!await CategoryExists(query.RootCategoryId, query.CategoryNumber.Value))
             {
                 return CategoryErrors.CategoryNotFound(query.CategoryNumber.Value, query.RootCategoryId);
             }
 
             // If the category number is not null, then the child categories of the parent are requested
-            categories = await _categoryReadRepository.GetChildren(query.RootCategoryId, query.CategoryNumber.Value).ToListAsync();
+            responses = await GetChildren(query.RootCategoryId, query.CategoryNumber.Value, query.ArticleNumber).ToListAsync();
         }
 
-        // If no children are found return an empty list
-        if (categories.Count is 0)
-        {
-            return Enumerable.Empty<Category>().ToErrorOr();
-        }
-
-        // 2. Check if a category is mapped to the article and set the IsSelected property
-        await SetIsSelectedForMappedCategory(
-            query.ArticleNumber,
-            query.RootCategoryId,
-            categories);
-
-        // 3. Return the categories
-        return categories;
+        // 2. Return the categories
+        return responses.Count is 0
+            ? Enumerable.Empty<GetChildrenOrTopLevelResponse>().Order().ToErrorOr()
+            : responses.OrderBy(category => category.Label, StringComparer.OrdinalIgnoreCase).ToErrorOr();
     }
 
-    private async Task SetIsSelectedForMappedCategory(string articleNumber, int rootCategoryId, List<Category> categories)
+    /// <summary>
+    /// Gets the top level categories based on the root category id.
+    /// </summary>
+    /// <param name="rootCategoryId">The root category id to search for.</param>
+    /// <param name="articleNumber">The article number to check the mapping for.</param>
+    /// <returns>An <see cref="IAsyncEnumerable{Category}"/> of <see cref="Category"/>s.</returns>
+    private IAsyncEnumerable<GetChildrenOrTopLevelResponse> GetTopLevelCategories(int rootCategoryId, string articleNumber)
     {
-        var mappedCategory = await _categoryReadRepository.GetMappedCategoryByRootCategoryId(articleNumber, rootCategoryId);
-        if (mappedCategory is null)
-        {
-            return;
-        }
+        return _dbContext.Categories
+            .Where(category => category.RootCategoryId == rootCategoryId && category.ParentId == null)
+            .Select(category => new GetChildrenOrTopLevelResponse(
+                category.CategoryNumber,
+                category.Name,
+                category.Articles!.Any(a => a.ArticleNumber == articleNumber),
+                category.ParentId != null))
+            .AsAsyncEnumerable();
+    }
 
-        var matchingCategory = categories.Find(category => category.CategoryNumber == mappedCategory.CategoryNumber);
-        if (matchingCategory is not null)
-        {
-            // Set the IsSelected property to true for the category that is mapped to the article
-            matchingCategory.IsSelected = true;
-        }
+    /// <summary>
+    /// Gets the categories by the category number and the root category id.
+    /// </summary>
+    /// <param name="rootCategoryId">The root category id to search for.</param>
+    /// <param name="categoryNumber">The category number to search for.</param>
+    /// <returns>A <see cref="Category"/> or <see langword="null"/> if not found.</returns>
+    private async Task<bool> CategoryExists(int rootCategoryId, long categoryNumber)
+    {
+        return await _dbContext.Categories
+            .AnyAsync(category =>
+                category.RootCategoryId == rootCategoryId
+                && category.CategoryNumber == categoryNumber);
+    }
+
+    /// <summary>
+    /// Gets the children of a category based on the root category id and the category number.
+    /// </summary>
+    /// <param name="rootCategoryId">The root category id to search for.</param>
+    /// <param name="categoryNumber">The category number to search for.</param>
+    /// <param name="articleNumber">The article number to check the mapping for.</param>
+    /// <returns>An <see cref="IAsyncEnumerable{Category}"/> of <see cref="Category"/>s.</returns>
+    private IAsyncEnumerable<GetChildrenOrTopLevelResponse> GetChildren(int rootCategoryId, long categoryNumber, string articleNumber)
+    {
+        return _dbContext.Categories
+            .Where(category => category.RootCategoryId == rootCategoryId && category.Parent!.CategoryNumber == categoryNumber)
+            .Select(category => new GetChildrenOrTopLevelResponse(
+                category.CategoryNumber,
+                category.Name,
+                category.Articles!.Any(a => a.ArticleNumber == articleNumber),
+                category.ParentId != null))
+            .AsAsyncEnumerable();
     }
 }

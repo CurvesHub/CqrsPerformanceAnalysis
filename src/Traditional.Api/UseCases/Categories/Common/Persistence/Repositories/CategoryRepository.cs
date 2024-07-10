@@ -35,20 +35,4 @@ internal class CategoryRepository(TraditionalDbContext _dbContext) : ICategoryRe
             .Select(category => (int?)category.Id)
             .SingleOrDefaultAsync();
     }
-
-    /// <inheritdoc/>
-    public IAsyncEnumerable<Category> GetTopLevelCategories(int rootCategoryId)
-    {
-        return _dbContext.Categories
-            .Where(category => category.RootCategoryId == rootCategoryId && category.ParentId == null)
-            .AsAsyncEnumerable();
-    }
-
-    /// <inheritdoc/>
-    public IAsyncEnumerable<Category> GetChildren(int rootCategoryId, long categoryNumber)
-    {
-        return _dbContext.Categories
-            .Where(category => category.RootCategoryId == rootCategoryId && category.Parent!.CategoryNumber == categoryNumber)
-            .AsAsyncEnumerable();
-    }
 }

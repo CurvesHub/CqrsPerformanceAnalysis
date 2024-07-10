@@ -2,7 +2,6 @@ using System.Net;
 using Cqrs.Api.Common.Constants;
 using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
-using Cqrs.Api.UseCases.Categories.Common.Persistence.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cqrs.Api.UseCases.Categories.Queries.GetChildrenOrTopLevel;
@@ -36,19 +35,7 @@ public class GetChildrenOrTopLevelEndpoint : IEndpoint
         var result = await queryHandler.GetChildrenAsync(query);
 
         return result.Match(
-            categories => Results.Ok(ToResponse(categories)),
+            Results.Ok,
             problemDetailsService.LogErrorsAndReturnProblem);
-    }
-
-    private static IEnumerable<GetChildrenOrTopLevelResponse> ToResponse(IEnumerable<Category> categories)
-    {
-        return categories
-            .Select(category =>
-                new GetChildrenOrTopLevelResponse(
-                    category.CategoryNumber,
-                    category.Name,
-                    category.IsSelected,
-                    category.IsLeaf))
-            .OrderBy(category => category.Label, StringComparer.OrdinalIgnoreCase);
     }
 }
