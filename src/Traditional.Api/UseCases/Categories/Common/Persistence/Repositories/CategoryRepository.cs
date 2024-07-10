@@ -10,15 +10,6 @@ namespace Traditional.Api.UseCases.Categories.Common.Persistence.Repositories;
 internal class CategoryRepository(TraditionalDbContext _dbContext) : ICategoryRepository
 {
     /// <inheritdoc />
-    public async Task<Category?> GetByNumberAndRootCategoryId(int rootCategoryId, long categoryNumber)
-    {
-        return await _dbContext.Categories
-            .SingleOrDefaultAsync(category =>
-                category.RootCategoryId == rootCategoryId
-                && category.CategoryNumber == categoryNumber);
-    }
-
-    /// <inheritdoc />
     public async Task<Category?> GetMappedCategoryByRootCategoryId(string articleNumber, int rootCategoryId)
     {
         return await _dbContext.Categories

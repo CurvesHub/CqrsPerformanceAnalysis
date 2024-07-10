@@ -10,16 +10,6 @@ namespace Cqrs.Api.UseCases.Articles.Persistence.Repositories;
 [SuppressMessage("Performance", "MA0020:Use direct methods instead of LINQ methods", Justification = "Not possible with EF Core linq queries")]
 internal class ArticleWriteRepository(CqrsWriteDbContext _dbContext) : IArticleWriteRepository
 {
-    /// <inheritdoc />
-    public IAsyncEnumerable<Article> GetByNumberWithCategoriesByRootCategoryId(string articleNumber, int rootCategoryId)
-    {
-        return _dbContext.Articles
-            .Where(article => article.ArticleNumber == articleNumber)
-            .Include(article => article.Categories!
-                .Where(category => category.RootCategoryId == rootCategoryId))
-            .AsAsyncEnumerable();
-    }
-
     /// <inheritdoc/>
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

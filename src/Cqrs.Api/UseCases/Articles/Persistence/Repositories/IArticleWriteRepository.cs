@@ -9,14 +9,6 @@ namespace Cqrs.Api.UseCases.Articles.Persistence.Repositories;
 public interface IArticleWriteRepository
 {
     /// <summary>
-    /// Gets the articles by the article number with the categories by the root category id.
-    /// </summary>
-    /// <param name="articleNumber">The article number to search for.</param>
-    /// <param name="rootCategoryId">The root category id to search for.</param>
-    /// <returns>An <see cref="IAsyncEnumerable{Article}"/> of <see cref="Article"/>s.</returns>
-    public IAsyncEnumerable<Article> GetByNumberWithCategoriesByRootCategoryId(string articleNumber, int rootCategoryId);
-
-    /// <summary>
     /// Gets the article id with the characteristic id by the article number.
     /// </summary>
     /// <param name="articleNumber">The article number to search for.</param>

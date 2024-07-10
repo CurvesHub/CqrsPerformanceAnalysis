@@ -1,19 +1,17 @@
+using Cqrs.Api.Common.DataAccess.Persistence;
 using Cqrs.Api.UseCases.Articles.Errors;
 using Cqrs.Api.UseCases.Articles.Persistence.Entities;
-using Cqrs.Api.UseCases.Articles.Persistence.Repositories;
 using Cqrs.Api.UseCases.Categories.Common.Errors;
 using Cqrs.Api.UseCases.Categories.Common.Persistence.Entities;
-using Cqrs.Api.UseCases.Categories.Common.Persistence.Repositories;
 using ErrorOr;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cqrs.Api.UseCases.Categories.Commands.UpdateCategoryMapping;
 
 /// <summary>
 /// Provides functionality to update the category mapping for an article.
 /// </summary>
-public class UpdateCategoryMappingCommandHandler(
-    ICategoryWriteRepository _categoryWriteRepository,
-    IArticleWriteRepository _articleWriteRepository)
+public class UpdateCategoryMappingCommandHandler(CqrsWriteDbContext _dbContext)
 {
     /// <summary>
     /// Updates the category mapping for an article.
@@ -23,7 +21,7 @@ public class UpdateCategoryMappingCommandHandler(
     public async Task<ErrorOr<Category>> UpdateCategoryMappingAsync(UpdateCategoryMappingCommand command)
     {
         // 1. Retrieve the requested article including all variants and the associated categories for the requested rootCategoryId
-        var articles = await _articleWriteRepository.GetByNumberWithCategoriesByRootCategoryId(
+        var articles = await GetByNumberWithCategoriesByRootCategoryId(
                 command.ArticleNumber,
                 command.RootCategoryId)
             .ToListAsync();
@@ -35,8 +33,7 @@ public class UpdateCategoryMappingCommandHandler(
         }
 
         // 2. Retrieve the requested category
-        var category = await _categoryWriteRepository
-            .GetByNumberAndRootCategoryId(command.RootCategoryId, command.CategoryNumber);
+        var category = await GetByNumberAndRootCategoryId(command.RootCategoryId, command.CategoryNumber);
 
         // If no category was found return a not found error
         if (category is null)
@@ -62,6 +59,35 @@ public class UpdateCategoryMappingCommandHandler(
             categories.Add(newCategory);
         }
 
-        await _articleWriteRepository.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Gets the articles by the article number with the categories by the root category id.
+    /// </summary>
+    /// <param name="articleNumber">The article number to search for.</param>
+    /// <param name="rootCategoryId">The root category id to search for.</param>
+    /// <returns>An <see cref="IAsyncEnumerable{Article}"/> of <see cref="Article"/>s.</returns>
+    private IAsyncEnumerable<Article> GetByNumberWithCategoriesByRootCategoryId(string articleNumber, int rootCategoryId)
+    {
+        return _dbContext.Articles
+            .Where(article => article.ArticleNumber == articleNumber)
+            .Include(article => article.Categories!
+                .Where(category => category.RootCategoryId == rootCategoryId))
+            .AsAsyncEnumerable();
+    }
+
+    /// <summary>
+    /// Gets the categories by the category number and the root category id.
+    /// </summary>
+    /// <param name="rootCategoryId">The root category id to search for.</param>
+    /// <param name="categoryNumber">The category number to search for.</param>
+    /// <returns>A <see cref="Category"/> or <see langword="null"/> if not found.</returns>
+    private async Task<Category?> GetByNumberAndRootCategoryId(int rootCategoryId, long categoryNumber)
+    {
+        return await _dbContext.Categories
+            .SingleOrDefaultAsync(category =>
+                category.RootCategoryId == rootCategoryId
+                && category.CategoryNumber == categoryNumber);
     }
 }
