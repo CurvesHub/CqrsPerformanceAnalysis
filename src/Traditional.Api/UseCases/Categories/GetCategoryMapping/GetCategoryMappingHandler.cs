@@ -1,7 +1,8 @@
 using ErrorOr;
+using Microsoft.EntityFrameworkCore;
 using Traditional.Api.Common.BaseRequests;
+using Traditional.Api.Common.DataAccess.Persistence;
 using Traditional.Api.UseCases.Articles.Errors;
-using Traditional.Api.UseCases.Articles.Persistence.Repositories;
 using Traditional.Api.UseCases.RootCategories.Common.Persistence.Entities;
 
 namespace Traditional.Api.UseCases.Categories.GetCategoryMapping;
@@ -9,7 +10,7 @@ namespace Traditional.Api.UseCases.Categories.GetCategoryMapping;
 /// <summary>
 /// Handler for querying category mapping for articles.
 /// </summary>
-public class GetCategoryMappingHandler(IArticleRepository _articleRepository)
+public class GetCategoryMappingHandler(TraditionalDbContext _dbContext)
 {
     /// <summary>
     /// Gets the associated category for the article based on the request.
@@ -19,7 +20,10 @@ public class GetCategoryMappingHandler(IArticleRepository _articleRepository)
     public async Task<ErrorOr<GetCategoryMappingResponse>> GetCategoryMappingAsync(BaseRequest request)
     {
         // 1. Get the first article (all variants are in the same category) with the categories (one category per RootCategory possible)
-        var article = await _articleRepository.GetFirstByNumberWithCategories(request.ArticleNumber);
+        var article = await _dbContext.Articles
+            .Include(a => a.Categories)!
+            .ThenInclude(category => category.RootCategory)
+            .FirstOrDefaultAsync(a => a.ArticleNumber == request.ArticleNumber);
 
         if (article is null)
         {

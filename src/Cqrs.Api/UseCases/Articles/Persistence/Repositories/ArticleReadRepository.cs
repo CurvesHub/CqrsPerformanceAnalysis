@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using Cqrs.Api.Common.DataAccess.Persistence;
-using Cqrs.Api.UseCases.Articles.Persistence.Entities;
 using Cqrs.Api.UseCases.Attributes.Common.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,15 +9,6 @@ namespace Cqrs.Api.UseCases.Articles.Persistence.Repositories;
 [SuppressMessage("Performance", "MA0020:Use direct methods instead of LINQ methods", Justification = "Not possible with EF Core linq queries")]
 internal class ArticleReadRepository(CqrsReadDbContext _dbContext) : IArticleReadRepository
 {
-    /// <inheritdoc />
-    public Task<Article?> GetFirstByNumberWithCategories(string articleNumber)
-    {
-        return _dbContext.Articles
-            .Include(article => article.Categories)!
-            .ThenInclude(category => category.RootCategory)
-            .FirstOrDefaultAsync(article => article.ArticleNumber == articleNumber);
-    }
-
     /// <inheritdoc/>
     public IAsyncEnumerable<ArticleDto> GetArticleDtos(string articleNumber)
     {

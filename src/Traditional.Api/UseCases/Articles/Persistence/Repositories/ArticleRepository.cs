@@ -20,15 +20,6 @@ internal class ArticleRepository(TraditionalDbContext _dbContext) : IArticleRepo
             .AsAsyncEnumerable();
     }
 
-    /// <inheritdoc />
-    public Task<Article?> GetFirstByNumberWithCategories(string articleNumber)
-    {
-        return _dbContext.Articles
-            .Include(article => article.Categories)!
-            .ThenInclude(category => category.RootCategory)
-            .FirstOrDefaultAsync(article => article.ArticleNumber == articleNumber);
-    }
-
     /// <inheritdoc/>
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

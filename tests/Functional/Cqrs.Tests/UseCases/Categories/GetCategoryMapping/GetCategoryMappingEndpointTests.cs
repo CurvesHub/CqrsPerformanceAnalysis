@@ -99,12 +99,12 @@ public class GetCategoryMappingEndpointTests(CqrsApiFactory factory)
     --------------------------------------------------------------------------------------------------*/
 
     [Fact]
-    public async Task GetCategoryAsync_WhenArticleDoesNotExist_ShouldReturnArticleNotFoundError()
+    public async Task GetCategoryAsync_WhenArticleDoesNotExist_ShouldReturnMappedCategoriesForArticleNotFound()
     {
         // Arrange
         _baseQuery = _baseQuery with { ArticleNumber = "99" };
 
-        var expectedError = ArticleErrors.ArticleNotFound(_baseQuery.ArticleNumber);
+        var expectedError = ArticleErrors.MappedCategoriesForArticleNotFound(_baseQuery.ArticleNumber, _baseQuery.RootCategoryId);
 
         // Act
         var response = await GetCategoryMappingAsync();

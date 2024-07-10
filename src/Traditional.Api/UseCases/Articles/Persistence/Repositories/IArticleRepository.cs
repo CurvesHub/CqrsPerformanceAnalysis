@@ -17,13 +17,6 @@ public interface IArticleRepository
     public IAsyncEnumerable<Article> GetByNumberWithCategoriesByRootCategoryId(string articleNumber, int rootCategoryId);
 
     /// <summary>
-    /// Gets the first article by the article number with all associated categories.
-    /// </summary>
-    /// <param name="articleNumber">The article number to search for.</param>
-    /// <returns>A <see cref="Article"/> with all associated categories.</returns>
-    public Task<Article?> GetFirstByNumberWithCategories(string articleNumber);
-
-    /// <summary>
     /// Saves the changes to the database.
     /// </summary>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
