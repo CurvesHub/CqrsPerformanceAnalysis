@@ -1,7 +1,5 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
-using Traditional.Api.Common.DataAccess.Repositories;
-using Traditional.Api.UseCases.Articles.Persistence.Repositories;
 using Traditional.Api.UseCases.Attributes.Common.Extensions;
 using Traditional.Api.UseCases.Attributes.Common.Models;
 using Traditional.Api.UseCases.Attributes.Common.Persistence.Entities;
@@ -14,41 +12,29 @@ namespace Traditional.Api.UseCases.Attributes.Common.Services;
 /// <summary>
 /// Converts database attributes into dtos for the category specifics get endpoint.
 /// </summary>
-public class AttributeConverter(
-    IArticleRepository _articleRepository,
-    ICachedRepository<AttributeMapping> _attributeMappingRepository)
+public static class AttributeConverter
 {
-    private static readonly string[] ColorMarketplaceAttributeId = ["color"];
-
-    private readonly Dictionary<string, bool> _articleVariantInformation = new(StringComparer.OrdinalIgnoreCase);
-    private List<AttributeMapping>? _allAttributeMappings;
-
     /// <summary>
     /// Converts all leaf attributes of an attribute into dtos for the category specifics get endpoint.
     /// </summary>
-    /// <param name="articleNumber">The article number to get the attribute values for.</param>
+    /// <param name="hasVariants">Whether the article has variants.</param>
     /// <param name="attribute">The attribute to convert.</param>
     /// <param name="allAttributes">The attribute values for all attributes.</param>
     /// <param name="articleDtos">The article ids with their characteristic ids.</param>
+    /// <param name="allAttributeMappings">All attribute mappings.</param>
     /// <returns>The converted dtos for the category specifics get endpoint.</returns>
-    public async Task<List<GetAttributesResponse>> ConvertAllLeafAttributes(
-        string articleNumber,
+    public static List<GetAttributesResponse> ConvertAllLeafAttributes(
+        bool hasVariants,
         Attribute attribute,
         List<(Attribute Attribute, List<AttributeValueDto> AttributeValueDtos)> allAttributes,
-        List<ArticleDto> articleDtos)
+        List<ArticleDto> articleDtos,
+        List<AttributeMapping> allAttributeMappings)
     {
-        // 1. Get the variant information for the article
-        if (!_articleVariantInformation.TryGetValue(articleNumber, out var hasVariants))
-        {
-            hasVariants = await _articleRepository.HasArticleVariantsAsync(articleNumber);
-            _articleVariantInformation[articleNumber] = hasVariants;
-        }
-
-        // 2. Filter the sub attributes of the attribute
-        attribute = await FilterSubAttributes(attribute, hasVariants);
+        // 1. Filter the sub attributes of the attribute
+        attribute = attribute.FilterSubAttributes(hasVariants, allAttributeMappings);
         attribute.SubAttributes ??= [];
 
-        // 3. Convert all sub attributes without further sub attributes
+        // 2. Convert all sub attributes without further sub attributes
         List<GetAttributesResponse> leafResponses = new(attribute.SubAttributes.Count);
         foreach (var subAttribute in attribute.SubAttributes.FindAll(subAttribute => subAttribute.SubAttributes is null or { Count: 0 }))
         {
@@ -56,25 +42,26 @@ public class AttributeConverter(
                 .Single(x => x.Attribute.Id == subAttribute.Id)
                 .AttributeValueDtos;
 
-            var response = await ConvertAttributeToResponse(articleNumber, subAttribute, attributeValueDtos, articleDtos, allAttributes);
+            var response = ConvertAttributeToResponse(hasVariants, subAttribute, attributeValueDtos, articleDtos, allAttributeMappings, allAttributes);
             response.MinValues = subAttribute.GetMinValues(checkParents: false);
 
             leafResponses.Add(response);
         }
 
-        // 4. Set the dependent attributes for each leaf attribute
+        // 3. Set the dependent attributes for each leaf attribute
         var attributeIds = leafResponses.ConvertAll(response => response.AttributeId);
         leafResponses.ForEach(response => response.DependentAttributes = attributeIds.Except([response.AttributeId]).ToList());
 
-        // 5. Convert all sub attributes until there are no more sub attributes
+        // 4. Convert all sub attributes until there are no more sub attributes
         List<(Attribute Attribute, List<GetAttributesResponse> leafResponses)> attributesWithResponses = new(attribute.SubAttributes.Count);
         foreach (var subAttribute in attribute.SubAttributes)
         {
-            var responseDtos = await ConvertAllLeafAttributes(
-                articleNumber,
+            var responseDtos = ConvertAllLeafAttributes(
+                hasVariants,
                 subAttribute,
                 allAttributes,
-                articleDtos);
+                articleDtos,
+                allAttributeMappings);
 
             attributesWithResponses.Add((subAttribute, responseDtos));
         }
@@ -87,7 +74,7 @@ public class AttributeConverter(
             }
         }
 
-        // 6. Order the attributes by minValues and flatten the list
+        // 5. Order the attributes by minValues and flatten the list
         return attributesWithResponses
             .SelectMany(tuple => tuple.leafResponses)
             .Union(leafResponses)
@@ -97,33 +84,28 @@ public class AttributeConverter(
     /// <summary>
     /// Converts an attribute into a dto for the category specifics get endpoint.
     /// </summary>
-    /// <param name="articleNumber">The article number to get the attribute values for.</param>
+    /// <param name="hasVariants">Whether the article has variants.</param>
     /// <param name="attribute">The attribute to convert.</param>
     /// <param name="attributeValueDtos">The attribute values with their article ids.</param>
     /// <param name="articleDtos">The article ids with their characteristic ids.</param>
+    /// <param name="allAttributeMappings">All attribute mappings.</param>
     /// <param name="otherAttributes">The other attributes to get the values from.</param>
     /// <returns>A dto for the category specifics get endpoint.</returns>
-    public async Task<GetAttributesResponse> ConvertAttributeToResponse(
-        string articleNumber,
+    public static GetAttributesResponse ConvertAttributeToResponse(
+        bool hasVariants,
         Attribute attribute,
         List<AttributeValueDto> attributeValueDtos,
         List<ArticleDto> articleDtos,
+        List<AttributeMapping> allAttributeMappings,
         List<(Attribute Attribute, List<AttributeValueDto> ArticleIdsWithAttributeValue)>? otherAttributes = null)
     {
-        // 1. Get the variant information for the article
-        if (!_articleVariantInformation.TryGetValue(articleNumber, out var hasVariants))
-        {
-            hasVariants = await _articleRepository.HasArticleVariantsAsync(articleNumber);
-            _articleVariantInformation[articleNumber] = hasVariants;
-        }
-
-        // 2. Filter the sub attributes of the attribute
-        attribute = await FilterSubAttributes(attribute, hasVariants);
+        // 1. Filter the sub attributes of the attribute
+        attribute = attribute.FilterSubAttributes(hasVariants, allAttributeMappings);
         attribute.SubAttributes ??= [];
 
-        // 3. Fetch the attribute values, product type and set product type
+        // 2. Fetch the attribute values, product type and set product type
         var variantAttributeValues = GetAttributeValuesPerCharacteristicId(attributeValueDtos, articleDtos);
-        var productType = GetProductType(attribute);
+        var productType = attribute.GetProductType();
         var setProductType = otherAttributes?
             .Where(tuple =>
                 tuple.Attribute.ParentAttribute is null
@@ -138,7 +120,7 @@ public class AttributeConverter(
             && setProductType is not null
             && variantAttributeValues.TrueForAll(value => value.Values.Length == 0))
         {
-            var attributeInSetProductType = SubAttributesFlat(setProductType)
+            var attributeInSetProductType = setProductType.SubAttributesFlat()
                 .FirstOrDefault(dbAttribute => string.Equals(RemoveProductType(dbAttribute.MarketplaceAttributeIds), RemoveProductType(attribute.MarketplaceAttributeIds), StringComparison.OrdinalIgnoreCase));
 
             if (attributeInSetProductType is not null)
@@ -149,7 +131,7 @@ public class AttributeConverter(
             }
         }
 
-        // 4. Convert the attribute to a dto
+        // 3. Convert the attribute to a dto
         var allowedValues = attribute.GetAllowedValues();
         var exampleValues = string.IsNullOrWhiteSpace(attribute.ExampleValues) ? [] : attribute.ExampleValues.Split(",").ToArray();
 
@@ -168,23 +150,13 @@ public class AttributeConverter(
                 .OrderByDescending(dbAttribute => dbAttribute.MinValues)
                 .Select(dbAttribute => dbAttribute.Id.ToString(CultureInfo.InvariantCulture))
                 .ToList(),
-            AttributePath: GetPath(attribute).SkipLast(count: 1).ToList(),
+            AttributePath: attribute.GetPath().SkipLast(count: 1).ToList(),
             IsEditable: (attribute.SubAttributes.Count == 0 || attribute.ParentAttribute == null) && attribute.IsEditable)
         {
             Values = variantAttributeValues,
             MinValues = attribute.GetMinValues()
         };
     }
-
-    /// <summary>
-    /// Checks if the attributes marketplaceAttributeId matches the correction exactly, starting from top level
-    /// excluding the ProductType.
-    /// <para>
-    /// Example: correction for marketplaceAttributeId `material` matches `HOME,material` but not `HOME,grip,material`.
-    /// </para>
-    /// </summary>
-    private static bool AttributeMatchesCorrection(string attributeId, string correctionAttributeId)
-        => Regex.IsMatch(attributeId, "^[^,]+," + correctionAttributeId + '$', RegexOptions.CultureInvariant, TimeSpan.FromMinutes(2));
 
     private static List<VariantAttributeValues> GetAttributeValuesPerCharacteristicId(
         IReadOnlyCollection<AttributeValueDto> attributeValueDtos,
@@ -205,7 +177,7 @@ public class AttributeConverter(
             : marketplaceAttributeId;
     }
 
-    private static Attribute GetProductType(Attribute attribute)
+    private static Attribute GetProductType(this Attribute attribute)
     {
         while (true)
         {
@@ -218,7 +190,7 @@ public class AttributeConverter(
         }
     }
 
-    private static IEnumerable<string> GetPath(Attribute attribute)
+    private static IEnumerable<string> GetPath(this Attribute attribute)
     {
         while (attribute.ParentAttribute is not null)
         {
@@ -227,7 +199,7 @@ public class AttributeConverter(
         }
     }
 
-    private static IEnumerable<Attribute> SubAttributesFlat(Attribute attribute)
+    private static IEnumerable<Attribute> SubAttributesFlat(this Attribute attribute)
     {
         return attribute.SubAttributes is null
             ? new[] { attribute }
@@ -236,19 +208,18 @@ public class AttributeConverter(
                 .Prepend(attribute);
     }
 
-    private async Task<Attribute> FilterSubAttributes(Attribute attribute, bool hasVariants)
+    private static Attribute FilterSubAttributes(this Attribute attribute, bool hasVariants, List<AttributeMapping> allAttributeMappings)
     {
         if (attribute.SubAttributes == null || attribute.SubAttributes.Count == 0)
         {
             return attribute;
         }
 
-        _allAttributeMappings ??= await _attributeMappingRepository.GetAllAsync();
-        var baseAttributeIds = _allAttributeMappings.Select(mapping => mapping.AttributeReference.Split(",")[0]);
+        var baseAttributeIds = allAttributeMappings.Select(mapping => mapping.AttributeReference.Split(",")[0]);
 
         if (hasVariants)
         {
-            baseAttributeIds = baseAttributeIds.Except(ColorMarketplaceAttributeId, StringComparer.OrdinalIgnoreCase);
+            baseAttributeIds = baseAttributeIds.Except(["color"], StringComparer.OrdinalIgnoreCase);
         }
 
         attribute.SubAttributes = attribute.SubAttributes
@@ -257,4 +228,14 @@ public class AttributeConverter(
 
         return attribute;
     }
+
+    /// <summary>
+    /// Checks if the attributes marketplaceAttributeId matches the correction exactly, starting from top level
+    /// excluding the ProductType.
+    /// <para>
+    /// Example: correction for marketplaceAttributeId `material` matches `HOME,material` but not `HOME,grip,material`.
+    /// </para>
+    /// </summary>
+    private static bool AttributeMatchesCorrection(string attributeId, string correctionAttributeId)
+        => Regex.IsMatch(attributeId, "^[^,]+," + correctionAttributeId + '$', RegexOptions.CultureInvariant, TimeSpan.FromMinutes(2));
 }

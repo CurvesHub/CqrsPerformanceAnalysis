@@ -1,5 +1,9 @@
 using ErrorOr;
+using Microsoft.EntityFrameworkCore;
+using Traditional.Api.Common.DataAccess.Persistence;
+using Traditional.Api.Common.DataAccess.Repositories;
 using Traditional.Api.UseCases.Attributes.Common.Errors;
+using Traditional.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Traditional.Api.UseCases.Attributes.Common.Responses;
 using Traditional.Api.UseCases.Attributes.Common.Services;
 
@@ -8,7 +12,10 @@ namespace Traditional.Api.UseCases.Attributes.GetSubAttributes;
 /// <summary>
 /// Handles the attribute requests.
 /// </summary>
-public class GetSubAttributesHandler(AttributeService _attributeService, AttributeConverter _attributeConverter)
+public class GetSubAttributesHandler(
+    TraditionalDbContext _dbContext,
+    ICachedRepository<AttributeMapping> _attributeMappingRepository,
+    AttributeService _attributeService)
 {
     /// <summary>
     /// Handles the GET request for category specific subAttributes.
@@ -49,11 +56,12 @@ public class GetSubAttributesHandler(AttributeService _attributeService, Attribu
         List<GetAttributesResponse> responseDtos = new(attributeIds.Count);
         foreach (var tuple in attributeIds.Select(attributeId => attributeDtos.First(tuple => tuple.Attribute.Id == attributeId)))
         {
-            var responseDto = await _attributeConverter.ConvertAttributeToResponse(
-                request.ArticleNumber,
+            var responseDto = AttributeConverter.ConvertAttributeToResponse(
+                await _dbContext.Articles.AnyAsync(article => article.ArticleNumber == request.ArticleNumber && article.CharacteristicId > 0),
                 tuple.Attribute,
                 tuple.AttributeValueDtos,
-                articleDtos);
+                articleDtos,
+                await _attributeMappingRepository.GetAllAsync());
 
             responseDtos.Add(responseDto);
         }

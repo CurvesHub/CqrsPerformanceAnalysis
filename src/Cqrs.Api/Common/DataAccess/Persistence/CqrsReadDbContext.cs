@@ -57,22 +57,53 @@ public class CqrsReadDbContext(DbContextOptions<CqrsReadDbContext> options) : Db
     public DbSet<AttributeDecimalValue> AttributeDecimalValues => Set<AttributeDecimalValue>();
 
     /// <inheritdoc />
+    public override int SaveChanges()
+    {
+        ThrowOnSaveChanges();
+        return 0;
+    }
+
+    /// <inheritdoc />
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        ThrowOnSaveChanges();
+        return 0;
+    }
+
+    /// <inheritdoc />
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        ThrowOnSaveChanges();
+        return Task.FromResult(0);
+    }
+
+    /// <inheritdoc />
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ThrowOnSaveChanges();
+        return Task.FromResult(0);
+    }
+
+    /// <inheritdoc />
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSnakeCaseNamingConvention();
-        // optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
         optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
     }
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // TODO: Refactor the write context to use write models and read context to use read models
         ConfigureDecimalPrecisionAndEnumConversion(modelBuilder);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(CqrsReadDbContext).Assembly);
 
         base.OnModelCreating(modelBuilder);
+    }
+
+    private static void ThrowOnSaveChanges()
+    {
+        throw new InvalidOperationException("SaveChanges cannot be called on read context.");
     }
 
     /// <summary>

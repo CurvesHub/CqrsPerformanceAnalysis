@@ -2,14 +2,7 @@
 
 ## Scenario 1: Traditional
 
-This scenario includes the following C# projects:
-
-- Traditional.Api
-- Traditional.Application
-- Traditional.Domain
-- Traditional.Infrastructure
-
-It uses various common business dependencies like:
+This scenario includes the `Traditional.Api` C# project. It uses various common business dependencies like:
 
 - [Entity Framework Core 8](https://learn.microsoft.com/en-us/ef/core/)
 - [Npgsql.EntityFrameworkCore.PostgreSQL](https://www.npgsql.org/efcore/)
@@ -20,14 +13,7 @@ It uses various common business dependencies like:
 
 ## Scenario 2: CQRS
 
-It includes the following C# projects:
-
-- Cqrs.Api
-- Cqrs.Application
-- Cqrs.Domain
-- Cqrs.Infrastructure
-
-It uses the same common business dependencies like [Scenario 1: Traditional](Application_Scenario_Overview.md#scenario-1-traditional) but new ones are included because a company would likely use those packages for the implementation of CQRS in a large scale application. 
+It includes the `Cqrs.Api` C# project. It uses the same common business dependencies like [Scenario 1: Traditional](Application_Scenario_Overview.md#scenario-1-traditional) but new ones are included because a company would likely use those packages for the implementation of CQRS in a large scale application. 
 
 The implementation of the CQRS pattern can be done by hand but also be simplified with the Mediator pattern. Especially if you want to use other functionality from the package and reduce your coupling even more with The Mediator Pattern. The nuget package [MediatR](https://github.com/jbogard/MediatR) provides a useful API to get started quickly. But it uses reflection under the hood, which can bring some overhead. The nuget package [Mediator.SourceGenerator](https://github.com/martinothamar/Mediator) uses [source generating](https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview) to generate the code which then can be optimized further by the [.NET Compiler (Roslyn)](https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/).
 
@@ -160,23 +146,7 @@ The analysis focuses on the **HTTP response times** but interesting anomalies in
 
 The following tools were used:
 
-### Database
-
-- [PostgreSQL](https://www.postgresql.org/docs/) Version: [16.2](https://www.postgresql.org/about/news/postgresql-162-156-1411-1314-and-1218-released-2807/)
-
-### Deployment
-
-- [Docker](https://docs.docker.com/)
-
-### Testing
-
-- [K6](https://k6.io/docs/examples/tutorials/get-started-with-k6/) [(Grafana docs)](https://grafana.com/docs/k6/latest/)
-- ([dotMemory](https://www.jetbrains.com/help/dotmemory/Introduction.html))
-- ([dotBenchmark](https://github.com/dotnet/BenchmarkDotNet))
-- ([dotTrace](https://www.jetbrains.com/help/profiler/Get_Started_with_Performance_Viewer.html))
-- ([PgWatch2](https://pgwatch2.readthedocs.io/en/latest/))
-
-### Visualization and metric scarping
-
-- [Grafana](https://grafana.com/docs/grafana/latest/)
-- [Prometheus](https://prometheus.io/docs/introduction/overview/)
+Database: [PostgreSQL](https://www.postgresql.org/docs/) Version: [16.2](https://www.postgresql.org/about/news/postgresql-162-156-1411-1314-and-1218-released-2807/)
+Deployment: [Docker](https://docs.docker.com/)
+Testing: [K6](https://k6.io/docs/examples/tutorials/get-started-with-k6/) [(Grafana docs)](https://grafana.com/docs/k6/latest/)
+Visualizations: [Grafana](https://grafana.com/docs/grafana/latest/)

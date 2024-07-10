@@ -4,7 +4,6 @@
 *.DotSettings*
 **/data/
 **/docs/.obsidian/
-**/docs/inProgress/
 **/docs/TODOs and Timeline.md
 **/Assets/K6Tests/*/archive/
 **/Assets/K6Tests/*/results/

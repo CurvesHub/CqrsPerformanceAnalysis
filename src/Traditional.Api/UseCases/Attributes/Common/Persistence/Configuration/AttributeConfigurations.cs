@@ -1,12 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Attribute = Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
-using Persistence_Entities_Attribute = Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
 namespace Traditional.Api.UseCases.Attributes.Common.Persistence.Configuration;
 
 /// <inheritdoc />
-internal class AttributeConfigurations : IEntityTypeConfiguration<Persistence_Entities_Attribute>
+internal class AttributeConfigurations : IEntityTypeConfiguration<Attribute>
 {
     /// <inheritdoc />
     public void Configure(EntityTypeBuilder<Attribute> builder)

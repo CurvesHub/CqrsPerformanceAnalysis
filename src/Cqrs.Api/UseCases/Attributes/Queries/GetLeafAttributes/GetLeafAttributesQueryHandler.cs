@@ -1,15 +1,22 @@
 using System.Globalization;
+using Cqrs.Api.Common.DataAccess.Persistence;
+using Cqrs.Api.Common.DataAccess.Repositories;
 using Cqrs.Api.UseCases.Attributes.Common.Errors;
+using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
 using Cqrs.Api.UseCases.Attributes.Common.Services;
 using ErrorOr;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cqrs.Api.UseCases.Attributes.Queries.GetLeafAttributes;
 
 /// <summary>
 /// Handles the attribute requests.
 /// </summary>
-public class GetLeafAttributesQueryHandler(AttributeReadService _attributeReadService, AttributeReadConverter _attributeReadConverter)
+public class GetLeafAttributesQueryHandler(
+    CqrsReadDbContext _dbContext,
+    ICachedReadRepository<AttributeMapping> _attributeMappingReadRepository,
+    AttributeReadService _attributeReadService)
 {
     /// <summary>
     /// Handles the GET request for category specific leafAttributes.
@@ -45,10 +52,11 @@ public class GetLeafAttributesQueryHandler(AttributeReadService _attributeReadSe
         }
 
         // 4. Convert the attribute to a response and return it
-        return await _attributeReadConverter.ConvertAllLeafAttributes(
-            query.ArticleNumber,
+        return AttributeConverter.ConvertAllLeafAttributes(
+            await _dbContext.Articles.AnyAsync(article => article.ArticleNumber == query.ArticleNumber && article.CharacteristicId > 0),
             attribute,
             attributeDtos,
-            articleDtos);
+            articleDtos,
+            await _attributeMappingReadRepository.GetAllAsync());
     }
 }

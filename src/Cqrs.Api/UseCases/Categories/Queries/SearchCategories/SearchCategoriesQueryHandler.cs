@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Cqrs.Api.Common.DataAccess.Persistence;
 using Cqrs.Api.Common.Extensions;
@@ -12,7 +11,6 @@ namespace Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
 /// <summary>
 /// Provides functionality to search for categories.
 /// </summary>
-[SuppressMessage("Performance", "MA0020:Use direct methods instead of LINQ methods", Justification = "Not possible with EF Core linq queries")]
 public class SearchCategoriesQueryHandler(CqrsReadDbContext _dbContext)
 {
     /// <summary>

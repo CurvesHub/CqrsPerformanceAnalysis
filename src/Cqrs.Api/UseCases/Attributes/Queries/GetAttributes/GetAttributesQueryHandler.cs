@@ -1,8 +1,13 @@
 using Cqrs.Api.Common.BaseRequests;
-using Cqrs.Api.UseCases.Attributes.Common.Persistence.Repositories;
+using Cqrs.Api.Common.DataAccess.Persistence;
+using Cqrs.Api.Common.DataAccess.Repositories;
+using Cqrs.Api.UseCases.Attributes.Common.Models;
+using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
 using Cqrs.Api.UseCases.Attributes.Common.Services;
 using ErrorOr;
+using Microsoft.EntityFrameworkCore;
+using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
 namespace Cqrs.Api.UseCases.Attributes.Queries.GetAttributes;
 
@@ -10,9 +15,9 @@ namespace Cqrs.Api.UseCases.Attributes.Queries.GetAttributes;
 /// Handles the <see cref="BaseQuery"/> request.
 /// </summary>
 public class GetAttributesQueryHandler(
-    AttributeReadService _attributeReadService,
-    AttributeReadConverter _attributeReadConverter,
-    IAttributeReadRepository _attributeReadRepository)
+    CqrsReadDbContext _dbContext,
+    ICachedReadRepository<AttributeMapping> _attributeMappingReadRepository,
+    AttributeReadService _attributeReadService)
 {
     private const string TRUE_STRING = "true";
 
@@ -34,8 +39,9 @@ public class GetAttributesQueryHandler(
         var (articleDtos, mappedCategoryId) = dtoOrError.Value;
 
         // 2. Fetch the attributes with sub attributes and boolean values
-        var attributeDtos = await _attributeReadRepository
-            .GetAttributesWithSubAttributesAndBooleanValues(mappedCategoryId, articleDtos.ConvertAll(a => a.ArticleId))
+        var attributeDtos = await GetAttributesWithSubAttributesAndBooleanValues(
+                mappedCategoryId,
+                articleDtos.Select(a => a.ArticleId))
             .ToListAsync();
 
         // 3. Convert the attributes to responses
@@ -45,11 +51,12 @@ public class GetAttributesQueryHandler(
 
         foreach (var attributeDto in attributeDtos)
         {
-            var responseDto = await _attributeReadConverter.ConvertAttributeToResponse(
-                query.ArticleNumber,
+            var responseDto = AttributeConverter.ConvertAttributeToResponse(
+                await _dbContext.Articles.AnyAsync(article => article.ArticleNumber == query.ArticleNumber && article.CharacteristicId > 0),
                 attributeDto.Attribute,
                 attributeDto.ArticleIdsWithBoolValues,
-                articleDtos);
+                articleDtos,
+                await _attributeMappingReadRepository.GetAllAsync());
 
             responseDtos.Add(responseDto);
 
@@ -76,5 +83,27 @@ public class GetAttributesQueryHandler(
         }
 
         return responseDtos;
+    }
+
+    /// <summary>
+    /// Gets the attributes with sub-attributes and boolean values.
+    /// </summary>
+    /// <param name="categoryId">The category id to get the attributes for.</param>
+    /// <param name="articleIds">The article ids to get the attributes for.</param>
+    /// <returns>An <see cref="IAsyncEnumerable{T}"/> of a tuple with the <see cref="Attribute"/> and a list of <see cref="AttributeValueDto"/>s.</returns>
+    private IAsyncEnumerable<(Attribute Attribute, List<AttributeValueDto> ArticleIdsWithBoolValues)> GetAttributesWithSubAttributesAndBooleanValues(int categoryId, IEnumerable<int> articleIds)
+    {
+        return _dbContext.Attributes
+            .Where(attribute => attribute.Categories!.Any(dbCategory => dbCategory.Id == categoryId) && attribute.ParentAttributeId == null)
+            .Include(attribute => attribute.SubAttributes)
+            .Select(attribute => new
+            {
+                Attribute = attribute,
+                ArticleIdsWithBoolValues = new List<AttributeValueDto>(attribute.AttributeBooleanValues!
+                    .Where(value => articleIds.Contains(value.ArticleId))
+                    .Select(value => new AttributeValueDto(value.AttributeId, value.ArticleId, value.Value.ToString())))
+            })
+            .ToAsyncEnumerable()
+            .Select(attribute => (attribute.Attribute, attribute.ArticleIdsWithBoolValues));
     }
 }

@@ -1,11 +1,13 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using ErrorOr;
+using Microsoft.EntityFrameworkCore;
+using Traditional.Api.Common.DataAccess.Persistence;
+using Traditional.Api.Common.DataAccess.Repositories;
 using Traditional.Api.UseCases.Articles.Persistence.Entities;
-using Traditional.Api.UseCases.Articles.Persistence.Repositories;
 using Traditional.Api.UseCases.Attributes.Common.Errors;
+using Traditional.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;
-using Traditional.Api.UseCases.Attributes.Common.Persistence.Repositories;
 using Traditional.Api.UseCases.Attributes.Common.Services;
 using Attribute = Traditional.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
@@ -16,11 +18,9 @@ namespace Traditional.Api.UseCases.Attributes.UpdateAttributeValues;
 /// </summary>
 [SuppressMessage("Design", "MA0042:Do not use blocking calls in an async method", Justification = "The task is awaited by Task.WhenAll().")]
 public class UpdateAttributeValuesHandler(
-    AttributeService _attributeService,
-    NewAttributeValueValidationService _validationService,
-    IArticleRepository _articleRepository,
-    IAttributeRepository _attributeRepository,
-    IServiceProvider _serviceProvider)
+    TraditionalDbContext _dbContext,
+    ICachedRepository<AttributeMapping> _attributeMappingRepository,
+    AttributeService _attributeService)
 {
     private static readonly string[] TrueStringArray = ["true"];
 
@@ -50,8 +50,7 @@ public class UpdateAttributeValuesHandler(
             .ToList();
 
         // 4. Get the marketplace attribute ids for the root attributes with new true boolean values
-        var productTypeMpIdsWithNewTrueValues = await _attributeRepository
-            .GetProductTypeMpIdsByAttributeIds(attributeIdsForNewTrueValues)
+        var productTypeMpIdsWithNewTrueValues = await GetProductTypeMpIdsByAttributeIds(attributeIdsForNewTrueValues)
             .ToListAsync();
 
         // If there are no or more than one marketplace attribute ids for the root attributes with new true boolean values, return an error
@@ -71,30 +70,23 @@ public class UpdateAttributeValuesHandler(
         // 5. Get the attributes for the new attribute values
         var receivedAttributeIds = request.NewAttributeValues.Select(value => value.AttributeId).ToList();
 
-        var attributes = await _attributeRepository
-            .GetAttributesWithSubAttributesByIdOrMpIdAndByRootCategoryId(
+        var attributes = await GetAttributesWithSubAttributesByIdOrMpIdAndByRootCategoryId(
                 productTypeMpIdsWithNewTrueValues.Single(),
                 receivedAttributeIds,
                 request.RootCategoryId)
             .ToListAsync();
 
         // 6. Validate the new attribute values and get the articles in parallel
-        var validationTask = _validationService.ValidateAttributes(
+        var attributeMappings = await _attributeMappingRepository.GetAllAsync();
+
+        var validationTask = NewAttributeValueValidationService.ValidateAttributes(
             request.ArticleNumber,
             attributes,
             request.NewAttributeValues.ToList(),
-            articleDtos);
+            articleDtos,
+            attributeMappings);
 
-        // We need to create a new scope to avoid the DbContext being shared between tasks (threads) since the article repository is also used indirectly by the validation service
-        await using var scope = _serviceProvider.CreateAsyncScope();
-        var secondArticleRepository = scope.ServiceProvider.GetRequiredService<IArticleRepository>();
-
-        if (ReferenceEquals(secondArticleRepository, _articleRepository))
-        {
-            throw new InvalidOperationException("The article repository is not registered as a scoped/transient service. Therefore task parallelism is not possible.");
-        }
-
-        var articlesTask = secondArticleRepository.GetByNumberWithAttributeValuesByRootCategoryId(
+        var articlesTask = GetByNumberWithAttributeValuesByRootCategoryId(
             request.ArticleNumber,
             request.RootCategoryId)
             .ToListAsync()
@@ -121,7 +113,7 @@ public class UpdateAttributeValuesHandler(
         AddNewAttributeValuesToArticles(request.NewAttributeValues, articles, attributes);
 
         // 8. Save the changes and return the updated result
-        await secondArticleRepository.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
         return Result.Updated;
     }
 
@@ -185,5 +177,53 @@ public class UpdateAttributeValuesHandler(
                     throw new NotSupportedException();
             }
         }
+    }
+
+    /// <summary>
+    /// Gets the articles by the article number with all attribute values.
+    /// </summary>
+    /// <param name="articleNumber">The article number to search for.</param>
+    /// <param name="rootCategoryId">The root category id to search for.</param>
+    /// <returns>An <see cref="IAsyncEnumerable{Article}"/> of <see cref="Article"/>s.</returns>
+    private IAsyncEnumerable<Article> GetByNumberWithAttributeValuesByRootCategoryId(string articleNumber, int rootCategoryId)
+    {
+        return _dbContext.Articles
+            .Where(a => a.ArticleNumber == articleNumber)
+            .Include(article => article.AttributeBooleanValues!.Where(value => value.Attribute!.RootCategoryId == rootCategoryId))
+            .Include(article => article.AttributeDecimalValues!.Where(value => value.Attribute!.RootCategoryId == rootCategoryId))
+            .Include(article => article.AttributeIntValues!.Where(value => value.Attribute!.RootCategoryId == rootCategoryId))
+            .Include(article => article.AttributeStringValues!.Where(value => value.Attribute!.RootCategoryId == rootCategoryId))
+            .ToAsyncEnumerable();
+    }
+
+    /// <summary>
+    /// Gets the attributes with sub-attributes by the given <paramref name="productTypeMpId"/>, <paramref name="attributeIds"/> and <paramref name="rootCategoryId"/>.
+    /// </summary>
+    /// <param name="productTypeMpId">The product type marketplace ids to get the attributes for.</param>
+    /// <param name="attributeIds">The attribute ids to get the attributes for.</param>
+    /// <param name="rootCategoryId">The root category id to get the attributes for.</param>
+    /// <returns>An <see cref="IAsyncEnumerable{T}"/> of <see cref="Attribute"/>s.</returns>
+    private IAsyncEnumerable<Attribute> GetAttributesWithSubAttributesByIdOrMpIdAndByRootCategoryId(string productTypeMpId, IEnumerable<int> attributeIds, int rootCategoryId)
+    {
+        return _dbContext.Attributes
+            .Where(attribute =>
+                attribute.RootCategoryId == rootCategoryId
+                && (attributeIds.Contains(attribute.Id)
+                    || attribute.ProductType == productTypeMpId))
+            .Include(a => a.SubAttributes)
+            .ToAsyncEnumerable();
+    }
+
+    /// <summary>
+    /// Gets the product type marketplace ids by the given <paramref name="attributeIds"/>.
+    /// </summary>
+    /// <param name="attributeIds">The attribute ids to get the product type marketplace ids for.</param>
+    /// <returns>An <see cref="IAsyncEnumerable{T}"/> of product type marketplace ids.</returns>
+    private IAsyncEnumerable<string> GetProductTypeMpIdsByAttributeIds(IEnumerable<int> attributeIds)
+    {
+        return _dbContext.Attributes
+            .Where(attribute => attributeIds.Contains(attribute.Id) && attribute.ParentAttributeId == null)
+            .Select(attribute => attribute.MarketplaceAttributeIds)
+            .ToAsyncEnumerable();
     }
 }

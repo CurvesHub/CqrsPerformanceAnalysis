@@ -20,7 +20,7 @@ public class SearchCategoriesEndpoint : IEndpoint
                 "Searches a category tree from bottom to top and returns all matches with the parents up to the root. " +
                 "Children or siblings of the match are not returned. " +
                 "The list is sorted in ascending order by the label of the category.")
-            .Produces<IEnumerable<SearchCategoriesResponse>>()
+            .Produces<IOrderedEnumerable<SearchCategoriesResponse>>()
             .ProducesProblem((int)HttpStatusCode.NotFound)
             .ProducesProblem((int)HttpStatusCode.BadRequest)
             .ProducesProblem((int)HttpStatusCode.InternalServerError)
@@ -40,7 +40,7 @@ public class SearchCategoriesEndpoint : IEndpoint
             problemDetailsService.LogErrorsAndReturnProblem);
     }
 
-    private static IEnumerable<SearchCategoriesResponse> ToResponse(
+    private static IOrderedEnumerable<SearchCategoriesResponse> ToResponse(
         IEnumerable<SearchCategoryDto> categories)
     {
         return categories.Select(category =>

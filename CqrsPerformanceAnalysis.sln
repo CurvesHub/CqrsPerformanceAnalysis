@@ -18,8 +18,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{04E9D03F-C
 		docker-compose.yml = docker-compose.yml
 		.dockerignore = .dockerignore
 		Dockerfile-Traditional = Dockerfile-Traditional
-		build\publishPerfomanceTestApi.sh = build\publishPerfomanceTestApi.sh
-		build\runPerfomanceTestApi.sh = build\runPerfomanceTestApi.sh
 		Dockerfile-Cqrs = Dockerfile-Cqrs
 	EndProjectSection
 EndProject

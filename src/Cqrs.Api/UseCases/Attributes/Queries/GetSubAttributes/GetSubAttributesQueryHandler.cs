@@ -1,14 +1,21 @@
+using Cqrs.Api.Common.DataAccess.Persistence;
+using Cqrs.Api.Common.DataAccess.Repositories;
 using Cqrs.Api.UseCases.Attributes.Common.Errors;
+using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
 using Cqrs.Api.UseCases.Attributes.Common.Services;
 using ErrorOr;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cqrs.Api.UseCases.Attributes.Queries.GetSubAttributes;
 
 /// <summary>
 /// Handles the attribute requests.
 /// </summary>
-public class GetSubAttributesQueryHandler(AttributeReadService _attributeReadService, AttributeReadConverter _attributeReadConverter)
+public class GetSubAttributesQueryHandler(
+    CqrsReadDbContext _dbContext,
+    ICachedReadRepository<AttributeMapping> _attributeMappingReadRepository,
+    AttributeReadService _attributeReadService)
 {
     /// <summary>
     /// Handles the GET request for category specific subAttributes.
@@ -49,11 +56,12 @@ public class GetSubAttributesQueryHandler(AttributeReadService _attributeReadSer
         List<GetAttributesResponse> responseDtos = new(attributeIds.Count);
         foreach (var tuple in attributeIds.Select(attributeId => attributeDtos.First(tuple => tuple.Attribute.Id == attributeId)))
         {
-            var responseDto = await _attributeReadConverter.ConvertAttributeToResponse(
-                query.ArticleNumber,
+            var responseDto = AttributeConverter.ConvertAttributeToResponse(
+                await _dbContext.Articles.AnyAsync(article => article.ArticleNumber == query.ArticleNumber && article.CharacteristicId > 0),
                 tuple.Attribute,
                 tuple.AttributeValueDtos,
-                articleDtos);
+                articleDtos,
+                await _attributeMappingReadRepository.GetAllAsync());
 
             responseDtos.Add(responseDto);
         }

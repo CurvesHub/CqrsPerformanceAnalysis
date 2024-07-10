@@ -6,6 +6,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\Cqrs.Api\Cqrs.Api.csproj" />
         <ProjectReference Include="..\..\src\Traditional.Api\Traditional.Api.csproj" />
         <ProjectReference Include="..\Functional\Traditional.Tests\Traditional.Tests.csproj" />
         <ProjectReference Include="..\TestCommon\TestCommon.csproj" />

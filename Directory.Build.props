@@ -12,23 +12,23 @@
 
     <ItemGroup>
         <!-- Analyzer -->
-        <GlobalPackageReference Include="Meziantou.Analyzer" Version="2.0.153">
+        <GlobalPackageReference Include="Meziantou.Analyzer" Version="2.0.160">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </GlobalPackageReference>
-        <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="9.25.1.91650">
+        <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="9.29.0.95321">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </GlobalPackageReference>
-        <GlobalPackageReference Include="Roslynator.Analyzers" Version="4.12.3">
+        <GlobalPackageReference Include="Roslynator.Analyzers" Version="4.12.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </GlobalPackageReference>
-        <GlobalPackageReference Include="Roslynator.Core" Version="4.12.3">
+        <GlobalPackageReference Include="Roslynator.Core" Version="4.12.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </GlobalPackageReference>
-        <GlobalPackageReference Include="Roslynator.CSharp" Version="4.12.3">
+        <GlobalPackageReference Include="Roslynator.CSharp" Version="4.12.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </GlobalPackageReference>
@@ -44,11 +44,11 @@
         which is not compatible with the version 4.7.0 of the analyzers.
         We use the latest version of those packages here.
          -->
-        <GlobalPackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2">
+        <GlobalPackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </GlobalPackageReference>
-        <GlobalPackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.9.2">
+        <GlobalPackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.10.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </GlobalPackageReference>

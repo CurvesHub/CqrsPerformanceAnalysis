@@ -19,8 +19,6 @@ internal class CategoryConfigurations : IEntityTypeConfiguration<Category>
         builder.Property(category => category.Path).IsRequired();
         builder.Property(category => category.IsLeaf).IsRequired();
 
-        builder.Ignore(category => category.IsSelected);
-
         builder
             .HasOne(category => category.RootCategory)
             .WithMany(rootCategory => rootCategory.Categories)

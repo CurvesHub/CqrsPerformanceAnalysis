@@ -65,7 +65,6 @@ public class CqrsWriteDbContext(DbContextOptions<CqrsWriteDbContext> options) : 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // TODO: Refactor the write context to use write models and read context to use read models
         ConfigureDecimalPrecisionAndEnumConversion(modelBuilder);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(CqrsWriteDbContext).Assembly);

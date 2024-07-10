@@ -2,16 +2,13 @@ using Cqrs.Api.Common.DataAccess.Persistence;
 using Cqrs.Api.Common.DataAccess.Repositories;
 using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
-using Cqrs.Api.UseCases.Articles.Persistence.Repositories;
 using Cqrs.Api.UseCases.Attributes.Commands.UpdateAttributeValues;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;
-using Cqrs.Api.UseCases.Attributes.Common.Persistence.Repositories;
 using Cqrs.Api.UseCases.Attributes.Common.Services;
 using Cqrs.Api.UseCases.Attributes.Queries.GetAttributes;
 using Cqrs.Api.UseCases.Attributes.Queries.GetLeafAttributes;
 using Cqrs.Api.UseCases.Attributes.Queries.GetSubAttributes;
 using Cqrs.Api.UseCases.Categories.Commands.UpdateCategoryMapping;
-using Cqrs.Api.UseCases.Categories.Common.Persistence.Repositories;
 using Cqrs.Api.UseCases.Categories.Queries.GetCategoryMapping;
 using Cqrs.Api.UseCases.Categories.Queries.GetChildrenOrTopLevel;
 using Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
@@ -21,6 +18,8 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace Cqrs.Api;
+
+// ReSharper disable UnusedMethodReturnValue.Local
 
 /// <summary>
 /// Provides the dependency injection configuration.
@@ -74,9 +73,7 @@ public static class DependencyInjection
         services.AddScoped<GetSubAttributesQueryHandler>();
 
         // Add Services
-        services.AddScoped<NewAttributeValueValidationService>();
         services.AddScoped<AttributeReadService>();
-        services.AddScoped<AttributeReadConverter>();
 
         return services;
     }
@@ -96,18 +93,8 @@ public static class DependencyInjection
         services.AddSingleton<Cache<RootCategory>>();
         services.AddSingleton<Cache<AttributeMapping>>();
 
-        // Add article repository
-        services.AddScoped<IArticleWriteRepository, ArticleWriteRepository>();
-        services.AddScoped<IArticleReadRepository, ArticleReadRepository>();
-
-        // Add category repositories
+        // Add cached repositories
         services.AddScoped<ICachedReadRepository<RootCategory>, CachedReadRepository<RootCategory>>();
-        services.AddScoped<ICategoryWriteRepository, CategoryWriteRepository>();
-        services.AddScoped<ICategoryReadRepository, CategoryReadRepository>();
-
-        // Add attribute repositories
-        services.AddScoped<IAttributeWriteRepository, AttributeWriteRepository>();
-        services.AddScoped<IAttributeReadRepository, AttributeReadRepository>();
         services.AddScoped<ICachedReadRepository<AttributeMapping>, CachedReadRepository<AttributeMapping>>();
 
         return services;
@@ -125,7 +112,6 @@ public static class DependencyInjection
             throw new InvalidOperationException("The connection string is not set.");
         }
 
-        // TODO: When using a read replica a different connection string must be used!
         return services
             .AddDbContext<CqrsWriteDbContext>(OptionsAction(connectionString))
             .AddDbContext<CqrsReadDbContext>(OptionsAction(connectionString));

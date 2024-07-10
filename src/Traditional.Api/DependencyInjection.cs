@@ -5,9 +5,7 @@ using Traditional.Api.Common.DataAccess.Persistence;
 using Traditional.Api.Common.DataAccess.Repositories;
 using Traditional.Api.Common.Endpoints;
 using Traditional.Api.Common.ErrorHandling;
-using Traditional.Api.UseCases.Articles.Persistence.Repositories;
 using Traditional.Api.UseCases.Attributes.Common.Persistence.Entities;
-using Traditional.Api.UseCases.Attributes.Common.Persistence.Repositories;
 using Traditional.Api.UseCases.Attributes.Common.Services;
 using Traditional.Api.UseCases.Attributes.GetAttributes;
 using Traditional.Api.UseCases.Attributes.GetLeafAttributes;
@@ -21,6 +19,8 @@ using Traditional.Api.UseCases.Categories.UpdateCategoryMapping;
 using Traditional.Api.UseCases.RootCategories.Common.Persistence.Entities;
 
 namespace Traditional.Api;
+
+// ReSharper disable UnusedMethodReturnValue.Local
 
 /// <summary>
 /// Provides the dependency injection configuration.
@@ -74,9 +74,7 @@ public static class DependencyInjection
         services.AddScoped<GetSubAttributesHandler>();
 
         // Add Services
-        services.AddScoped<NewAttributeValueValidationService>();
         services.AddScoped<AttributeService>();
-        services.AddScoped<AttributeConverter>();
 
         return services;
     }
@@ -96,16 +94,12 @@ public static class DependencyInjection
         services.AddSingleton<Cache<RootCategory>>();
         services.AddSingleton<Cache<AttributeMapping>>();
 
-        // Add article repository
-        services.AddScoped<IArticleRepository, ArticleRepository>();
-
-        // Add category repositories
+        // Add cached repositories
         services.AddScoped<ICachedRepository<RootCategory>, CachedRepository<RootCategory>>();
-        services.AddScoped<ICategoryRepository, CategoryRepository>();
-
-        // Add attribute repositories
-        services.AddScoped<IAttributeRepository, AttributeRepository>();
         services.AddScoped<ICachedRepository<AttributeMapping>, CachedRepository<AttributeMapping>>();
+
+        // Add repositories
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
 
         return services;
     }

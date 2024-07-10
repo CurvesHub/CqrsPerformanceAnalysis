@@ -26,7 +26,6 @@ public static class CategoryFactory
     /// <param name="name">The category's name.</param>
     /// <param name="path">The category's path.</param>
     /// <param name="isLeaf">The category's leaf state.</param>
-    /// <param name="isSelected">A value indicating whether the category is selected.</param>
     /// <param name="rootCategory">The associated root category.</param>
     /// <param name="parent">The associated parent category.</param>
     /// <param name="children">The associated child categories.</param>
@@ -38,7 +37,6 @@ public static class CategoryFactory
         string? name = null,
         string? path = null,
         bool isLeaf = false,
-        bool isSelected = false,
         RootCategory? rootCategory = null,
         Category? parent = null,
         List<Category>? children = null,
@@ -52,7 +50,6 @@ public static class CategoryFactory
             path ?? $"{TestConstants.Category.PATH} {NextUniqueCategoryNumber}",
             isLeaf)
         {
-            IsSelected = isSelected,
             RootCategoryId = rootCategoryId,
             RootCategory = rootCategory,
             ParentId = parent?.Id,

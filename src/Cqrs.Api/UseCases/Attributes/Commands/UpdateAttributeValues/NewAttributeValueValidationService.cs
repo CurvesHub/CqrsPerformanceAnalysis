@@ -1,10 +1,9 @@
 using System.Globalization;
-using Cqrs.Api.Common.DataAccess.Repositories;
 using Cqrs.Api.UseCases.Attributes.Common.Errors;
+using Cqrs.Api.UseCases.Attributes.Common.Extensions;
 using Cqrs.Api.UseCases.Attributes.Common.Models;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;
-using Cqrs.Api.UseCases.Attributes.Common.Persistence.Extensions;
 using ErrorOr;
 using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
@@ -13,10 +12,8 @@ namespace Cqrs.Api.UseCases.Attributes.Commands.UpdateAttributeValues;
 /// <summary>
 /// Checks if the attributes given by the category specifics put endpoint are valid.
 /// </summary>
-public class NewAttributeValueValidationService(ICachedReadRepository<AttributeMapping> _attributeMappingReadRepository)
+public static class NewAttributeValueValidationService
 {
-    private List<AttributeMapping>? _allAttributeMappings;
-
     /// <summary>
     /// Checks if the attributes given by the category specifics put endpoint are valid.
     /// </summary>
@@ -24,12 +21,14 @@ public class NewAttributeValueValidationService(ICachedReadRepository<AttributeM
     /// <param name="attributes">The attributes to check against.</param>
     /// <param name="newAttributeValues">The new attribute values to check.</param>
     /// <param name="articleDtos">The article ids with characteristic ids.</param>
+    /// <param name="allAttributeMappings">All attribute mappings.</param>
     /// <returns>An error or success.</returns>
-    public async Task<ErrorOr<Success>> ValidateAttributes(
+    public static async Task<ErrorOr<Success>> ValidateAttributes(
         string articleNumber,
         List<Attribute> attributes,
         List<NewAttributeValue> newAttributeValues,
-        List<ArticleDto> articleDtos)
+        List<ArticleDto> articleDtos,
+        List<AttributeMapping> allAttributeMappings)
     {
         // 1. Get the characteristic ids from the article DTOs
         var characteristicIds = articleDtos.ConvertAll(article => article.CharacteristicId);
@@ -116,7 +115,8 @@ public class NewAttributeValueValidationService(ICachedReadRepository<AttributeM
                     productType,
                     attributesIdsForCharacteristicId,
                     characteristicId,
-                    articleNumber);
+                    articleNumber,
+                    allAttributeMappings);
 
                 if (result.IsError)
                 {
@@ -258,11 +258,12 @@ public class NewAttributeValueValidationService(ICachedReadRepository<AttributeM
         return Result.Success;
     }
 
-    private async Task<ErrorOr<Success>> CheckRequiredSubAttributes(
+    private static async Task<ErrorOr<Success>> CheckRequiredSubAttributes(
         Attribute attribute,
         List<int> receivedAttributeIds,
         int characteristicId,
         string articleNumber,
+        List<AttributeMapping> allAttributeMappings,
         bool attributeIsOptional = false)
     {
         // 1. If the attribute has no sub attributes, return Success
@@ -278,8 +279,7 @@ public class NewAttributeValueValidationService(ICachedReadRepository<AttributeM
         }
 
         // 3. Get all attribute mappings and filter the sub attributes
-        _allAttributeMappings ??= await _attributeMappingReadRepository.GetAllAsync();
-        var baseAttributeIds = _allAttributeMappings.Select(mapping => mapping.AttributeReference.Split(",")[0]);
+        var baseAttributeIds = allAttributeMappings.Select(mapping => mapping.AttributeReference.Split(",")[0]);
 
         var filteredSubAttributes = attribute.SubAttributes
             .Where(a => !baseAttributeIds.Contains(a.MarketplaceAttributeIds.Split(",")[^1], StringComparer.OrdinalIgnoreCase))
@@ -308,7 +308,7 @@ public class NewAttributeValueValidationService(ICachedReadRepository<AttributeM
         List<Error> errors = [];
         foreach (var dbAttribute in required.Where(dbAttribute => dbAttribute.SubAttributes is not { Count: 0 }))
         {
-            var result = await CheckRequiredSubAttributes(dbAttribute, receivedAttributeIds, characteristicId, articleNumber);
+            var result = await CheckRequiredSubAttributes(dbAttribute, receivedAttributeIds, characteristicId, articleNumber, allAttributeMappings);
 
             if (result.IsError)
             {
@@ -319,7 +319,7 @@ public class NewAttributeValueValidationService(ICachedReadRepository<AttributeM
         // 7. Check if the optional sub attributes are valid
         foreach (var dbAttribute in optional)
         {
-            var result = await CheckRequiredSubAttributes(dbAttribute, receivedAttributeIds, characteristicId, articleNumber, attributeIsOptional: true);
+            var result = await CheckRequiredSubAttributes(dbAttribute, receivedAttributeIds, characteristicId, articleNumber, allAttributeMappings, attributeIsOptional: true);
             if (result.IsError)
             {
                 errors.AddRange(result.Errors);

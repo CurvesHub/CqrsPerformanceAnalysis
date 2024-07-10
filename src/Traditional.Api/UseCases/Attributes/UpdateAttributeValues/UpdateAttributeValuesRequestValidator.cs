@@ -10,8 +10,7 @@ namespace Traditional.Api.UseCases.Attributes.UpdateAttributeValues;
 /// </summary>
 [UsedImplicitly]
 [SuppressMessage("ReSharper", "ConditionalAccessQualifierIsNonNullableAccordingToAPIContract", Justification = "False Positive, when the request does not include the property, it is null.")]
-public class UpdateAttributeValuesRequestValidator
-    : AbstractValidator<UpdateAttributeValuesRequest>
+public class UpdateAttributeValuesRequestValidator : AbstractValidator<UpdateAttributeValuesRequest>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateAttributeValuesRequestValidator"/> class.

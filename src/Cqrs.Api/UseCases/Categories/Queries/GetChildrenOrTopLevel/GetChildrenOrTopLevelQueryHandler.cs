@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Cqrs.Api.Common.DataAccess.Persistence;
 using Cqrs.Api.UseCases.Categories.Common.Errors;
 using Cqrs.Api.UseCases.Categories.Common.Persistence.Entities;
@@ -10,7 +9,6 @@ namespace Cqrs.Api.UseCases.Categories.Queries.GetChildrenOrTopLevel;
 /// <summary>
 /// Provides functionality to get child categories or the top level categories based on the request.
 /// </summary>
-[SuppressMessage("Performance", "MA0020:Use direct methods instead of LINQ methods", Justification = "Not possible with EF Core linq queries")]
 public class GetChildrenOrTopLevelQueryHandler(CqrsReadDbContext _dbContext)
 {
     /// <summary>

@@ -1,10 +1,11 @@
+using System.Globalization;
 using Cqrs.Api.Common.BaseRequests;
+using Cqrs.Api.Common.DataAccess.Persistence;
+using Cqrs.Api.Common.Extensions;
 using Cqrs.Api.UseCases.Articles.Errors;
-using Cqrs.Api.UseCases.Articles.Persistence.Repositories;
 using Cqrs.Api.UseCases.Attributes.Common.Models;
-using Cqrs.Api.UseCases.Attributes.Common.Persistence.Repositories;
-using Cqrs.Api.UseCases.Categories.Common.Persistence.Repositories;
 using ErrorOr;
+using Microsoft.EntityFrameworkCore;
 using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
 namespace Cqrs.Api.UseCases.Attributes.Common.Services;
@@ -12,13 +13,8 @@ namespace Cqrs.Api.UseCases.Attributes.Common.Services;
 /// <summary>
 /// Provides attribute related functionality.
 /// </summary>
-/// <param name="_categoryReadRepository">The category repository.</param>
-/// <param name="_articleReadRepository">The article repository.</param>
-/// <param name="_attributeReadRepository">The attribute repository.</param>
-public class AttributeReadService(
-    ICategoryReadRepository _categoryReadRepository,
-    IArticleReadRepository _articleReadRepository,
-    IAttributeReadRepository _attributeReadRepository)
+/// <param name="_dbContext">The cqrs read database context.</param>
+public class AttributeReadService(CqrsReadDbContext _dbContext)
 {
     /// <summary>
     /// Get the article DTOs and the mapped category id for the requested article number.
@@ -27,14 +23,20 @@ public class AttributeReadService(
     /// <returns>A <see cref="ErrorOr.Error"/> or a tuple of the article DTOs and the mapped category id.</returns>
     public async Task<ErrorOr<(List<ArticleDto>, int CategoryId)>> GetArticleDtosAndMappedCategoryIdAsync(BaseQuery query)
     {
-        var articleDtos = await _articleReadRepository.GetArticleDtos(query.ArticleNumber).ToListAsync();
+        var articleDtos = await _dbContext.Articles
+            .Where(a => a.ArticleNumber == query.ArticleNumber)
+            .Select(article => new ArticleDto(article.Id, article.CharacteristicId))
+            .ToListAsync();
 
         if (articleDtos.Count == 0)
         {
             return ArticleErrors.ArticleNotFound(query.ArticleNumber);
         }
 
-        var mappedCategoryId = await _categoryReadRepository.GetMappedCategoryIdByRootCategoryId(query.ArticleNumber, query.RootCategoryId);
+        var mappedCategoryId = await _dbContext.Categories
+            .Where(category => category.RootCategoryId == query.RootCategoryId && category.Articles!.Any(article => article.ArticleNumber == query.ArticleNumber))
+            .Select(category => (int?)category.Id)
+            .SingleOrDefaultAsync();
 
         if (mappedCategoryId is null)
         {
@@ -52,12 +54,18 @@ public class AttributeReadService(
     /// <param name="productTypeIds">The product type ids to search for.</param>
     /// <returns>A list of tuples of the attribute and the attribute value DTOs.</returns>
     public async Task<List<(Attribute Attribute, List<AttributeValueDto> AttributeValueDtos)>> GetAttributesAndSubAttributesWithValuesAsync(
-            List<int> articleIds,
-            int rootCategoryId,
-            List<int> productTypeIds)
+        List<int> articleIds,
+        int rootCategoryId,
+        List<int> productTypeIds)
     {
-        var setProductTypeId = await _attributeReadRepository
-            .GetFirstAttributeIdsForTrueProductTypesByArticleIdsAndRootCategoryId(articleIds, rootCategoryId);
+        var setProductTypeId = await _dbContext.AttributeBooleanValues
+            .Where(value =>
+                value.Value
+                && articleIds.Contains(value.ArticleId)
+                && value.Attribute!.ParentAttributeId == null
+                && value.Attribute!.RootCategoryId == rootCategoryId)
+            .Select(value => (int?)value.AttributeId)
+            .FirstOrDefaultAsync();
 
         if (setProductTypeId is not null)
         {
@@ -66,12 +74,35 @@ public class AttributeReadService(
 
         productTypeIds = productTypeIds.Distinct().ToList();
 
-        var attributes = await _attributeReadRepository
-            .GetAttributesAndSubAttributesFlatRecursivelyAsNoTracking(productTypeIds)
+        var attributes = await _dbContext.Attributes.RecursiveCteQuery(
+                attribute => productTypeIds.Contains(attribute.Id),
+                attribute => attribute.SubAttributes)
+            .AsNoTrackingWithIdentityResolution()
             .ToListAsync();
 
-        var attributeValueDtos = await _attributeReadRepository
-                .LoadAttributeValueDataAsync(attributes.Select(attribute => attribute.Id), articleIds);
+        List<int> attributeIds = attributes.ConvertAll(attribute => attribute.Id);
+
+        var booleanValues = await _dbContext.AttributeBooleanValues
+            .Where(value => articleIds.Contains(value.ArticleId) && attributeIds.Contains(value.AttributeId))
+            .Select(value => new AttributeValueDto(value.AttributeId, value.ArticleId, value.Value.ToString()))
+            .ToListAsync();
+
+        var decimalValues = await _dbContext.AttributeDecimalValues
+            .Where(value => articleIds.Contains(value.ArticleId) && attributeIds.Contains(value.AttributeId))
+            .Select(value => new AttributeValueDto(value.AttributeId, value.ArticleId, value.Value.ToString(CultureInfo.InvariantCulture)))
+            .ToListAsync();
+
+        var intValues = await _dbContext.AttributeIntValues
+            .Where(value => articleIds.Contains(value.ArticleId) && attributeIds.Contains(value.AttributeId))
+            .Select(value => new AttributeValueDto(value.AttributeId, value.ArticleId, value.Value.ToString(CultureInfo.InvariantCulture)))
+            .ToListAsync();
+
+        var stringValues = await _dbContext.AttributeStringValues
+            .Where(value => articleIds.Contains(value.ArticleId) && attributeIds.Contains(value.AttributeId))
+            .Select(value => new AttributeValueDto(value.AttributeId, value.ArticleId, value.Value))
+            .ToListAsync();
+
+        var attributeValueDtos = booleanValues.Concat(decimalValues).Concat(intValues).Concat(stringValues);
 
         return attributes.ConvertAll(attribute =>
             (attribute, attributeValueDtos.Where(value => value.AttributeId == attribute.Id).ToList()));

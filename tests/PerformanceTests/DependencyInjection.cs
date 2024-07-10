@@ -1,3 +1,4 @@
+using Cqrs.Api.Common.DataAccess.Persistence;
 using Microsoft.EntityFrameworkCore;
 using PerformanceTests.Common.Services;
 using PerformanceTests.Infrastructure;
@@ -51,7 +52,9 @@ public static class DependencyInjection
     private static IServiceCollection AddRequiredDbContexts(this IServiceCollection services, IConfiguration configuration)
     {
         return services
-            .AddDbContext<TraditionalDbContext>(OptionsAction("TraditionalConnection"))
+            .AddDbContext<TraditionalDbContext>(OptionsAction("MainConnection"))
+            .AddDbContext<CqrsReadDbContext>(OptionsAction("MainConnection"))
+            .AddDbContext<CqrsWriteDbContext>(OptionsAction("MainConnection"))
             .AddDbContext<PerformanceDbContext>(OptionsAction("PerformanceConnection"));
 
         Action<DbContextOptionsBuilder> OptionsAction(string connectionStringLocation)

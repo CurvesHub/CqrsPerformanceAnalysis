@@ -76,6 +76,7 @@ dotnet_diagnostic.AD0001.severity = none # AD0001: Analyzer has thrown an except
 # MA Diagnostic Rules
 ##########################################
 dotnet_diagnostic.MA0004.severity = none # MA0004: Use Task.ConfigureAwait(false) if the current SynchronizationContext is not needed - Not needed
+dotnet_diagnostic.MA0020.severity = none # MA0026: Use Exists instead of Any - False positive with EF Core and less performant
 dotnet_diagnostic.MA0026.severity = none # MA0026: TodoShouldBeSolved - Duplicate
 dotnet_diagnostic.MA0016.severity = none # MA0016: Prefer using collection abstraction instead of implementation - Not needed
 dotnet_diagnostic.MA0051.severity = none # MA0051: Method is too long (... lines; maximum allowed: 60) - Not needed

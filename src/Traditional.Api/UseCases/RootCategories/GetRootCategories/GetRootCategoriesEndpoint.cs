@@ -22,9 +22,9 @@ public class GetRootCategoriesEndpoint : IEndpoint
             .CacheOutput(builder => builder.Expire(TimeSpan.FromDays(1)));
     }
 
-    private static async Task<IResult> GetRootCategoriesAsync(ICachedRepository<RootCategory> _rootCategoryRepository)
+    private static async Task<IResult> GetRootCategoriesAsync(ICachedRepository<RootCategory> rootCategoryRepository)
     {
-        var rootCategories = await _rootCategoryRepository.GetAllAsync();
+        var rootCategories = await rootCategoryRepository.GetAllAsync();
 
         var response = rootCategories.Select(rootCategory =>
             new GetRootCategoryResponse(

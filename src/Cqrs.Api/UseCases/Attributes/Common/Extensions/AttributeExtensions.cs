@@ -1,6 +1,6 @@
 using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
-namespace Cqrs.Api.UseCases.Attributes.Common.Persistence.Extensions;
+namespace Cqrs.Api.UseCases.Attributes.Common.Extensions;
 
 /// <summary>
 /// Provides extension methods for the <see cref="Attribute"/> class.

@@ -45,14 +45,6 @@ public class Category(
     public bool IsLeaf { get; init; } = isLeaf;
 
     /// <summary>
-    /// Gets or sets a value indicating whether the category is selected.
-    /// This is used by different handlers to indicate if the category
-    /// is already mapped to the requested article.
-    /// It is not persisted and only temporary set.
-    /// </summary>
-    public bool IsSelected { get; set; }
-
-    /// <summary>
     /// Gets or sets the id of the associated <see cref="RootCategory"/>.
     /// </summary>
     public int RootCategoryId { get; set; }

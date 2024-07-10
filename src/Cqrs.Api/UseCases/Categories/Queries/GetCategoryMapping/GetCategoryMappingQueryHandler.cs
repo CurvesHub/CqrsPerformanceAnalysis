@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Cqrs.Api.Common.BaseRequests;
 using Cqrs.Api.Common.DataAccess.Persistence;
 using Cqrs.Api.UseCases.Articles.Errors;
@@ -11,7 +10,6 @@ namespace Cqrs.Api.UseCases.Categories.Queries.GetCategoryMapping;
 /// <summary>
 /// Handler for querying category mapping for articles.
 /// </summary>
-[SuppressMessage("Performance", "MA0020:Use direct methods instead of LINQ methods", Justification = "Not possible with EF Core linq queries")]
 public class GetCategoryMappingQueryHandler(CqrsReadDbContext _dbContext)
 {
     /// <summary>
