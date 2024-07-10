@@ -24,6 +24,8 @@ public class GetRootCategoriesEndpoint : IEndpoint
 
     private static async Task<IResult> GetRootCategoriesAsync(ICachedReadRepository<RootCategory> rootCategoryReadRepository)
     {
+        // Like Greg Young said: "It is possible to use the application services even in the query side".
+        // We need to do this because we want to use the cache and the business logic guard that the root categories are seeded.
         var rootCategories = await rootCategoryReadRepository.GetAllAsync();
 
         var response = rootCategories.Select(rootCategory =>
