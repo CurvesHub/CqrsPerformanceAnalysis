@@ -6,7 +6,6 @@ using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
 using Cqrs.Api.UseCases.Attributes.Common.Services;
 using ErrorOr;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cqrs.Api.UseCases.Attributes.Queries.GetLeafAttributes;
@@ -17,15 +16,14 @@ namespace Cqrs.Api.UseCases.Attributes.Queries.GetLeafAttributes;
 public class GetLeafAttributesQueryHandler(
     CqrsReadDbContext _dbContext,
     ICachedReadRepository<AttributeMapping> _attributeMappingReadRepository,
-    AttributeReadService _attributeReadService) : IRequestHandler<GetLeafAttributesQuery, ErrorOr<List<GetAttributesResponse>>>
+    AttributeReadService _attributeReadService)
 {
     /// <summary>
     /// Handles the GET request for category specific leafAttributes.
     /// </summary>
     /// <param name="query">The request.</param>
-    /// <param name="cancellationToken">The token to cancel the requests.</param>
     /// <returns>A list of category specific leaf attributes of the article in the category tree.</returns>
-    public async Task<ErrorOr<List<GetAttributesResponse>>> Handle(GetLeafAttributesQuery query, CancellationToken cancellationToken)
+    public async Task<ErrorOr<List<GetAttributesResponse>>> GetLeafAttributesAsync(GetLeafAttributesQuery query)
     {
         // 1. Fetch the article DTOs
         var dtoOrError = await _attributeReadService.GetArticleDtosAndMappedCategoryIdAsync(query);

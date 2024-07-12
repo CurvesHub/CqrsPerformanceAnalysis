@@ -1,8 +1,5 @@
 using Cqrs.Api.Common.BaseRequests;
-using Cqrs.Api.UseCases.Categories.Common.Persistence.Entities;
-using ErrorOr;
 using JetBrains.Annotations;
-using MediatR;
 
 namespace Cqrs.Api.UseCases.Categories.Commands.UpdateCategoryMapping;
 
@@ -17,4 +14,4 @@ public record UpdateCategoryMappingCommand(
     int RootCategoryId,
     string ArticleNumber,
     long CategoryNumber)
-    : BaseQuery(RootCategoryId, ArticleNumber), IRequest<ErrorOr<Category>>;
+    : BaseQuery(RootCategoryId, ArticleNumber);

@@ -2,8 +2,16 @@ using Cqrs.Api.Common.DataAccess.Persistence;
 using Cqrs.Api.Common.DataAccess.Repositories;
 using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
+using Cqrs.Api.UseCases.Attributes.Commands.UpdateAttributeValues;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Cqrs.Api.UseCases.Attributes.Common.Services;
+using Cqrs.Api.UseCases.Attributes.Queries.GetAttributes;
+using Cqrs.Api.UseCases.Attributes.Queries.GetLeafAttributes;
+using Cqrs.Api.UseCases.Attributes.Queries.GetSubAttributes;
+using Cqrs.Api.UseCases.Categories.Commands.UpdateCategoryMapping;
+using Cqrs.Api.UseCases.Categories.Queries.GetCategoryMapping;
+using Cqrs.Api.UseCases.Categories.Queries.GetChildrenOrTopLevel;
+using Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
 using Cqrs.Api.UseCases.RootCategories.Common.Persistence.Entities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -52,8 +60,17 @@ public static class DependencyInjection
         // Add fluent validators
         services.AddValidatorsFromAssemblyContaining(typeof(DependencyInjection));
 
-        // Add mediatr handlers
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
+        // Add category handlers
+        services.AddScoped<GetCategoryMappingQueryHandler>();
+        services.AddScoped<GetChildrenOrTopLevelQueryHandler>();
+        services.AddScoped<SearchCategoriesQueryHandler>();
+        services.AddScoped<UpdateCategoryMappingCommandHandler>();
+
+        // Add attribute handlers
+        services.AddScoped<GetAttributesQueryHandler>();
+        services.AddScoped<UpdateAttributeValuesCommandHandler>();
+        services.AddScoped<GetLeafAttributesQueryHandler>();
+        services.AddScoped<GetSubAttributesQueryHandler>();
 
         // Add Services
         services.AddScoped<AttributeReadService>();

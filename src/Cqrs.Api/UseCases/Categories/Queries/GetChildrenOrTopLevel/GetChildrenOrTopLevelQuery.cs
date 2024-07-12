@@ -1,7 +1,5 @@
 using Cqrs.Api.Common.BaseRequests;
-using ErrorOr;
 using JetBrains.Annotations;
-using MediatR;
 
 namespace Cqrs.Api.UseCases.Categories.Queries.GetChildrenOrTopLevel;
 
@@ -16,4 +14,4 @@ public record GetChildrenOrTopLevelQuery(
     int RootCategoryId,
     string ArticleNumber,
     long? CategoryNumber)
-    : BaseQuery(RootCategoryId, ArticleNumber), IRequest<ErrorOr<IOrderedEnumerable<GetChildrenOrTopLevelResponse>>>;
+    : BaseQuery(RootCategoryId, ArticleNumber);

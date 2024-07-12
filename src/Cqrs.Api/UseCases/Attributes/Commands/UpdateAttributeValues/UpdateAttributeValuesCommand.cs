@@ -1,7 +1,5 @@
 using Cqrs.Api.Common.BaseRequests;
-using ErrorOr;
 using JetBrains.Annotations;
-using MediatR;
 
 namespace Cqrs.Api.UseCases.Attributes.Commands.UpdateAttributeValues;
 
@@ -16,4 +14,4 @@ public record UpdateAttributeValuesCommand(
     int RootCategoryId,
     string ArticleNumber,
     NewAttributeValue[] NewAttributeValues)
-    : BaseQuery(RootCategoryId, ArticleNumber), IRequest<ErrorOr<Updated>>;
+    : BaseQuery(RootCategoryId, ArticleNumber);

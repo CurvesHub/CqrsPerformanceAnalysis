@@ -4,7 +4,6 @@ using Cqrs.Api.UseCases.Articles.Persistence.Entities;
 using Cqrs.Api.UseCases.Categories.Common.Errors;
 using Cqrs.Api.UseCases.Categories.Common.Persistence.Entities;
 using ErrorOr;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cqrs.Api.UseCases.Categories.Commands.UpdateCategoryMapping;
@@ -12,15 +11,14 @@ namespace Cqrs.Api.UseCases.Categories.Commands.UpdateCategoryMapping;
 /// <summary>
 /// Provides functionality to update the category mapping for an article.
 /// </summary>
-public class UpdateCategoryMappingCommandHandler(CqrsWriteDbContext _dbContext) : IRequestHandler<UpdateCategoryMappingCommand, ErrorOr<Category>>
+public class UpdateCategoryMappingCommandHandler(CqrsWriteDbContext _dbContext)
 {
     /// <summary>
     /// Updates the category mapping for an article.
     /// </summary>
     /// <param name="command">Provides the information for which category mapping should be updated.</param>
-    /// <param name="cancellationToken">The token to cancel the requests.</param>
     /// <returns>An <see cref="ErrorOr.Error"/> or the new mapped <see cref="Category"/> of the article.</returns>
-    public async Task<ErrorOr<Category>> Handle(UpdateCategoryMappingCommand command, CancellationToken cancellationToken)
+    public async Task<ErrorOr<Category>> UpdateCategoryMappingAsync(UpdateCategoryMappingCommand command)
     {
         // 1. Retrieve the requested article including all variants and the associated categories for the requested rootCategoryId
         var articles = await GetByNumberWithCategoriesByRootCategoryId(
