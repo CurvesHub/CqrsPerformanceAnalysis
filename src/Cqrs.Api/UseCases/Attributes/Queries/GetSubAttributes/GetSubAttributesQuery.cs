@@ -1,4 +1,7 @@
 using Cqrs.Api.Common.BaseRequests;
+using Cqrs.Api.UseCases.Attributes.Common.Responses;
+using ErrorOr;
+using MediatR;
 
 namespace Cqrs.Api.UseCases.Attributes.Queries.GetSubAttributes;
 
@@ -12,4 +15,4 @@ public record GetSubAttributesQuery(
     int RootCategoryId,
     string ArticleNumber,
     string AttributeIds)
-    : BaseQuery(RootCategoryId, ArticleNumber);
+    : BaseQuery(RootCategoryId, ArticleNumber), IRequest<ErrorOr<List<GetAttributesResponse>>>;

@@ -2,6 +2,7 @@ using System.Net;
 using Cqrs.Api.Common.Constants;
 using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
@@ -30,10 +31,10 @@ public class SearchCategoriesEndpoint : IEndpoint
 
     private static async Task<IResult> SearchCategoriesAsync(
         [AsParameters] SearchCategoriesQuery query,
-        [FromServices] SearchCategoriesQueryHandler queryHandler,
+        [FromServices] ISender sender,
         [FromServices] HttpProblemDetailsService problemDetailsService)
     {
-        var result = await queryHandler.SearchCategoriesAsync(query);
+        var result = await sender.Send(query);
 
         return result.Match(
             categories => Results.Ok(ToResponse(categories)),

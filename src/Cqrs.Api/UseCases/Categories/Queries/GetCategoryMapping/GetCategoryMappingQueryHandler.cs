@@ -1,8 +1,9 @@
-using Cqrs.Api.Common.BaseRequests;
 using Cqrs.Api.Common.DataAccess.Persistence;
 using Cqrs.Api.UseCases.Articles.Errors;
 using Cqrs.Api.UseCases.RootCategories.Common.Persistence.Entities;
 using ErrorOr;
+using JetBrains.Annotations;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cqrs.Api.UseCases.Categories.Queries.GetCategoryMapping;
@@ -10,14 +11,16 @@ namespace Cqrs.Api.UseCases.Categories.Queries.GetCategoryMapping;
 /// <summary>
 /// Handler for querying category mapping for articles.
 /// </summary>
-public class GetCategoryMappingQueryHandler(CqrsReadDbContext _dbContext)
+[UsedImplicitly]
+public class GetCategoryMappingQueryHandler(CqrsReadDbContext _dbContext) : IRequestHandler<GetCategoryMappingQuery, ErrorOr<GetCategoryMappingResponse>>
 {
     /// <summary>
     /// Gets the associated category for the article based on the request.
     /// </summary>
     /// <param name="query">The request.</param>
+    /// <param name="cancellationToken">The token to cancel the requests.</param>
     /// <returns>An error or an <see cref="GetCategoryMappingResponse"/>.</returns>
-    public async Task<ErrorOr<GetCategoryMappingResponse>> GetCategoryMappingAsync(BaseQuery query)
+    public async Task<ErrorOr<GetCategoryMappingResponse>> Handle(GetCategoryMappingQuery query, CancellationToken cancellationToken)
     {
         // 1. Get the mapped category for the article (all variants are in the same category, one category per RootCategory possible)
         var categoryResponses = await _dbContext.Categories

@@ -3,6 +3,7 @@ using Cqrs.Api.Common.Constants;
 using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cqrs.Api.UseCases.Attributes.Queries.GetSubAttributes;
@@ -27,10 +28,10 @@ public class GetSubAttributesEndpoint : IEndpoint
 
     private static async Task<IResult> GetSubAttributesAsync(
         [AsParameters] GetSubAttributesQuery query,
-        [FromServices] GetSubAttributesQueryHandler queryHandler,
+        [FromServices] ISender sender,
         [FromServices] HttpProblemDetailsService problemDetailsService)
     {
-        var result = await queryHandler.GetSubAttributesAsync(query);
+        var result = await sender.Send(query);
 
         return result.Match(
             responses => Results.Ok(responses.OrderByDescending(response => response.MinValues)),

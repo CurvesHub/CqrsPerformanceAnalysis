@@ -5,6 +5,7 @@ using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
 using Cqrs.Api.UseCases.Attributes.Common.Services;
 using ErrorOr;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cqrs.Api.UseCases.Attributes.Queries.GetSubAttributes;
@@ -15,14 +16,15 @@ namespace Cqrs.Api.UseCases.Attributes.Queries.GetSubAttributes;
 public class GetSubAttributesQueryHandler(
     CqrsReadDbContext _dbContext,
     ICachedReadRepository<AttributeMapping> _attributeMappingReadRepository,
-    AttributeReadService _attributeReadService)
+    AttributeReadService _attributeReadService) : IRequestHandler<GetSubAttributesQuery, ErrorOr<List<GetAttributesResponse>>>
 {
     /// <summary>
     /// Handles the GET request for category specific subAttributes.
     /// </summary>
     /// <param name="query">The request.</param>
+    /// <param name="cancellationToken">The token to cancel the requests.</param>
     /// <returns>A list of the configurations and the ids of the sub-attributes of all passed attributes and their values for the requested article in the requested category tree.</returns>
-    public async Task<ErrorOr<List<GetAttributesResponse>>> GetSubAttributesAsync(GetSubAttributesQuery query)
+    public async Task<ErrorOr<List<GetAttributesResponse>>> Handle(GetSubAttributesQuery query, CancellationToken cancellationToken)
     {
         // 1. Fetch the article DTOs
         var dtoOrError = await _attributeReadService.GetArticleDtosAndMappedCategoryIdAsync(query);

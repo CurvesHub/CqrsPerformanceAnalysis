@@ -19,6 +19,9 @@
         <PackageReference Include="Serilog.Sinks.Console" />
         <PackageReference Include="Serilog.Sinks.Elasticsearch" />
 
+        <!-- MediatR -->
+        <PackageReference Include="MediatR" />
+
         <!-- Entity Framework -->
         <PackageReference Include="EFCore.NamingConventions" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" />

@@ -4,6 +4,8 @@ using Cqrs.Api.Common.Extensions;
 using Cqrs.Api.UseCases.Categories.Common.Errors;
 using Cqrs.Api.UseCases.Categories.Common.Persistence.Entities;
 using ErrorOr;
+using JetBrains.Annotations;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
@@ -11,15 +13,16 @@ namespace Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
 /// <summary>
 /// Provides functionality to search for categories.
 /// </summary>
-public class SearchCategoriesQueryHandler(CqrsReadDbContext _dbContext)
+[UsedImplicitly]
+public class SearchCategoriesQueryHandler(CqrsReadDbContext _dbContext) : IRequestHandler<SearchCategoriesQuery, ErrorOr<IEnumerable<SearchCategoryDto>>>
 {
     /// <summary>
     /// Searches for categories based on the request.
     /// </summary>
     /// <param name="query">Provides the information for the search.</param>
+    /// <param name="cancellationToken">The token to cancel the requests.</param>
     /// <returns>An <see cref="ErrorOr.Error"/> or a list of <see cref="Category"/>s with all their children.</returns>
-    public async Task<ErrorOr<IEnumerable<SearchCategoryDto>>> SearchCategoriesAsync(
-        SearchCategoriesQuery query)
+    public async Task<ErrorOr<IEnumerable<SearchCategoryDto>>> Handle(SearchCategoriesQuery query, CancellationToken cancellationToken)
     {
         // 1. Retrieve the category and all its parents up to the top level category
         var allCategories = IsSearchTermRequested(query)

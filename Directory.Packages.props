@@ -34,6 +34,9 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageVersion>
 
+        <!-- MediatR -->
+        <PackageVersion Include="MediatR" Version="12.3.0" />
+
         <!-- ******************** tests ******************** -->
         <!-- General -->
         <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />

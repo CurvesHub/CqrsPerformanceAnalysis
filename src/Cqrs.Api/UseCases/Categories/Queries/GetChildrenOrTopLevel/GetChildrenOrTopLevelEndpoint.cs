@@ -2,6 +2,7 @@ using System.Net;
 using Cqrs.Api.Common.Constants;
 using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cqrs.Api.UseCases.Categories.Queries.GetChildrenOrTopLevel;
@@ -29,10 +30,10 @@ public class GetChildrenOrTopLevelEndpoint : IEndpoint
 
     private static async Task<IResult> GetChildrenAsync(
         [AsParameters] GetChildrenOrTopLevelQuery query,
-        [FromServices] GetChildrenOrTopLevelQueryHandler queryHandler,
+        [FromServices] ISender sender,
         [FromServices] HttpProblemDetailsService problemDetailsService)
     {
-        var result = await queryHandler.GetChildrenAsync(query);
+        var result = await sender.Send(query);
 
         return result.Match(
             Results.Ok,

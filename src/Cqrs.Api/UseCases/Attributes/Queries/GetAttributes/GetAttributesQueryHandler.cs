@@ -6,6 +6,7 @@ using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
 using Cqrs.Api.UseCases.Attributes.Common.Services;
 using ErrorOr;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
@@ -17,7 +18,7 @@ namespace Cqrs.Api.UseCases.Attributes.Queries.GetAttributes;
 public class GetAttributesQueryHandler(
     CqrsReadDbContext _dbContext,
     ICachedReadRepository<AttributeMapping> _attributeMappingReadRepository,
-    AttributeReadService _attributeReadService)
+    AttributeReadService _attributeReadService) : IRequestHandler<GetAttributesQuery, ErrorOr<List<GetAttributesResponse>>>
 {
     private const string TRUE_STRING = "true";
 
@@ -25,8 +26,9 @@ public class GetAttributesQueryHandler(
     /// Handles the GET request for category specific attributes.
     /// </summary>
     /// <param name="query">The request.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A list of category specific attributes of the article in the category tree.</returns>
-    public async Task<ErrorOr<List<GetAttributesResponse>>> GetAttributesAsync(BaseQuery query)
+    public async Task<ErrorOr<List<GetAttributesResponse>>> Handle(GetAttributesQuery query, CancellationToken cancellationToken)
     {
         // 1. Fetch the article DTOs and the mapped category Id
         var dtoOrError = await _attributeReadService.GetArticleDtosAndMappedCategoryIdAsync(query);

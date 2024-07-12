@@ -31,7 +31,7 @@ public class SearchCategoriesQueryHandlerTests
         var handler = new SearchCategoriesQueryHandler(new CqrsReadDbContext(new DbContextOptions<CqrsReadDbContext>()));
 
         // Act
-        Func<Task> act = async () => await handler.SearchCategoriesAsync(request);
+        Func<Task> act = async () => await handler.Handle(request, CancellationToken.None);
 
         // Assert
         await act.Should()

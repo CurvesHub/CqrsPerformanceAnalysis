@@ -3,6 +3,7 @@ using Cqrs.Api.Common.Constants;
 using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
 using Cqrs.Api.UseCases.Categories.Common.Persistence.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cqrs.Api.UseCases.Categories.Commands.UpdateCategoryMapping;
@@ -28,10 +29,10 @@ public class UpdateCategoryMappingEndpoint : IEndpoint
 
     private static async Task<IResult> UpdateCategoryMappingAsync(
         [FromBody] UpdateCategoryMappingCommand command,
-        [FromServices] UpdateCategoryMappingCommandHandler commandHandler,
+        [FromServices] ISender sender,
         [FromServices] HttpProblemDetailsService problemDetailsService)
     {
-        var result = await commandHandler.UpdateCategoryMappingAsync(command);
+        var result = await sender.Send(command);
 
         return result.Match(
             category => Results.Created("categories", ToResponse(category)),
