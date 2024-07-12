@@ -24,14 +24,14 @@ public class GetCategoryMappingK6TestEndpoint : IEndpoint
     private static async Task<IResult> StartK6TestForGetCategoryMappingAsync(
         K6TestHandler handler,
         CancellationToken cancellationToken,
-        bool useTraditionalApi = true,
+        AvailableApiNames apiToUse = AvailableApiNames.TraditionalApi,
         bool checkElastic = true,
         bool withWarmUp = true,
         bool saveMinimalResults = true,
         string seed = "hardcoded_seed")
     {
         var testInfo = TestInformation.CreateInfoForGetCategoryMapping(
-            useTraditionalApi,
+            apiToUse,
             checkElastic,
             withWarmUp,
             saveMinimalResults,

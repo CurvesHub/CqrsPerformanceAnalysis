@@ -16,17 +16,9 @@ public class AllK6TestsEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder endpoints)
     {
         endpoints
-            .MapGet("K6Tests/allOfBothApis", StartAllK6TestAsync)
-            .WithTags(EndpointTags.ALL_TESTS)
-            .WithSummary("Starts all automated K6 tests of both the traditional and the cqrs API in sequence.")
-            .Produces((int)HttpStatusCode.OK)
-            .ProducesProblem((int)HttpStatusCode.InternalServerError)
-            .WithOpenApi();
-
-        endpoints
             .MapGet("K6Tests/allOfOneApi", StartAllK6TestByApiAsync)
             .WithTags(EndpointTags.ALL_TESTS)
-            .WithSummary("Starts all automated K6 tests of either the traditional or the cqrs API.")
+            .WithSummary("Starts all automated K6 tests of either the traditional or the cqrs API or both.")
             .Produces((int)HttpStatusCode.OK)
             .ProducesProblem((int)HttpStatusCode.InternalServerError)
             .WithOpenApi();
@@ -34,7 +26,7 @@ public class AllK6TestsEndpoint : IEndpoint
         endpoints
             .MapGet("K6Tests/finialTestRunWithThreeSeeds", StartAllFinalK6TestAsync)
             .WithTags(EndpointTags.ALL_TESTS)
-            .WithSummary("Starts all automated K6 tests of both the traditional and the cqrs API in sequence. With three different seeds.")
+            .WithSummary("Starts all automated K6 tests of both the traditional and the cqrs API in sequence and with three different seeds.")
             .Produces((int)HttpStatusCode.OK)
             .ProducesProblem((int)HttpStatusCode.InternalServerError)
             .WithOpenApi();
@@ -44,87 +36,34 @@ public class AllK6TestsEndpoint : IEndpoint
         ILogger logger,
         IServiceProvider serviceProvider,
         CancellationToken cancellationToken,
-        bool useTraditionalApi = true,
+        AvailableApiNames apiToUse = AvailableApiNames.AllApis,
         bool checkElastic = true,
         bool withWarmUp = true,
         bool saveMinimalResults = true,
         string seed = "hardcoded_seed")
     {
-        List<TestInformation> testInfos =
-        [
-            TestInformation.CreateInfoForGetAttributes(useTraditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForGetLeafAttributes(useTraditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForGetSubAttributes(useTraditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForUpdateAttributeValues(useTraditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForGetCategoryMapping(useTraditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForGetChildrenOrTopLevel(useTraditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForSearchCategories(useTraditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForUpdateCategoryMapping(useTraditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForGetRootCategories(useTraditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed)
-        ];
+        List<TestInformation> testInfos = [];
 
-        int totalTestCount = testInfos.Count;
-        int currentTestCount = 1;
-        foreach (var testInfo in testInfos)
+        if (apiToUse == AvailableApiNames.AllApis)
         {
-            await using var scope = serviceProvider.CreateAsyncScope();
-            var handler = scope.ServiceProvider.GetRequiredService<K6TestHandler>();
-            await handler.StartK6TestAndProcessResultsAsync(testInfo, cancellationToken);
-            logger.Information("Handled test {CurrentTestCount} of {TotalTestCount}", currentTestCount++, totalTestCount);
+            testInfos.AddRange(GetAllTestInfosPerEndpointForApi(AvailableApiNames.TraditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed));
+            testInfos.AddRange(GetAllTestInfosPerEndpointForApi(AvailableApiNames.CqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed));
+            testInfos.AddRange(GetAllTestInfosPerEndpointForApi(AvailableApiNames.CqrsApiMediatr, checkElastic, withWarmUp, saveMinimalResults, seed));
+        }
+        else
+        {
+            testInfos.AddRange(GetAllTestInfosPerEndpointForApi(apiToUse, checkElastic, withWarmUp, saveMinimalResults, seed));
         }
 
-        return Results.Ok();
-    }
+        LogEstimatedRuntime(logger, testInfos);
 
-    private static async Task<IResult> StartAllK6TestAsync(
-        ILogger logger,
-        IServiceProvider serviceProvider,
-        CancellationToken cancellationToken,
-        bool checkElastic = true,
-        bool withWarmUp = true,
-        bool saveMinimalResults = true,
-        string seed = "hardcoded_seed")
-    {
-        const bool traditionalApi = true;
-        const bool cqrsApi = false;
-        List<TestInformation> testInfos =
-        [
-            TestInformation.CreateInfoForGetAttributes(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForGetAttributes(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-            TestInformation.CreateInfoForGetLeafAttributes(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForGetLeafAttributes(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-            TestInformation.CreateInfoForGetSubAttributes(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForGetSubAttributes(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-            TestInformation.CreateInfoForUpdateAttributeValues(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForUpdateAttributeValues(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-            TestInformation.CreateInfoForGetCategoryMapping(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForGetCategoryMapping(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-            TestInformation.CreateInfoForGetChildrenOrTopLevel(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForGetChildrenOrTopLevel(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-            TestInformation.CreateInfoForSearchCategories(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForSearchCategories(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-            TestInformation.CreateInfoForUpdateCategoryMapping(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForUpdateCategoryMapping(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-            TestInformation.CreateInfoForGetRootCategories(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-            TestInformation.CreateInfoForGetRootCategories(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed)
-        ];
-
-        int totalTestCount = testInfos.Count;
-        int currentTestCount = 1;
+        int testCount = 1;
         foreach (var testInfo in testInfos)
         {
             await using var scope = serviceProvider.CreateAsyncScope();
             var handler = scope.ServiceProvider.GetRequiredService<K6TestHandler>();
             await handler.StartK6TestAndProcessResultsAsync(testInfo, cancellationToken);
-            logger.Information("Handled test {CurrentTestCount} of {TotalTestCount}", currentTestCount++, totalTestCount);
+            logger.Information("Handled test {CurrentTestCount} of {TotalTestCount}", testCount++, testInfos.Count);
         }
 
         return Results.Ok();
@@ -134,64 +73,80 @@ public class AllK6TestsEndpoint : IEndpoint
         ILogger logger,
         IServiceProvider serviceProvider,
         CancellationToken cancellationToken,
-        bool checkElastic = true,
-        bool withWarmUp = true,
-        bool saveMinimalResults = true)
+        int testsPerApi = 1)
     {
+        const bool checkElastic = true, withWarmUp = true, saveMinimalResults = true;
         string[] seeds = ["hardcoded_seed", "another_seed", "third_seed"];
-        const bool traditionalApi = true;
-        const bool cqrsApi = false;
 
+        // Add 3 APIs with 9 endpoint tests for 3 seeds -> 3*9*3 = 81 Tests a 2min = 162min = 2h 42min
         List<TestInformation> testInfos = [];
         foreach (var seed in seeds)
         {
-            // Add 10 tests for each seed
-            for (int i = 0; i < 10; i++)
+            testInfos.AddRange(GetAllTestInfosPerEndpointForApi(AvailableApiNames.TraditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed));
+            testInfos.AddRange(GetAllTestInfosPerEndpointForApi(AvailableApiNames.CqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed));
+            testInfos.AddRange(GetAllTestInfosPerEndpointForApi(AvailableApiNames.CqrsApiMediatr, checkElastic, withWarmUp, saveMinimalResults, seed));
+        }
+
+        if (testsPerApi > 1)
+        {
+            // Copy the testInfos for each additional test
+            var additionalTestInfos = new List<TestInformation>(testInfos);
+            for (int i = 1; i < testsPerApi; i++)
             {
-                testInfos.AddRange(
-                [
-                    TestInformation.CreateInfoForGetAttributes(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-                    TestInformation.CreateInfoForGetAttributes(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-                    TestInformation.CreateInfoForGetLeafAttributes(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-                    TestInformation.CreateInfoForGetLeafAttributes(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-                    TestInformation.CreateInfoForGetSubAttributes(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-                    TestInformation.CreateInfoForGetSubAttributes(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-                    TestInformation.CreateInfoForUpdateAttributeValues(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-                    TestInformation.CreateInfoForUpdateAttributeValues(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-                    TestInformation.CreateInfoForGetCategoryMapping(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-                    TestInformation.CreateInfoForGetCategoryMapping(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-                    TestInformation.CreateInfoForGetChildrenOrTopLevel(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-                    TestInformation.CreateInfoForGetChildrenOrTopLevel(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-                    TestInformation.CreateInfoForSearchCategories(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-                    TestInformation.CreateInfoForSearchCategories(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-                    TestInformation.CreateInfoForUpdateCategoryMapping(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-                    TestInformation.CreateInfoForUpdateCategoryMapping(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-
-                    TestInformation.CreateInfoForGetRootCategories(traditionalApi, checkElastic, withWarmUp, saveMinimalResults, seed),
-                    TestInformation.CreateInfoForGetRootCategories(cqrsApi, checkElastic, withWarmUp, saveMinimalResults, seed)
-                ]);
+                testInfos.AddRange(additionalTestInfos);
             }
         }
 
-        int totalTestCount = testInfos.Count;
-        int currentTestCount = 1;
-        foreach (var testInfo in testInfos.OrderBy(
-                     testInfo => testInfo.EndpointName + (testInfo.UseTraditionalApi ? "Traditional" : "CQRS"),
-                     StringComparer.InvariantCulture))
+        LogEstimatedRuntime(logger, testInfos);
+
+        int testCount = 1;
+        foreach (var testInfo in testInfos)
         {
             await using var scope = serviceProvider.CreateAsyncScope();
             var handler = scope.ServiceProvider.GetRequiredService<K6TestHandler>();
             await handler.StartK6TestAndProcessResultsAsync(testInfo, cancellationToken);
-            logger.Information("Handled test {CurrentTestCount} of {TotalTestCount}", currentTestCount++, totalTestCount);
+            logger.Information("Handled test {CurrentTestCount} of {TotalTestCount}", testCount++, testInfos.Count);
         }
 
         return Results.Ok();
+    }
+
+    private static List<TestInformation> GetAllTestInfosPerEndpointForApi(
+        AvailableApiNames apiToUse,
+        bool checkElastic,
+        bool withWarmUp,
+        bool saveMinimalResults,
+        string seed)
+    {
+        return
+        [
+            TestInformation.CreateInfoForGetAttributes(apiToUse, checkElastic, withWarmUp, saveMinimalResults, seed),
+            TestInformation.CreateInfoForGetLeafAttributes(apiToUse, checkElastic, withWarmUp, saveMinimalResults, seed),
+            TestInformation.CreateInfoForGetSubAttributes(apiToUse, checkElastic, withWarmUp, saveMinimalResults, seed),
+            TestInformation.CreateInfoForUpdateAttributeValues(apiToUse, checkElastic, withWarmUp, saveMinimalResults, seed),
+            TestInformation.CreateInfoForGetCategoryMapping(apiToUse, checkElastic, withWarmUp, saveMinimalResults, seed),
+            TestInformation.CreateInfoForGetChildrenOrTopLevel(apiToUse, checkElastic, withWarmUp, saveMinimalResults, seed),
+            TestInformation.CreateInfoForSearchCategories(apiToUse, checkElastic, withWarmUp, saveMinimalResults, seed),
+            TestInformation.CreateInfoForUpdateCategoryMapping(apiToUse, checkElastic, withWarmUp, saveMinimalResults, seed),
+            TestInformation.CreateInfoForGetRootCategories(apiToUse, checkElastic, withWarmUp, saveMinimalResults, seed)
+        ];
+    }
+
+    private static void LogEstimatedRuntime(ILogger logger, List<TestInformation> testInfos)
+    {
+        var estimatedRuntime5S = TimeSpan.FromSeconds(testInfos.Count * 5);
+        var estimatedRuntime1M = TimeSpan.FromMinutes(testInfos.Count * 1);
+        var estimatedRuntime2M = TimeSpan.FromMinutes(testInfos.Count * 2);
+
+        logger.Information(
+            "Starting {TestCount} tests with estimated runtime (5s | 1min | 2min per Test) of {EstimatedRuntime5s} min | {EstimatedRuntime1m} min | {EstimatedRuntime2m} min\n" +
+            "In hours: {EstimatedRuntime5sHours} hours | {EstimatedRuntime1mHours} hours | {EstimatedRuntime2mHours} hours",
+            testInfos.Count,
+            estimatedRuntime5S.TotalMinutes,
+            estimatedRuntime1M.TotalMinutes,
+            estimatedRuntime2M.TotalMinutes,
+            estimatedRuntime5S.TotalHours,
+            estimatedRuntime1M.TotalHours,
+            estimatedRuntime2M.TotalHours);
     }
 }

@@ -24,14 +24,14 @@ public class GetChildrenOrTopLevelK6TestEndpoint : IEndpoint
     private static async Task<IResult> StartK6TestForGetChildrenOrTopLevelAsync(
         K6TestHandler handler,
         CancellationToken cancellationToken,
-        bool useTraditionalApi = true,
+        AvailableApiNames apiToUse = AvailableApiNames.TraditionalApi,
         bool checkElastic = true,
         bool withWarmUp = true,
         bool saveMinimalResults = true,
         string seed = "hardcoded_seed")
     {
         var testInfo = TestInformation.CreateInfoForGetChildrenOrTopLevel(
-            useTraditionalApi,
+            apiToUse,
             checkElastic,
             withWarmUp,
             saveMinimalResults,

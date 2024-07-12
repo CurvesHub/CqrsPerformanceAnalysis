@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using PerformanceTests.Common.Constants;
 using PerformanceTests.Infrastructure.DataModels;
 
 namespace PerformanceTests.Infrastructure;
@@ -52,6 +54,19 @@ public class PerformanceDbContext(DbContextOptions options) : DbContext(options)
         modelBuilder.Entity<TestRun>()
             .Property(testRun => testRun.CreatedAt)
             .HasColumnType("timestamp with time zone")
+            .IsRequired();
+
+        modelBuilder.Entity<TestRun>()
+            .Property(testRun => testRun.ApiToUse)
+            .HasConversion<EnumToStringConverter<AvailableApiNames>>()
+            .IsRequired();
+
+        modelBuilder.Entity<TestRun>()
+            .Property(testRun => testRun.Seed)
+            .IsRequired();
+
+        modelBuilder.Entity<TestRun>()
+            .Property(testRun => testRun.EndpointName)
             .IsRequired();
 
         modelBuilder.Entity<TestRun>()

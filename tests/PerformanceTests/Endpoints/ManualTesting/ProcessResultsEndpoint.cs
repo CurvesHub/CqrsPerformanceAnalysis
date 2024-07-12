@@ -1,5 +1,6 @@
 using System.Net;
 using PerformanceTests.Common.Constants;
+using PerformanceTests.Common.Models;
 using PerformanceTests.Common.Services;
 using Traditional.Api.Common.Endpoints;
 
@@ -22,7 +23,7 @@ public class ProcessResultsEndpoint : IEndpoint
 
     private static async Task<IResult> ProcessResultsAsync(ResultProcessor processor)
     {
-        await processor.ProcessResultsAsync();
+        await processor.ProcessResultsAsync(TestInformation.CreateForManualProcessing());
         return Results.Ok();
     }
 }

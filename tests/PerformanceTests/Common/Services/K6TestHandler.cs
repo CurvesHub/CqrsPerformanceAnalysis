@@ -33,23 +33,24 @@ public class K6TestHandler(
 
             _logger.Information("The required messuring/result containers are running. Starting the api and database containers");
 
-            await _containerProvider.StartApiContainerAsync(testInformation.UseTraditionalApi, cancellationToken);
+            await _containerProvider.StartApiContainerAsync(testInformation.ApiToUse, cancellationToken);
             await _containerProvider.StartDbContainerAsync(cancellationToken);
 
             _logger.Information("Creating the database and setting up the example data");
 
             await _testDataGenerator.SetupExampleDataAsync(cancellationToken: cancellationToken);
 
-            await _apiClient.WaitForApiToBeReady(testInformation.UseTraditionalApi, cancellationToken);
+            await _apiClient.WaitForApiToBeReady(testInformation.ApiToUse, cancellationToken);
 
             if (testInformation.WithWarmUp)
             {
                 await _apiClient.SendWarmupRequestsAsync(
-                    testInformation.UseTraditionalApi,
+                    testInformation.ApiToUse,
                     testInformation.EndpointRoute,
                     testInformation.WarmUpRequest,
                     cancellationToken);
-                _logger.Information("{ApiType} API is warmed up", testInformation.UseTraditionalApi ? "Traditional" : "Cqrs");
+
+                _logger.Information("{ApiType} API is warmed up", testInformation.ApiToUse);
             }
 
             _logger.Information("Starting the k6 test for: {EndpointName} and waiting for it to finish", testInformation.EndpointName);
@@ -58,13 +59,13 @@ public class K6TestHandler(
                 .StartK6TestAndGetK6ExitCodeAndLogsAsync(
                     testInformation.TestDirectoryName,
                     testInformation.EndpointName,
-                    testInformation.UseTraditionalApi,
+                    testInformation.ApiToUse,
                     testInformation.Seed,
                     cancellationToken);
 
             _logger.Information("The k6 test for: {EndpointName} is stopped with exit code {ExitCode}. Processing the results", testInformation.EndpointName, exitCode);
 
-            await _resultProcessor.ProcessResultsAsync(logs, testInformation.SaveMinimalResults, cancellationToken);
+            await _resultProcessor.ProcessResultsAsync(testInformation, logs, cancellationToken);
         }
         finally
         {

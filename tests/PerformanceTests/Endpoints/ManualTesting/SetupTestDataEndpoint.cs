@@ -16,7 +16,10 @@ public class SetupTestDataEndpoint : IEndpoint
             .WithTags(EndpointTags.MANUAL_TESTING);
     }
 
-    private static async Task<IResult> SetupExampleDataAsync(TestDataGenerator testDataGenerator, CancellationToken cancellationToken, [FromQuery] int dataCount = 10_000)
+    private static async Task<IResult> SetupExampleDataAsync(
+        TestDataGenerator testDataGenerator,
+        CancellationToken cancellationToken,
+        [FromQuery] int dataCount = 10_000)
     {
         await testDataGenerator.SetupExampleDataAsync(dataCount, cancellationToken);
         return Results.Ok();

@@ -1,6 +1,8 @@
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using DotNet.Testcontainers.Builders;
+using PerformanceTests.Common.Models;
 using PerformanceTests.Infrastructure;
 using PerformanceTests.Infrastructure.DataModels;
 using PerformanceTests.Infrastructure.JsonModels;
@@ -20,11 +22,11 @@ public class ResultProcessor(ILogger _logger, PerformanceDbContext _performanceD
     /// <summary>
     /// Processes the results of a k6 test.
     /// </summary>
+    /// <param name="testInfo">The test information.</param>
     /// <param name="logs">The logs of the k6 test.</param>
-    /// <param name="saveMinimalResults">A value indicating whether to save minimal results.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task ProcessResultsAsync((string Stdout, string Stderr)? logs = null, bool saveMinimalResults = true, CancellationToken cancellationToken = default)
+    public async Task ProcessResultsAsync(TestInformation testInfo, (string Stdout, string Stderr)? logs = null, CancellationToken cancellationToken = default)
     {
         _logger.Information("Started processing K6 Results");
 
@@ -36,7 +38,7 @@ public class ResultProcessor(ILogger _logger, PerformanceDbContext _performanceD
 
         // For each result directory, process the files and add the test run to the database
         var resultTasks = resultDirectories
-            .Select(dir => ProcessResultDirectoryAsync(dir, logs, saveMinimalResults, cancellationToken).ToArrayAsync(cancellationToken).AsTask());
+            .Select(dir => ProcessResultDirectoryAsync(dir, logs, testInfo, cancellationToken).ToArrayAsync(cancellationToken).AsTask());
 
         var resultPerDir = (await Task.WhenAll(resultTasks)).SelectMany(test => test);
 
@@ -96,7 +98,7 @@ public class ResultProcessor(ILogger _logger, PerformanceDbContext _performanceD
     private async IAsyncEnumerable<TestRun?> ProcessResultDirectoryAsync(
         string directory,
         (string Stdout, string Stderr)? logs,
-        bool saveMinimalResults,
+        TestInformation testInfo,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // Get all files in the directory
@@ -110,7 +112,7 @@ public class ResultProcessor(ILogger _logger, PerformanceDbContext _performanceD
 
         foreach (var (key, value) in GroupedFiles(allFiles))
         {
-            yield return await ConstructTestRun(logs, value, key, saveMinimalResults, cancellationToken);
+            yield return await ConstructTestRun(logs, value, key, testInfo, cancellationToken);
         }
     }
 
@@ -165,7 +167,7 @@ public class ResultProcessor(ILogger _logger, PerformanceDbContext _performanceD
         (string Stdout, string Stderr)? logs,
         IReadOnlyCollection<string> groupedFiles,
         DateTime creationTime,
-        bool saveMinimalResults,
+        TestInformation testInfo,
         CancellationToken cancellationToken = default)
     {
         if (groupedFiles.Count is not 3)
@@ -190,7 +192,7 @@ public class ResultProcessor(ILogger _logger, PerformanceDbContext _performanceD
             }
             else if (file.Contains("Metric", StringComparison.Ordinal))
             {
-                dataPoints = await ExtractDataPointsAsync(file, saveMinimalResults, cancellationToken);
+                dataPoints = await ExtractDataPointsAsync(file, testInfo.SaveMinimalResults, cancellationToken);
             }
             else if (file.Contains("Report", StringComparison.Ordinal))
             {
@@ -205,6 +207,9 @@ public class ResultProcessor(ILogger _logger, PerformanceDbContext _performanceD
             SummaryContent: summaryContent,
             HtmlReport: htmlReport,
             CreatedAt: new DateTimeOffset(creationTime).ToUniversalTime(),
+            ApiToUse: testInfo.ApiToUse,
+            Seed: testInfo.Seed,
+            EndpointName: testInfo.EndpointName,
             LogsStdout: logs?.Stdout,
             LogsStderr: logs?.Stderr)
         {
@@ -273,7 +278,7 @@ public class ResultProcessor(ILogger _logger, PerformanceDbContext _performanceD
                 Directory.CreateDirectory(archivePath);
             }
 
-            var newFileName = $"{creationTime:yyyy-MM-dd_HH-mm-ss}_{Path.GetFileName(filePath)}";
+            var newFileName = $"{creationTime:yyyy-MM-dd_HH-mm-ss}_{Path.GetFileName(filePath)}_{DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture)}";
             var destFileName = Path.Combine(archivePath, newFileName);
 
             File.Move(filePath, destFileName);

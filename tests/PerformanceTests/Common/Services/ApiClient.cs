@@ -25,13 +25,13 @@ public class ApiClient(ILogger _logger)
     /// <summary>
     /// Waits for the api to be ready by sending a request to <see cref="EndpointRoutes.RootCategories.GET_ROOT_CATEGORIES"/>.
     /// </summary>
-    /// <param name="useTraditionalApi">Indicates whether to use the traditional api.</param>
+    /// <param name="apiToUse">The api to use.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <exception cref="InvalidOperationException">Thrown when the api is not ready after 10 seconds.</exception>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task WaitForApiToBeReady(bool useTraditionalApi, CancellationToken cancellationToken = default)
+    public async Task WaitForApiToBeReady(AvailableApiNames apiToUse, CancellationToken cancellationToken = default)
     {
-        _logger.Information("Waiting for the {ApiType} api to be ready", useTraditionalApi ? "Traditional" : "Cqrs");
+        _logger.Information("Waiting for the {ApiType} api to be ready", apiToUse);
 
         const int maxAttempts = 10;
         const int delay = 1000;
@@ -39,7 +39,7 @@ public class ApiClient(ILogger _logger)
 
         var client = new HttpClient
         {
-            BaseAddress = new Uri(useTraditionalApi
+            BaseAddress = new Uri(apiToUse is AvailableApiNames.TraditionalApi
                 ? $"http://localhost:{AvailableApiPorts.TRADITIONAL_API_PORT}"
                 : $"http://localhost:{AvailableApiPorts.CQRS_API_PORT}")
         };
@@ -84,14 +84,14 @@ public class ApiClient(ILogger _logger)
     /// <summary>
     /// Sends ten warm up requests to the api.
     /// </summary>
-    /// <param name="useTraditionalApi">Indicates whether to use the traditional api.</param>
+    /// <param name="apiToUse">The api to use.</param>
     /// <param name="route">The route to send the requests to.</param>
     /// <param name="request">The request to send.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <exception cref="InvalidOperationException">Thrown when the warm up request fails.</exception>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task SendWarmupRequestsAsync(
-        bool useTraditionalApi,
+        AvailableApiNames apiToUse,
         string route,
         object? request = null,
         CancellationToken cancellationToken = default)
@@ -100,7 +100,7 @@ public class ApiClient(ILogger _logger)
 
         _logger.Information("Sending {RequestCount} warm up requests", requestCount);
 
-        _client.BaseAddress = new Uri(useTraditionalApi
+        _client.BaseAddress = new Uri(apiToUse is AvailableApiNames.TraditionalApi
             ? $"http://localhost:{AvailableApiPorts.TRADITIONAL_API_PORT}"
             : $"http://localhost:{AvailableApiPorts.CQRS_API_PORT}");
 

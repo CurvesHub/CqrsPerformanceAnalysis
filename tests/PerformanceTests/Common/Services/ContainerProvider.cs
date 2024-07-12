@@ -47,12 +47,12 @@ public class ContainerProvider
     /// <summary>
     /// Starts the api container.
     /// </summary>
-    /// <param name="useTraditionalApi">Indicates whether to use the traditional api.</param>
+    /// <param name="apiToUse">The api to use.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public async Task StartApiContainerAsync(bool useTraditionalApi, CancellationToken cancellationToken = default)
+    public async Task StartApiContainerAsync(AvailableApiNames apiToUse, CancellationToken cancellationToken = default)
     {
-        _apiContainer = BuildApiContainer(useTraditionalApi);
+        _apiContainer = BuildApiContainer(apiToUse);
         await _apiContainer.StartAsync(cancellationToken);
     }
 
@@ -72,18 +72,18 @@ public class ContainerProvider
     /// </summary>
     /// <param name="testDirectoryName">The name of the test directory.</param>
     /// <param name="endpointName">The name of the endpoint.</param>
-    /// <param name="useTraditionalApi">Indicates whether to use the traditional api.</param>
+    /// <param name="apiToUse">The api to use.</param>
     /// <param name="seed">The seed for the random number generator.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The exit code and the logs of the k6 test.</returns>
     public async Task<(long exitCode, (string Stdout, string Stderr) logs)> StartK6TestAndGetK6ExitCodeAndLogsAsync(
         string testDirectoryName,
         string endpointName,
-        bool useTraditionalApi,
+        AvailableApiNames apiToUse,
         string seed,
         CancellationToken cancellationToken = default)
     {
-        _k6Container = BuildK6Container(testDirectoryName, endpointName, useTraditionalApi, seed);
+        _k6Container = BuildK6Container(testDirectoryName, endpointName, apiToUse, seed);
 
         // Start the k6 container and the test.
         await _k6Container.StartAsync(cancellationToken);
@@ -115,7 +115,7 @@ public class ContainerProvider
             .Build();
     }
 
-    private static IContainer BuildApiContainer(bool useTraditionalApi)
+    private static IContainer BuildApiContainer(AvailableApiNames apiToUse)
     {
 #pragma warning disable S125 // Sections of code should not be commented out
         // Optional: Build the api image new very time to ensure that the latest changes are used.
@@ -133,11 +133,35 @@ public class ContainerProvider
         await apiImage.CreateAsync();*/
 #pragma warning restore S125
 
+        string dockerImage, containerName;
+        int apiPort;
+
+        switch (apiToUse)
+        {
+            case AvailableApiNames.TraditionalApi:
+                dockerImage = "api.traditional:latest";
+                containerName = "api-traditional";
+                apiPort = AvailableApiPorts.TRADITIONAL_API_PORT;
+                break;
+            case AvailableApiNames.CqrsApi:
+                dockerImage = "api.cqrs:latest";
+                containerName = "api-cqrs";
+                apiPort = AvailableApiPorts.CQRS_API_PORT;
+                break;
+            case AvailableApiNames.CqrsApiMediatr:
+                dockerImage = "api.cqrs.mediatr:latest";
+                containerName = "api-cqrs-mediatr";
+                apiPort = AvailableApiPorts.CQRS_API_PORT;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(apiToUse), apiToUse, "The provided api name is not supported.");
+        }
+
         return new ContainerBuilder()
-            .WithImage(useTraditionalApi ? "api.traditional:latest" : "api.cqrs:latest")
+            .WithImage(dockerImage)
             .WithNetwork("main-network")
-            .WithName(useTraditionalApi ? "api-traditional" : "api-cqrs")
-            .WithPortBinding(useTraditionalApi ? AvailableApiPorts.TRADITIONAL_API_PORT : AvailableApiPorts.CQRS_API_PORT, 8080)
+            .WithName(containerName)
+            .WithPortBinding(apiPort, 8080)
             .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Production")
             .WithCleanUp(true)
             .WithCreateParameterModifier(parameterModifier =>
@@ -149,34 +173,36 @@ public class ContainerProvider
             .Build();
     }
 
-    private static IContainer BuildK6Container(string testDirectoryName, string endpointName, bool useTraditionalApi, string seed)
+    private static IContainer BuildK6Container(string testDirectoryName, string endpointName, AvailableApiNames apiToUse, string seed)
     {
         var testDirectory = Path.GetFullPath(Path.Combine(
             CommonDirectoryPath.GetProjectDirectory().DirectoryPath,
             "Assets/K6Tests",
             testDirectoryName));
 
-        var apiName = useTraditionalApi ? "Traditional" : "Cqrs";
-
         string[] commands =
         [
             "run",
             $"/scripts/{testDirectoryName}/K6-{endpointName}.js",
-            $"--summary-export=/results/{testDirectoryName}/K6-{apiName}-{endpointName}-Summary.json",
+            $"--summary-export=/results/{testDirectoryName}/K6-{apiToUse}-{endpointName}-Summary.json",
             "--out",
-            $"json=/results/{testDirectoryName}/K6-{apiName}-{endpointName}-Metric.jsonl"
+            $"json=/results/{testDirectoryName}/K6-{apiToUse}-{endpointName}-Metric.jsonl"
         ];
+
+        var apiPort = apiToUse is AvailableApiNames.TraditionalApi
+            ? AvailableApiPorts.TRADITIONAL_API_PORT
+            : AvailableApiPorts.CQRS_API_PORT;
 
         return new ContainerBuilder()
             .WithImage("grafana/k6:0.51.0")
             .WithNetwork("main-network")
-            .WithName($"k6-test-{apiName}-{endpointName}")
+            .WithName($"k6-test-{apiToUse}-{endpointName}")
             .WithBindMount(Path.Combine(testDirectory, "scripts"), $"/scripts/{testDirectoryName}")
             .WithBindMount(Path.Combine(testDirectory, "results"), $"/results/{testDirectoryName}")
             .WithCommand(commands)
             .WithEnvironment("K6_WEB_DASHBOARD", "true")
-            .WithEnvironment("K6_WEB_DASHBOARD_EXPORT", $"/results/{testDirectoryName}/K6-{apiName}-{endpointName}-Report.html")
-            .WithEnvironment("API_PORT_TO_USE", useTraditionalApi ? AvailableApiPorts.TRADITIONAL_API_PORT.ToString(CultureInfo.InvariantCulture) : AvailableApiPorts.CQRS_API_PORT.ToString(CultureInfo.InvariantCulture))
+            .WithEnvironment("K6_WEB_DASHBOARD_EXPORT", $"/results/{testDirectoryName}/K6-{apiToUse}-{endpointName}-Report.html")
+            .WithEnvironment("API_PORT_TO_USE", apiPort.ToString(CultureInfo.InvariantCulture))
             .WithEnvironment("MY_SEED", seed)
             .WithPortBinding(5665)
             .WithCleanUp(true)

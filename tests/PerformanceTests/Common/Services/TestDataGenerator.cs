@@ -43,8 +43,6 @@ public class TestDataGenerator(TraditionalDbContext _traditionalDbContext, ILogg
 
         // To simplify the update attribute values test are all values of type boolean
         const AttributeValueType valueType = AttributeValueType.Boolean;
-#pragma warning disable S125 // Before we had: var valueType = (AttributeValueType)(i % 4);
-#pragma warning restore S125
 
         _logger.Information("Start creating example data for {DataCount} articles", dataCount);
         var stopwatch = Stopwatch.StartNew();

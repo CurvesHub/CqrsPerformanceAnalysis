@@ -1,3 +1,5 @@
+using PerformanceTests.Common.Constants;
+
 namespace PerformanceTests.Infrastructure.DataModels;
 
 /// <summary>
@@ -7,6 +9,9 @@ namespace PerformanceTests.Infrastructure.DataModels;
 /// <param name="SummaryContent">The summary json content of the test run.</param>
 /// <param name="HtmlReport">The html report of the test run.</param>
 /// <param name="CreatedAt">The creation time in utc of the test run.</param>
+/// <param name="ApiToUse">The api to use for the test run.</param>
+/// <param name="Seed">The seed used for the test run.</param>
+/// <param name="EndpointName">The endpoint name of the test run.</param>
 /// <param name="LogsStdout">The standard output of the test run.</param>
 /// <param name="LogsStderr">The standard error of the test run.</param>
 /// <param name="Metadata">The metadata associated with the test run.</param>
@@ -15,6 +20,9 @@ public record TestRun(
     string SummaryContent,
     string HtmlReport,
     DateTimeOffset CreatedAt,
+    AvailableApiNames ApiToUse,
+    string Seed,
+    string EndpointName,
     string? LogsStdout = null,
     string? LogsStderr = null,
     string? Metadata = null)

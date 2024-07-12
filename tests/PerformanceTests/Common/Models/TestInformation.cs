@@ -1,3 +1,4 @@
+using PerformanceTests.Common.Constants;
 using TestCommon.Constants;
 using Traditional.Api.Common.BaseRequests;
 using Traditional.Api.UseCases.Attributes.Common.Responses;
@@ -26,9 +27,9 @@ public record TestInformation
     public string TestDirectoryName { get; }
 
     /// <summary>
-    /// Gets a value indicating whether to use the traditional API.
+    /// Gets the API to use.
     /// </summary>
-    public bool UseTraditionalApi { get; }
+    public AvailableApiNames ApiToUse { get; }
 
     /// <summary>
     /// Gets the route of the endpoint.
@@ -67,7 +68,7 @@ public record TestInformation
     /// <param name="testDirectoryName">The name of the test directory.</param>
     /// <param name="endpointRoute">The route of the endpoint.</param>
     /// <param name="warmUpRequest">The request to send to the endpoint.</param>
-    /// <param name="useTraditionalApi">Indicates whether to use the traditional API.</param>
+    /// <param name="apiToUse">The API to use.</param>
     /// <param name="checkElastic">Indicates whether to check if the elastic search container is running.</param>
     /// <param name="withWarmUp">The request object to send to the endpoint.</param>
     /// <param name="saveMinimalResults">Indicates whether to save only minimal results.</param>
@@ -78,7 +79,7 @@ public record TestInformation
         string testDirectoryName,
         string endpointRoute,
         object? warmUpRequest,
-        bool useTraditionalApi,
+        AvailableApiNames apiToUse,
         bool checkElastic,
         bool withWarmUp,
         bool saveMinimalResults,
@@ -86,7 +87,7 @@ public record TestInformation
     {
         EndpointName = endpointName;
         TestDirectoryName = testDirectoryName;
-        UseTraditionalApi = useTraditionalApi;
+        ApiToUse = apiToUse;
         EndpointRoute = endpointRoute;
         WarmUpRequest = warmUpRequest;
         CheckElastic = checkElastic;
@@ -99,14 +100,14 @@ public record TestInformation
     /// <summary>
     /// Creates a new instance of the <see cref="TestInformation"/> class for the GetAttributes endpoint.
     /// </summary>
-    /// <param name="useTraditionalApi">Indicates whether to use the traditional API.</param>
+    /// <param name="apiToUse">The API to use.</param>
     /// <param name="checkElastic">Indicates whether to check if the elastic search container is running.</param>
     /// <param name="withWarmUp">Indicates whether to send a warm-up request to the endpoint.</param>
     /// <param name="saveMinimalResults">Indicates whether to save only minimal results.</param>
     /// <param name="seed">The seed for the test.</param>
     /// <returns>A new instance of the <see cref="TestInformation"/> class.</returns>
     public static TestInformation CreateInfoForGetAttributes(
-        bool useTraditionalApi,
+        AvailableApiNames apiToUse,
         bool checkElastic,
         bool withWarmUp,
         bool saveMinimalResults,
@@ -117,7 +118,7 @@ public record TestInformation
             testDirectoryName: "Attributes",
             endpointRoute: EndpointRoutes.Attributes.GET_ATTRIBUTES,
             warmUpRequest: new BaseRequest(RootCategoryId: 1, ArticleNumber: "1"),
-            useTraditionalApi: useTraditionalApi,
+            apiToUse: apiToUse,
             checkElastic: checkElastic,
             withWarmUp: withWarmUp,
             saveMinimalResults: saveMinimalResults,
@@ -127,14 +128,14 @@ public record TestInformation
     /// <summary>
     /// Creates a new instance of the <see cref="TestInformation"/> class for the GetLeafAttributes endpoint.
     /// </summary>
-    /// <param name="useTraditionalApi">Indicates whether to use the traditional API.</param>
+    /// <param name="apiToUse">The API to use.</param>
     /// <param name="checkElastic">Indicates whether to check if the elastic search container is running.</param>
     /// <param name="withWarmUp">Indicates whether to send a warm-up request to the endpoint.</param>
     /// <param name="saveMinimalResults">Indicates whether to save only minimal results.</param>
     /// <param name="seed">The seed for the test.</param>
     /// <returns>A new instance of the <see cref="TestInformation"/> class.</returns>
     public static TestInformation CreateInfoForGetLeafAttributes(
-        bool useTraditionalApi,
+        AvailableApiNames apiToUse,
         bool checkElastic,
         bool withWarmUp,
         bool saveMinimalResults,
@@ -145,7 +146,7 @@ public record TestInformation
             testDirectoryName: "Attributes",
             endpointRoute: EndpointRoutes.Attributes.GET_LEAF_ATTRIBUTES,
             warmUpRequest: new GetLeafAttributesRequest(RootCategoryId: 1, ArticleNumber: "1", AttributeId: "1"),
-            useTraditionalApi: useTraditionalApi,
+            apiToUse: apiToUse,
             checkElastic: checkElastic,
             withWarmUp: withWarmUp,
             saveMinimalResults: saveMinimalResults,
@@ -155,14 +156,14 @@ public record TestInformation
     /// <summary>
     /// Creates a new instance of the <see cref="TestInformation"/> class for the GetSubAttributes endpoint.
     /// </summary>
-    /// <param name="useTraditionalApi">Indicates whether to use the traditional API.</param>
+    /// <param name="apiToUse">The API to use.</param>
     /// <param name="checkElastic">Indicates whether to check if the elastic search container is running.</param>
     /// <param name="withWarmUp">Indicates whether to send a warm-up request to the endpoint.</param>
     /// <param name="saveMinimalResults">Indicates whether to save only minimal results.</param>
     /// <param name="seed">The seed for the test.</param>
     /// <returns>A new instance of the <see cref="TestInformation"/> class.</returns>
     public static TestInformation CreateInfoForGetSubAttributes(
-        bool useTraditionalApi,
+        AvailableApiNames apiToUse,
         bool checkElastic,
         bool withWarmUp,
         bool saveMinimalResults,
@@ -173,7 +174,7 @@ public record TestInformation
             testDirectoryName: "Attributes",
             endpointRoute: EndpointRoutes.Attributes.GET_SUB_ATTRIBUTES,
             warmUpRequest: new GetSubAttributesRequest(RootCategoryId: 1, ArticleNumber: "1", AttributeIds: "1"),
-            useTraditionalApi: useTraditionalApi,
+            apiToUse: apiToUse,
             checkElastic: checkElastic,
             withWarmUp: withWarmUp,
             saveMinimalResults: saveMinimalResults,
@@ -183,14 +184,14 @@ public record TestInformation
     /// <summary>
     /// Creates a new instance of the <see cref="TestInformation"/> class for the UpdateAttributeValues endpoint.
     /// </summary>
-    /// <param name="useTraditionalApi">Indicates whether to use the traditional API.</param>
+    /// <param name="apiToUse">The API to use.</param>
     /// <param name="checkElastic">Indicates whether to check if the elastic search container is running.</param>
     /// <param name="withWarmUp">Indicates whether to send a warm-up request to the endpoint.</param>
     /// <param name="saveMinimalResults">Indicates whether to save only minimal results.</param>
     /// <param name="seed">The seed for the test.</param>
     /// <returns>A new instance of the <see cref="TestInformation"/> class.</returns>
     public static TestInformation CreateInfoForUpdateAttributeValues(
-        bool useTraditionalApi,
+        AvailableApiNames apiToUse,
         bool checkElastic,
         bool withWarmUp,
         bool saveMinimalResults,
@@ -221,7 +222,7 @@ public record TestInformation
             testDirectoryName: "Attributes",
             endpointRoute: EndpointRoutes.Attributes.UPDATE_ATTRIBUTE_VALUES,
             warmUpRequest: request,
-            useTraditionalApi: useTraditionalApi,
+            apiToUse: apiToUse,
             checkElastic: checkElastic,
             withWarmUp: withWarmUp,
             saveMinimalResults: saveMinimalResults,
@@ -231,14 +232,14 @@ public record TestInformation
     /// <summary>
     /// Creates a new instance of the <see cref="TestInformation"/> class for the GetCategoryMapping endpoint.
     /// </summary>
-    /// <param name="useTraditionalApi">Indicates whether to use the traditional API.</param>
+    /// <param name="apiToUse">The API to use.</param>
     /// <param name="checkElastic">Indicates whether to check if the elastic search container is running.</param>
     /// <param name="withWarmUp">Indicates whether to send a warm-up request to the endpoint.</param>
     /// <param name="saveMinimalResults">Indicates whether to save only minimal results.</param>
     /// <param name="seed">The seed for the test.</param>
     /// <returns>A new instance of the <see cref="TestInformation"/> class.</returns>
     public static TestInformation CreateInfoForGetCategoryMapping(
-        bool useTraditionalApi,
+        AvailableApiNames apiToUse,
         bool checkElastic,
         bool withWarmUp,
         bool saveMinimalResults,
@@ -249,7 +250,7 @@ public record TestInformation
             testDirectoryName: "Categories",
             endpointRoute: EndpointRoutes.Categories.GET_CATEGORY_MAPPING,
             warmUpRequest: new BaseRequest(RootCategoryId: 1, ArticleNumber: "1"),
-            useTraditionalApi: useTraditionalApi,
+            apiToUse: apiToUse,
             checkElastic: checkElastic,
             withWarmUp: withWarmUp,
             saveMinimalResults: saveMinimalResults,
@@ -259,14 +260,14 @@ public record TestInformation
     /// <summary>
     /// Creates a new instance of the <see cref="TestInformation"/> class for the GetChildrenOrTopLevel endpoint.
     /// </summary>
-    /// <param name="useTraditionalApi">Indicates whether to use the traditional API.</param>
+    /// <param name="apiToUse">The API to use.</param>
     /// <param name="checkElastic">Indicates whether to check if the elastic search container is running.</param>
     /// <param name="withWarmUp">Indicates whether to send a warm-up request to the endpoint.</param>
     /// <param name="saveMinimalResults">Indicates whether to save only minimal results.</param>
     /// <param name="seed">The seed for the test.</param>
     /// <returns>A new instance of the <see cref="TestInformation"/> class.</returns>
     public static TestInformation CreateInfoForGetChildrenOrTopLevel(
-        bool useTraditionalApi,
+        AvailableApiNames apiToUse,
         bool checkElastic,
         bool withWarmUp,
         bool saveMinimalResults,
@@ -277,7 +278,7 @@ public record TestInformation
             testDirectoryName: "Categories",
             endpointRoute: EndpointRoutes.Categories.GET_CHILDREN_OR_TOP_LEVEL,
             warmUpRequest: new GetChildrenOrTopLevelRequest(RootCategoryId: 1, ArticleNumber: "1", CategoryNumber: 2),
-            useTraditionalApi: useTraditionalApi,
+            apiToUse: apiToUse,
             checkElastic: checkElastic,
             withWarmUp: withWarmUp,
             saveMinimalResults: saveMinimalResults,
@@ -287,14 +288,14 @@ public record TestInformation
     /// <summary>
     /// Creates a new instance of the <see cref="TestInformation"/> class for the SearchCategories endpoint.
     /// </summary>
-    /// <param name="useTraditionalApi">Indicates whether to use the traditional API.</param>
+    /// <param name="apiToUse">The API to use.</param>
     /// <param name="checkElastic">Indicates whether to check if the elastic search container is running.</param>
     /// <param name="withWarmUp">Indicates whether to send a warm-up request to the endpoint.</param>
     /// <param name="saveMinimalResults">Indicates whether to save only minimal results.</param>
     /// <param name="seed">The seed for the test.</param>
     /// <returns>A new instance of the <see cref="TestInformation"/> class.</returns>
     public static TestInformation CreateInfoForSearchCategories(
-        bool useTraditionalApi,
+        AvailableApiNames apiToUse,
         bool checkElastic,
         bool withWarmUp,
         bool saveMinimalResults,
@@ -305,7 +306,7 @@ public record TestInformation
             testDirectoryName: "Categories",
             endpointRoute: EndpointRoutes.Categories.SEARCH_CATEGORIES,
             warmUpRequest: new SearchCategoriesRequest(RootCategoryId: 1, ArticleNumber: "1", CategoryNumber: 2),
-            useTraditionalApi: useTraditionalApi,
+            apiToUse: apiToUse,
             checkElastic: checkElastic,
             withWarmUp: withWarmUp,
             saveMinimalResults: saveMinimalResults,
@@ -315,14 +316,14 @@ public record TestInformation
     /// <summary>
     /// Creates a new instance of the <see cref="TestInformation"/> class for the UpdateCategoryMapping endpoint.
     /// </summary>
-    /// <param name="useTraditionalApi">Indicates whether to use the traditional API.</param>
+    /// <param name="apiToUse">The API to use.</param>
     /// <param name="checkElastic">Indicates whether to check if the elastic search container is running.</param>
     /// <param name="withWarmUp">Indicates whether to send a warm-up request to the endpoint.</param>
     /// <param name="saveMinimalResults">Indicates whether to save only minimal results.</param>
     /// <param name="seed">The seed for the test.</param>
     /// <returns>A new instance of the <see cref="TestInformation"/> class.</returns>
     public static TestInformation CreateInfoForUpdateCategoryMapping(
-        bool useTraditionalApi,
+        AvailableApiNames apiToUse,
         bool checkElastic,
         bool withWarmUp,
         bool saveMinimalResults,
@@ -333,7 +334,7 @@ public record TestInformation
             testDirectoryName: "Categories",
             endpointRoute: EndpointRoutes.Categories.UPDATE_CATEGORY_MAPPING,
             warmUpRequest: new UpdateCategoryMappingRequest(RootCategoryId: 1, ArticleNumber: "1", CategoryNumber: 2),
-            useTraditionalApi: useTraditionalApi,
+            apiToUse: apiToUse,
             checkElastic: checkElastic,
             withWarmUp: withWarmUp,
             saveMinimalResults: saveMinimalResults,
@@ -343,14 +344,14 @@ public record TestInformation
     /// <summary>
     /// Creates a new instance of the <see cref="TestInformation"/> class for the GetRootCategories endpoint.
     /// </summary>
-    /// <param name="useTraditionalApi">Indicates whether to use the traditional API.</param>
+    /// <param name="apiToUse">The API to use.</param>
     /// <param name="checkElastic">Indicates whether to check if the elastic search container is running.</param>
     /// <param name="withWarmUp">Indicates whether to send a warm-up request to the endpoint.</param>
     /// <param name="saveMinimalResults">Indicates whether to save only minimal results.</param>
     /// <param name="seed">The seed for the test.</param>
     /// <returns>A new instance of the <see cref="TestInformation"/> class.</returns>
     public static TestInformation CreateInfoForGetRootCategories(
-        bool useTraditionalApi,
+        AvailableApiNames apiToUse,
         bool checkElastic,
         bool withWarmUp,
         bool saveMinimalResults,
@@ -359,12 +360,30 @@ public record TestInformation
         return new TestInformation(
             endpointName: "GetRootCategories",
             testDirectoryName: "RootCategories",
-            useTraditionalApi: useTraditionalApi,
             endpointRoute: EndpointRoutes.RootCategories.GET_ROOT_CATEGORIES,
             warmUpRequest: null,
+            apiToUse: apiToUse,
             checkElastic: checkElastic,
             withWarmUp: withWarmUp,
             saveMinimalResults: saveMinimalResults,
             seed: seed);
+    }
+
+    /// <summary>
+    /// Creates a new instance of the <see cref="TestInformation"/> class for manuel result processing.
+    /// </summary>
+    /// <returns>A new instance of the <see cref="TestInformation"/> class.</returns>
+    public static TestInformation CreateForManualProcessing()
+    {
+        return new TestInformation(
+            endpointName: "ManuelProcessing",
+            testDirectoryName: "ManuelProcessing",
+            endpointRoute: "ManuelProcessing",
+            warmUpRequest: null,
+            apiToUse: AvailableApiNames.TraditionalApi,
+            checkElastic: true,
+            withWarmUp: true,
+            saveMinimalResults: true,
+            seed: "ManuelProcessing");
     }
 }
