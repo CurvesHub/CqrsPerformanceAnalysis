@@ -2,8 +2,11 @@
 **/obj/
 **/.idea/
 *.DotSettings*
-**/data/
-**/docs/.obsidian/
-**/docs/TODOs and Timeline.md
+**/data/elasticsearch/
+**/data/grafana/
+**/data/kibana/
+**/data/postgres/main/
+
+**/data/postgres/performance/
 **/Assets/K6Tests/*/archive/
 **/Assets/K6Tests/*/results/

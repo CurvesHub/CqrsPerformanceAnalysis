@@ -195,3 +195,14 @@ services:
       - "5665:5665"
     networks:
       - default
+
+  # The python result analyzer for the k6 test
+  k6-result-analyzer:
+    image: python:3.9-slim
+    container_name: k6-result-analyzer
+    volumes:
+      - ./tests/PerformanceTests/Assets/ResultAnalyzer/mounted:/mounted
+    working_dir: /mounted
+    command: sh -c "pip install -r requirements.txt && python ResultAnalyzer.py"
+    networks:
+      - default

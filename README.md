@@ -1,69 +1,23 @@
 # CQRS Performance Analysis
 
-## Disclaimer
-
-This project is currently under development 🏗👷‍♂️🔨. Therefore, the documentation 📝 is not complete yet and may have outdated information. You can view 🔍 the open tasks 📋 and eventually planned features at [TODOs](./docs/TODOs.md).
-
-TODO: Change readme to have:
-- A quick introduction
-- links to
-    - solution structure
-    - Use cases
-    - Scenarios
-    - Businesses scenario
-    - Endpoints (Request and Response)
-- Requirements to get started
-    - Docker
-    - Dotnet sdk
-- How to run the tests manual and automated
-
-TODO: Anleitung wie man die endpoints ausprobiert, die app in docker started, die test local, in docker und automatisiert ausführt.
-TODO: Use click to expand in Readme
-TODO: link to the database scheme and put it on a page with some information about the database
-
-TODO: Put this into a sh file
-
-## Build the performance test project:
-- `cd .\repositories\DemoProjects\Bachelor\CqrsPerformanceAnalysis`
-- `rm .\src\Traditional\Traditional.Api\appsettings.Development.json`
-- `rm .\src\Traditional\Traditional.Api\appsettings.json`
-- `cd .\tests\Common\PerformanceTests\`
-- `dotnet restore PerformanceTests.csproj --no-cache`
-- `dotnet build PerformanceTests.csproj -c Release --no-cache`
-- `dotnet publish PerformanceTests.csproj -c Release /p:UseAppHost=false`
-- `cd ..\..\..\`
-- `git checkout -- .\src\Traditional\Traditional.Api\appsettings.json`
-- `git checkout -- .\src\Traditional\Traditional.Api\appsettings.Development.json`
-
-## Run the performance test project:
-- `cd .\repositories\DemoProjects\Bachelor\CqrsPerformanceAnalysis\tests\Common\PerformanceTests\`
-- `dotnet C:\Users\jens.richter\repositories\DemoProjects\Bachelor\CqrsPerformanceAnalysis\tests\Common\PerformanceTests\bin\Release\net8.0\publish\PerformanceTests.dll --urls="http://localhost:5017"`
-- `curl 'http://localhost:5017'`
-- `curl 'http://localhost:5017/K6Tests/allOfBothApis?checkElastic=true&withWarmUp=true&saveMinimalResults=true'`
-
 ## Overview
 
-This project aims to provide different complex scenarios. Those are used to evaluate if restructuring a project with CQRS will bring performance benefits.
+This project is used to compare a traditional API with a CQRS API. The goal is to evaluate if restructuring a project with CQRS will bring performance benefits.
 
-See also the specific documentation for each scenario:
-- [Scenario 1: Traditional](./docs/Application_Scenario_Overview.md#scenario-1-traditional)
-- [Scenario 2: CQRS](./docs/Application_Scenario_Overview.md#scenario-2-cqrs)
-- [Database Information](./docs/Database_Scheme_Overview.md)
+The solution includes the following projects:
+- `Traditional.Api`: A traditional API which uses a single `DbContext` for all queries and commands.
+- `Cqrs.Api`: A CQRS API which uses two `DbContexts` for queries and commands.
+- `main-MediatR branch`: The CQRS API uses the MediatR package to implement the CQRS pattern.
 
 ## Business scenario
 
 This Web API provides access to article content data like categories and attributes. The user can provide new data for the articles which will be saved in a database.
 
-#TODOs
-- [ ] Provide more information about the use cases.
 - This API writes and reads data about articles, categories and category specific attributes from an internal company database.
 - The company's content team uses this API to manage the attributes and categories of the articles.
 - This services does not sync the data with any external services (marketplaces). This is done by another service.
 
-### Endpoints
-
-#TODOs
-- [ ] List all routes endpoints here
+## Endpoints
 
 These are all the endpoints which are available in the API:
 ```http
@@ -79,3 +33,12 @@ GET /rootCategories
 GET /error
 ```
 Try the endpoints yourself by using http requests in the [requests](./requests) folder. You can fire a request right away in JetBrains Rider or in Visual Studio Code with the [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) extension.
+
+## Used technologies
+
+The following tools were used:
+
+Database: [PostgreSQL](https://www.postgresql.org/docs/) Version: [16.2](https://www.postgresql.org/about/news/postgresql-162-156-1411-1314-and-1218-released-2807/)
+Deployment: [Docker](https://docs.docker.com/)
+Testing: [K6](https://k6.io/docs/examples/tutorials/get-started-with-k6/) [(Grafana docs)](https://grafana.com/docs/k6/latest/)
+Visualizations: [Grafana](https://grafana.com/docs/grafana/latest/)
