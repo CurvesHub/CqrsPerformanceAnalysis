@@ -2,6 +2,8 @@ using Cqrs.Api.Common.DataAccess.Persistence;
 using Cqrs.Api.UseCases.Categories.Common.Errors;
 using Cqrs.Api.UseCases.Categories.Common.Persistence.Entities;
 using ErrorOr;
+using JetBrains.Annotations;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cqrs.Api.UseCases.Categories.Queries.GetChildrenOrTopLevel;
@@ -9,14 +11,16 @@ namespace Cqrs.Api.UseCases.Categories.Queries.GetChildrenOrTopLevel;
 /// <summary>
 /// Provides functionality to get child categories or the top level categories based on the request.
 /// </summary>
-public class GetChildrenOrTopLevelQueryHandler(CqrsReadDbContext _dbContext)
+[UsedImplicitly]
+public class GetChildrenOrTopLevelQueryHandler(CqrsReadDbContext _dbContext) : IRequestHandler<GetChildrenOrTopLevelQuery, ErrorOr<IOrderedEnumerable<GetChildrenOrTopLevelResponse>>>
 {
     /// <summary>
     /// Gets the child categories or the top level categories (without their children) based on the request.
     /// </summary>
     /// <param name="query">Provides the information for which categories should be retrieved.</param>
+    /// <param name="cancellationToken">The token to cancel the requests.</param>
     /// <returns>An <see cref="ErrorOr.Error"/> or a list of <see cref="Category"/>s.</returns>
-    public async Task<ErrorOr<IOrderedEnumerable<GetChildrenOrTopLevelResponse>>> GetChildrenAsync(GetChildrenOrTopLevelQuery query)
+    public async Task<ErrorOr<IOrderedEnumerable<GetChildrenOrTopLevelResponse>>> Handle(GetChildrenOrTopLevelQuery query, CancellationToken cancellationToken)
     {
         // 1. Retrieve the requested categories
         List<GetChildrenOrTopLevelResponse> responses;

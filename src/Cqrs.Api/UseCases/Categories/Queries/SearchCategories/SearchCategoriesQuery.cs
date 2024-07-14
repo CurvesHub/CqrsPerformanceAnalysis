@@ -1,5 +1,7 @@
 using Cqrs.Api.Common.BaseRequests;
+using ErrorOr;
 using JetBrains.Annotations;
+using MediatR;
 
 namespace Cqrs.Api.UseCases.Categories.Queries.SearchCategories;
 
@@ -16,4 +18,4 @@ public record SearchCategoriesQuery(
     string ArticleNumber,
     long? CategoryNumber = null,
     string? SearchTerm = null)
-    : BaseQuery(RootCategoryId, ArticleNumber);
+    : BaseQuery(RootCategoryId, ArticleNumber), IRequest<ErrorOr<IEnumerable<SearchCategoryDto>>>;

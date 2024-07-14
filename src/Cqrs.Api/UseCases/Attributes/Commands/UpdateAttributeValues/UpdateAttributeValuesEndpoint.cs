@@ -2,6 +2,7 @@ using System.Net;
 using Cqrs.Api.Common.Constants;
 using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cqrs.Api.UseCases.Attributes.Commands.UpdateAttributeValues;
@@ -27,10 +28,10 @@ public class UpdateAttributeValuesEndpoint : IEndpoint
 
     private static async Task<IResult> UpdateAttributeValuesAsync(
         [FromBody] UpdateAttributeValuesCommand command,
-        [FromServices] UpdateAttributeValuesCommandHandler commandHandler,
+        [FromServices] ISender sender,
         [FromServices] HttpProblemDetailsService problemDetailsService)
     {
-        var result = await commandHandler.UpdateAttributeValuesAsync(command);
+        var result = await sender.Send(command);
 
         return result.Match(
             _ => Results.NoContent(),

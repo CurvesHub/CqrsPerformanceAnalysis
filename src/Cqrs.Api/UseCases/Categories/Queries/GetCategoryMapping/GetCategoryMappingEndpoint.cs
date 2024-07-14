@@ -3,6 +3,7 @@ using Cqrs.Api.Common.BaseRequests;
 using Cqrs.Api.Common.Constants;
 using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cqrs.Api.UseCases.Categories.Queries.GetCategoryMapping;
@@ -25,11 +26,11 @@ public class GetCategoryMappingEndpoint : IEndpoint
     }
 
     private static async Task<IResult> GetCategoryMappingAsync(
-        [AsParameters] BaseQuery query,
-        [FromServices] GetCategoryMappingQueryHandler queryHandler,
+        [AsParameters] GetCategoryMappingQuery query,
+        [FromServices] ISender sender,
         [FromServices] HttpProblemDetailsService problemDetailsService)
     {
-        var result = await queryHandler.GetCategoryMappingAsync(query);
+        var result = await sender.Send(query);
 
         return result.Match(
             Results.Ok,

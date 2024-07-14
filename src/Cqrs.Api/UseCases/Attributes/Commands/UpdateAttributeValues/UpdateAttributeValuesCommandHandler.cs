@@ -10,6 +10,7 @@ using Cqrs.Api.UseCases.Attributes.Common.Models;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities;
 using Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.AttributeValues;
 using ErrorOr;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Attribute = Cqrs.Api.UseCases.Attributes.Common.Persistence.Entities.Attribute;
 
@@ -21,7 +22,7 @@ namespace Cqrs.Api.UseCases.Attributes.Commands.UpdateAttributeValues;
 [SuppressMessage("Design", "MA0042:Do not use blocking calls in an async method", Justification = "The task is awaited by Task.WhenAll().")]
 public class UpdateAttributeValuesCommandHandler(
     CqrsWriteDbContext _dbContext,
-    ICachedReadRepository<AttributeMapping> _attributeMappingReadRepository)
+    ICachedReadRepository<AttributeMapping> _attributeMappingReadRepository) : IRequestHandler<UpdateAttributeValuesCommand, ErrorOr<Updated>>
 {
     private static readonly string[] TrueStringArray = ["true"];
 
@@ -29,9 +30,9 @@ public class UpdateAttributeValuesCommandHandler(
     /// Handles the request to update the attribute values of an article.
     /// </summary>
     /// <param name="command">The request.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>An <see cref="ErrorOr.Error"/> or a <see cref="Updated"/> result.</returns>
-    public async Task<ErrorOr<Updated>> UpdateAttributeValuesAsync(
-        UpdateAttributeValuesCommand command)
+    public async Task<ErrorOr<Updated>> Handle(UpdateAttributeValuesCommand command, CancellationToken cancellationToken)
     {
         // 1. Fetch the article DTOs
         var dtoOrError = await GetArticleDtosAndMappedCategoryIdAsync(command);

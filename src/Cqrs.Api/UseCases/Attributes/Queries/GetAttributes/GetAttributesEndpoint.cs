@@ -4,6 +4,7 @@ using Cqrs.Api.Common.Constants;
 using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cqrs.Api.UseCases.Attributes.Queries.GetAttributes;
@@ -27,11 +28,11 @@ public class GetAttributesEndpoint : IEndpoint
     }
 
     private static async Task<IResult> GetAttributesAsync(
-        [AsParameters] BaseQuery query,
-        [FromServices] GetAttributesQueryHandler queryHandler,
+        [AsParameters] GetAttributesQuery query,
+        [FromServices] ISender sender,
         [FromServices] HttpProblemDetailsService problemDetailsService)
     {
-        var result = await queryHandler.GetAttributesAsync(query);
+        var result = await sender.Send(query);
 
         return result.Match(
             responses => Results.Ok(responses.OrderBy(response => response.MinValues)),

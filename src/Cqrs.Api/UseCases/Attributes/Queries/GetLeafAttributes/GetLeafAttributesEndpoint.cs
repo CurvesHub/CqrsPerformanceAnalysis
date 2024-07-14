@@ -3,6 +3,7 @@ using Cqrs.Api.Common.Constants;
 using Cqrs.Api.Common.Endpoints;
 using Cqrs.Api.Common.ErrorHandling;
 using Cqrs.Api.UseCases.Attributes.Common.Responses;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cqrs.Api.UseCases.Attributes.Queries.GetLeafAttributes;
@@ -27,10 +28,10 @@ public class GetLeafAttributesEndpoint : IEndpoint
 
     private static async Task<IResult> GetLeafAttributesAsync(
         [AsParameters] GetLeafAttributesQuery query,
-        [FromServices] GetLeafAttributesQueryHandler queryHandler,
+        [FromServices] ISender sender,
         [FromServices] HttpProblemDetailsService problemDetailsService)
     {
-        var result = await queryHandler.GetLeafAttributesAsync(query);
+        var result = await sender.Send(query);
 
         return result.Match(
             Results.Ok,
