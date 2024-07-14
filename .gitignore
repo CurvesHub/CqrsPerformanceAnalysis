@@ -6,7 +6,4 @@
 **/data/grafana/
 **/data/kibana/
 **/data/postgres/main/
-
 **/data/postgres/performance/
-**/Assets/K6Tests/*/archive/
-**/Assets/K6Tests/*/results/
