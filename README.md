@@ -2,24 +2,25 @@
 
 ## Overview
 
-This project is used to compare a traditional API with a CQRS API. The goal is to evaluate if restructuring a project with CQRS will bring performance benefits.
+This project is used to compare a traditional API implementation with two CQRS API implementations. The goal is to evaluate if restructuring a project with CQRS but without DDD and ES will bring performance benefits.
 
 The solution includes the following projects:
 - `Traditional.Api`: A traditional API which uses a single `DbContext` for all queries and commands.
-- `Cqrs.Api`: A CQRS API which uses two `DbContexts` for queries and commands.
-- `main-MediatR branch`: The CQRS API uses the MediatR package to implement the CQRS pattern.
+- `Cqrs.Api`: A CQRS API which uses two `DbContexts` separated for queries and commands.
+- `main-rebased-mediatr branch`: This CQRS API uses the MediatR package to implement the CQRS pattern.
 
 ## Business scenario
 
-This Web API provides access to article content data like categories and attributes. The user can provide new data for the articles which will be saved in a database.
+This Web API provides access to article content data like categories and attributes. The user can update data which will be saved in a database.
 
 - This API writes and reads data about articles, categories and category specific attributes from an internal company database.
 - The company's content team uses this API to manage the attributes and categories of the articles.
-- This services does not sync the data with any external services (marketplaces). This is done by another service.
+- This service does not sync the data with any external service (marketplaces). This is done by another service.
 
 ## Endpoints
 
 These are all the endpoints which are available in the API:
+
 ```http
 GET /attributes
 PUT /attributes
@@ -32,6 +33,7 @@ GET /categories/search
 GET /rootCategories
 GET /error
 ```
+
 Try the endpoints yourself by using http requests in the [requests](./requests) folder. You can fire a request right away in JetBrains Rider or in Visual Studio Code with the [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) extension.
 
 ## Used technologies

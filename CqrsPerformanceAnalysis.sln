@@ -19,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{04E9D03F-C
 		.dockerignore = .dockerignore
 		Dockerfile-Traditional = Dockerfile-Traditional
 		Dockerfile-Cqrs = Dockerfile-Cqrs
+		LICENSE.txt = LICENSE.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Traditional.Api", "src\Traditional.Api\Traditional.Api.csproj", "{0EA1EA14-737B-4A9B-8616-DDEE7E4C5ADB}"
